@@ -1,44 +1,54 @@
 <template>
-  <div>
+  <v-card
+    class="overflow-hidden"
+    height="100%"
+  >
     <v-app-bar
-      color="deep-purple accent-4"
-      dense
+      color="deep-purple"
       dark
     >
-      <v-app-bar-nav-icon></v-app-bar-nav-icon>
+      <v-app-bar-nav-icon @click="drawer = true"></v-app-bar-nav-icon>
 
-      <v-toolbar-title>Page title</v-toolbar-title>
-
-      <v-spacer></v-spacer>
-
-      <v-btn icon>
-        <v-icon>mdi-heart</v-icon>
-      </v-btn>
-
-      <v-btn icon>
-        <v-icon>mdi-magnify</v-icon>
-      </v-btn>
-
-      <v-menu
-        left
-        bottom
-      >
-        <template v-slot:activator="{ on }">
-          <v-btn icon v-on="on">
-            <v-icon>mdi-dots-vertical</v-icon>
-          </v-btn>
-        </template>
-
-        <v-list>
-          <v-list-item
-            v-for="n in 5"
-            :key="n"
-            @click="() => {}"
-          >
-            <v-list-item-title>Option {{ n }}</v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-menu>
+      <v-toolbar-title>Title</v-toolbar-title>
     </v-app-bar>
-  </div>
+    <router-view></router-view>
+
+    <v-navigation-drawer
+      v-model="drawer"
+      absolute
+      temporary
+    >
+      <v-list
+        nav
+        dense
+      >
+        <v-list-item-group
+          active-class="deep-purple--text text--accent-4"
+        >
+          <v-list-item to="/">
+            <v-list-item-icon>
+              <v-icon>mdi-home</v-icon>
+            </v-list-item-icon>
+            <v-list-item-title>Sleep</v-list-item-title>
+          </v-list-item>
+
+          <v-list-item to="/activ">
+            <v-list-item-icon>
+              <v-icon>mdi-account</v-icon>
+            </v-list-item-icon>
+            <v-list-item-title>Activity</v-list-item-title>
+          </v-list-item>
+
+        </v-list-item-group>
+      </v-list>
+    </v-navigation-drawer>
+  </v-card>
 </template>
+
+<script>
+  export default {
+    data: () => ({
+      drawer: false,
+    }),
+  }
+</script>

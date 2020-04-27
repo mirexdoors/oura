@@ -1,8 +1,14 @@
 const Auth = {
   state: {
     user: "user",
+    token: null,
+    client_id: "RKDF3YTKZSPGAPJO",
   },
-  mutations: {},
+  mutations: {
+    saveToken(state, payload) {
+      state.token = payload;
+    },
+  },
   actions: {},
   getters: {},
 };

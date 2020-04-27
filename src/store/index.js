@@ -4,9 +4,11 @@ import Vuex from "vuex";
 Vue.use(Vuex);
 
 import Auth from "./modules/auth";
+import Sleep from "./modules/sleep";
 
 export const store = new Vuex.Store({
   modules: {
     Auth,
+    Sleep,
   },
 });
