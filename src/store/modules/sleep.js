@@ -2,17 +2,17 @@ import axios from "axios";
 
 const Sleep = {
   state: {
-    infoSleep: [],
+    infoSleep: '',
   },
   mutations: {
       setInfoSleep(state, payload) {
-          state = payload;
+          state.infoSleep = payload;
       }
   },
   actions: {
-    getSlepInfo({commit}) {
+    getSlepInfo({commit}, payload) {
       const token = this.state.Auth.token;
-      const url = `https://api.ouraring.com/v1/sleep?access_token=${token}&start=2020-04-01&end=2020-04-20`;
+      const url = `https://api.ouraring.com/v1/sleep?access_token=${token}&start=${payload.start}&end=${payload.end}`;
       axios
         .get(url)
         .then(function(response) {
