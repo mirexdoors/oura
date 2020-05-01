@@ -2,7 +2,14 @@ const Auth = {
   state: {
     user: "user",
     token: null,
-    client_id: "RKDF3YTKZSPGAPJO",
+    parameteres: {
+      client_id: 'RKDF3YTKZSPGAPJO',
+      state: 'XXX',
+      response_type: 'token',
+      scope: 'daily',
+      redirect_uri:  location.href
+    },
+
   },
   mutations: {
     saveToken(state, payload) {

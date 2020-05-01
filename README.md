@@ -1,5 +1,11 @@
 # oura
 
+##TODO
+1) Controls in navbar
+3) Table#1
+5) Preloader
+4) Radio buttons for dates
+
 ## Project setup
 ```
 npm install

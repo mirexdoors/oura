@@ -1,12 +1,20 @@
 <template>
-  <v-card class="mx-auto my-auto" max-width="344" outlined>
-    <v-container>
-      <v-card-text>Welcome to the app to control your dream. To work, you will need to register at https://cloud.ouraring.com/. If you already have an account, click on the link below.</v-card-text>
-      <a
-        :href="url"
-      >Sign In</a>
-    </v-container>
-  </v-card>
+    <v-card class="py-5 text-center" flat>
+        <div class="px-4 px-md-0">
+          <p>
+              Welcome to the app to control your dream.
+          </p>
+          <p>
+          To work, you will need to register at <a href="https://cloud.ouraring.com/">https://cloud.ouraring.com/</a>
+          </p>
+          <p>
+              If you already have an account, click on the link below.
+          </p>
+        </div>
+      <v-card-actions>
+        <v-btn min-width="150" rounded color="mx-auto primary" :href="url" dark>Sign In</v-btn>
+      </v-card-actions>
+    </v-card>
 </template>
 
 <script>
@@ -16,8 +24,13 @@ export default {
       url: '',
     }
   },
-  mounted(){
-    this.url = `https://cloud.ouraring.com/oauth/authorize?client_id=${this.$store.state.Auth.client_id}&state=XXX&response_type=token`;
+  mounted() {
+    const parameteres = this.$store.state.Auth.parameteres;
+    let url = new URL('https://cloud.ouraring.com/oauth/authorize');
+    for (const parameter in parameteres) {
+      url.searchParams.set(parameter, parameteres[parameter]);
+    }
+    this.url = String(url);
   }
 };
 </script>
