@@ -2,7 +2,7 @@
   <div>
     <v-container>
       <v-row>
-        <v-col cols="12" lg="6">
+        <v-col cols="12" lg="4">
           <v-menu
             ref="menu1"
             v-model="menu1"
@@ -15,8 +15,7 @@
             <template v-slot:activator="{ on }">
               <v-text-field
                 v-model="dateFormatted"
-                label="Date"
-                hint="MM/DD/YYYY format"
+                label="Date Start"
                 persistent-hint
                 @blur="date1 = parseDate(dateFormatted)"
                 v-on="on"
@@ -24,13 +23,9 @@
             </template>
             <v-date-picker v-model="date1" no-title @input="menu1 = false"></v-date-picker>
           </v-menu>
-          <p>
-            Date in ISO format:
-            <strong>{{ date1 }}</strong>
-          </p>
         </v-col>
 
-        <v-col cols="12" lg="6">
+        <v-col cols="12" lg="4">
           <v-menu
             v-model="menu2"
             :close-on-content-click="false"
@@ -42,8 +37,7 @@
             <template v-slot:activator="{ on }">
               <v-text-field
                 v-model="computedDateFormatted"
-                label="Date (read only text field)"
-                hint="MM/DD/YYYY format"
+                label="Date End"
                 persistent-hint
                 readonly
                 v-on="on"
@@ -51,44 +45,42 @@
             </template>
             <v-date-picker v-model="date2" no-title @input="menu2 = false"></v-date-picker>
           </v-menu>
-          <p>
-            Date in ISO format:
-            <strong>{{ date2 }}</strong>
-          </p>
+        </v-col>
+        <v-col cols="12" lg="4">
+          <v-btn
+            class="ma-2 center"
+            :disabled="getPreloader"
+            color="success"
+            @click="upload()"
+          >Upload</v-btn>
         </v-col>
       </v-row>
     </v-container>
-    <v-btn class="ma-2 center" :loading="loading" :disabled="loading" color="success" @click="upload()">
-      Custom Loader
-      <template v-slot:loader>
-        <span>Loading...</span>
-      </template>
-    </v-btn>
-    <div>{{infoSleep}}</div>
+    <v-layout v-if="getPreloader" row wrap align-center justify-center>
+      <v-progress-circular :size="100" :width="10" color="green" indeterminate></v-progress-circular>
+    </v-layout>
+    <div v-else>{{infoSleep}}</div>
   </div>
 </template>
 
 <script>
-// import { mapState } from "vuex";
-
 export default {
   data: vm => ({
     date1: new Date().toISOString().substr(0, 10),
     date2: new Date().toISOString().substr(0, 10),
     dateFormatted: vm.formatDate(new Date().toISOString().substr(0, 10)),
     menu1: false,
-    menu2: false,
-    loader: null,
-    loading: false
+    menu2: false
   }),
   computed: {
     infoSleep() {
-      // eslint-disable-next-line vue/no-side-effects-in-computed-properties
-      if (this.$store.state.Sleep.infoSleep) this.loading = false;
-      return this.$store.state.Sleep.infoSleep;
+      return this.$store.state.Data.infoSleep;
     },
     computedDateFormatted() {
       return this.formatDate(this.date2);
+    },
+    getPreloader() {
+      return this.$store.state.Data.preloader;
     }
   },
   watch: {
@@ -97,19 +89,11 @@ export default {
     },
     date2() {
       this.dateFormatted = this.formatDate(this.date2);
-    },
-    loader() {
-      const l = this.loader;
-      this[l] = !this[l];
-
-      setTimeout(() => (this[l] = false), 3000);
-
-      this.loader = null;
     }
   },
   methods: {
     upload() {
-      this.loading = true;
+      this.$store.commit("setPreloader", true);
       const start = this.date1;
       const end = this.date2;
       this.$store.dispatch("getSlepInfo", { start, end });
@@ -118,7 +102,7 @@ export default {
       if (!date) return null;
 
       const [year, month, day] = date.split("-");
-      return `${month}/${day}/${year}`;
+      return `${year}-${month}-${day}`;
     },
     parseDate(date) {
       if (!date) return null;
