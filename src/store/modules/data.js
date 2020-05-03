@@ -13,12 +13,19 @@ const Sleep = {
         if (obj.sleep) dataObj.sleep = obj.sleep;
         if (obj.activity) dataObj.activity = obj.activity;
         if (obj.readiness) dataObj.readiness = obj.readiness;
-      })
+      });
 
       state.infoSleep = dataObj;
     },
     setPreloader(state, payload) {
-      state.preloader = payload;
+      if (!payload) {
+        setTimeout(() => {
+          state.preloader = payload
+        }, 700)
+      } else {
+        state.preloader = payload;
+      }
+
     },
   },
   actions: {

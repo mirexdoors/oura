@@ -7,7 +7,7 @@ const Auth = {
       state: 'XXX',
       response_type: 'token',
       scope: 'daily',
-      redirect_uri:  location.href
+      redirect_uri:  location.origin + '/'
     },
 
   },

@@ -11,8 +11,8 @@
               If you already have an account, click on the link below.
           </p>
         </div>
-      <v-card-actions>
-        <v-btn min-width="150" rounded color="mx-auto primary" :href="url" dark>Sign In</v-btn>
+      <v-card-actions class="d-flex justify-center">
+        <v-btn min-width="150" rounded color="primary" :href="url" dark>Sign In</v-btn>
       </v-card-actions>
     </v-card>
 </template>
