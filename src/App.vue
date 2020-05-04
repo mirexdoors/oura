@@ -7,9 +7,38 @@
                 <v-app-bar-nav-icon class="primary--text" @click.stop="drawer = !drawer"/>
             </v-row>
         </v-app-bar>
-        <v-navigation-drawer  v-if="isAuth" v-model="drawer" app class="pa-10">
-            <Controls @changeDrawer="setDrawer" />
-            <Logout class="mt-12"/>
+        <v-navigation-drawer :width="290" v-if="isAuth" v-model="drawer" app class="pa-4">
+            <v-tabs
+                    v-model="tab"
+                    background-color="accent-4"
+            >
+                <v-tab
+                        :href="`#coeff`"
+                >
+                    Coefficients
+                </v-tab>
+                <v-tab
+                        :href="`#average`"
+                >
+                    Average
+                </v-tab>
+
+                <v-tab-item
+                        class="pt-8"
+                        :value="'coeff'"
+                >
+                    <controls-coeff @changeDrawer="setDrawer" class="pb-4"/>
+                </v-tab-item>
+
+                <v-tab-item
+                        class="pt-8"
+                        :value="'average'"
+                >
+                    <controls-average  @changeDrawer="setDrawer"></controls-average>
+                </v-tab-item>
+            </v-tabs>
+            <v-divider></v-divider>
+            <Logout class="mt-8"/>
         </v-navigation-drawer>
 
         <v-content>
@@ -26,7 +55,8 @@
   import Logout from "./components/Logout";
   import Authorization from "./components/Authorization";
   import Data from "./components/main/Data";
-  import Controls from "./components/main/Controls";
+  import ControlsCoeff from "./components/controls/ControlsCoeffs";
+  import ControlsAverage from "./components/controls/ControlsAverage";
   import preloader from "./components/preloader";
 
   export default {
@@ -34,7 +64,8 @@
     data() {
       return {
         auth: false,
-        drawer: true
+        drawer: true,
+        tab: null,
       };
     },
     computed: {
@@ -81,7 +112,8 @@
       Authorization,
       Data,
       Logout,
-      Controls,
+      ControlsCoeff,
+      ControlsAverage,
       preloader
     }
   };

@@ -1,4 +1,4 @@
-const APINames = {
+export const APINames = {
   sleep: {
     bedtime_start: 'Bedtime',
     bedtime_end: 'Get-out-of-bed time',
@@ -35,6 +35,17 @@ const APINames = {
     score: 'Readiness score'
   }
 };
+export const getParameters = () => {
+  const result = [];
+  for (const category in APINames) {
+    for (const param in APINames[category]) {
+      result.push(APINames[category][param]);
+    }
+  }
+  return result;
+};
+
+
 const getSecondsToday = (date) => {
   const d = new Date(date);
   return d.getHours() * 3600 + d.getMinutes() * 60 + d.getSeconds();
@@ -43,6 +54,64 @@ const getSecondsToday = (date) => {
 const getCorrelation = (summ, deviationX, deviationY) => {
   return ((summ) / Math.sqrt(deviationX * deviationY))
       .toFixed(3);
+};
+
+const getCategoryByParam = (parameter) => {
+  let result = null;
+  for (const category in APINames) {
+    for (const param in APINames[category]) {
+      if (APINames[category][param] === parameter) {
+        result = category;
+        break;
+      }
+    }
+    if (result) break;
+  }
+  return result;
+};
+const getParameter = (data) => {
+  let result;
+  for (const param in data[0]) {
+    if (param !== 'date') {
+      result = param;
+      break;
+    }
+  }
+  return result;
+};
+
+const getSummByParam = (array, parameter, category) => {
+  let summ = 0;
+  array.forEach((item) => {
+    for (const param in item) {
+
+      if (parameter === APINames[category][param]) {
+        summ += item[param];
+        break;
+      }
+    }
+  });
+  return summ;
+};
+
+export const dataTableAverageInfo = (data, yearData) => {
+  //0 Определяем категорию параметра
+  const parameter = getParameter(data);
+  const category = getCategoryByParam(parameter);
+  const categoryDays = yearData[category];
+  const length = categoryDays.length;
+  const summ = getSummByParam(categoryDays, parameter, category);
+  const average = (summ/length).toFixed(2);
+ const result = data.map((item) => {
+  return {
+    value: item[parameter],
+    date: item.date,
+    average
+  }
+ });
+return result;
+  //2 находим среднее значение
+  //3 формируем результирующийц массив
 };
 
 export const dataTableCoeffHelper = (data) => {
@@ -138,11 +207,11 @@ export const dataTableCoeffHelper = (data) => {
     const keys = Object.keys(devForDay[day]);
     for (let param in devForDay[day]) {
       keys.forEach(item => {
-      if (item !== param && !Object.prototype.hasOwnProperty.call(linkParams[day], item + '$' + param)) {
-        const key = param + '$' + item;
+        if (item !== param && !Object.prototype.hasOwnProperty.call(linkParams[day], item + '$' + param)) {
+          const key = param + '$' + item;
 
-        linkParams[day][key] = devForDay[day][param] * devForDay[day][item];
-      }
+          linkParams[day][key] = devForDay[day][param] * devForDay[day][item];
+        }
       });
     }
   }
@@ -162,7 +231,7 @@ export const dataTableCoeffHelper = (data) => {
     for (let i = index + 1; i < parameters.length; i++) {
       const anotherParam = parameters[i];
       let key = item.name + '$' + anotherParam.name;
-      if (!Object.prototype.hasOwnProperty.call(summLinkParams,  item.name + '$' + anotherParam.name)) {
+      if (!Object.prototype.hasOwnProperty.call(summLinkParams, item.name + '$' + anotherParam.name)) {
         key = anotherParam.name + '$' + item.name;
       }
 
@@ -174,6 +243,6 @@ export const dataTableCoeffHelper = (data) => {
       });
     }
   });
-
+  console.log(result)
   return result;
 };
