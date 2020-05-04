@@ -2,10 +2,8 @@
     <v-card class="py-5 text-center" flat>
         <div class="px-4 px-md-0">
           <p>
-              Welcome to the app to control your dream.
-          </p>
-          <p>
-          To work, you will need to register at <a href="https://cloud.ouraring.com/">https://cloud.ouraring.com/</a>
+              Analyse your sleep. To work, you will need to register at на Sign up at
+      <a href="https://cloud.ouraring.com/">https://cloud.ouraring.com/</a>
           </p>
           <p>
               If you already have an account, click on the link below.

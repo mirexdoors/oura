@@ -96,7 +96,7 @@
         this.$store.commit("setPreloader", true);
 
         if (window.innerWidth < 768) {
-          this.$store.commit("setDrawer", false);
+          this.$emit("changeDrawer", false);
         }
         const start = this.date1;
         const end = this.date2;
