@@ -131,8 +131,20 @@ export const dataTableCoeffHelper = (data) => {
           const appName = APINames[dataCategory][param];
           if (!tempNames.includes(appName)) {
             tempNames.push(appName);
+            //записываем текущий параметр и параметры
+            // для +-дня
             parameters.push({
               name: appName,
+              summ: 0,
+              deviation: 0
+            });
+            parameters.push({
+              name: appName + ' prev. day',
+              summ: 0,
+              deviation: 0
+            });
+            parameters.push({
+              name: appName +  ' next day',
               summ: 0,
               deviation: 0
             });
@@ -151,10 +163,15 @@ export const dataTableCoeffHelper = (data) => {
           const appName = APINames[dataCategory][param];
           if (!Object.prototype.hasOwnProperty.call(tempSumm, index)) tempSumm[index] = {};
           tempSumm[index][appName] = item[param];
+          if (data[dataCategory][index-1])
+          tempSumm[index][appName + ' prev. day'] = data[dataCategory][index-1][param];
+          if (data[dataCategory][index+1])
+          tempSumm[index][appName + ' next day'] = data[dataCategory][index+1][param];
         }
       }
     });
   }
+
   //3. Вычисляем суму значений параметра
   const summOfParam = {};
   for (let index in tempSumm) {
@@ -207,14 +224,25 @@ export const dataTableCoeffHelper = (data) => {
     const keys = Object.keys(devForDay[day]);
     for (let param in devForDay[day]) {
       keys.forEach(item => {
-        if (item !== param && !Object.prototype.hasOwnProperty.call(linkParams[day], item + '$' + param)) {
-          const key = param + '$' + item;
+        if (item !== param &&
+            !Object.prototype.hasOwnProperty.call(linkParams[day], item + '$' + param) &&
+            !((param.indexOf('prev.') > -1 && item.indexOf('prev.') > -1)) &&
+            !((param.indexOf('next day') > -1 && item.indexOf('next day') > -1)) &&
+            !((param.indexOf('prev.') > -1 && item.indexOf('next day') > -1)) &&
+            !((param.indexOf('next day') > -1 && item.indexOf('prev.') > -1)) &&
+            ((param !== item + ' next day')) &&
+            ((item !== param + ' next day'))
+        ) {
+         {
 
-          linkParams[day][key] = devForDay[day][param] * devForDay[day][item];
+           const key = param + '$' + item;
+           linkParams[day][key] = devForDay[day][param] * devForDay[day][item];
+         }
         }
       });
     }
   }
+
 
   //9 получаем сумму произведений для каждой пары
   const summLinkParams = {};
@@ -234,15 +262,15 @@ export const dataTableCoeffHelper = (data) => {
       if (!Object.prototype.hasOwnProperty.call(summLinkParams, item.name + '$' + anotherParam.name)) {
         key = anotherParam.name + '$' + item.name;
       }
-
-      const paramSumm = summLinkParams[key];
-      result.push({
-        name_1: item.name,
-        name_2: anotherParam.name,
-        coeff: getCorrelation(paramSumm, summOfSqrDevForDay[item.name], summOfSqrDevForDay[anotherParam.name])
-      });
+      if (Object.prototype.hasOwnProperty.call(summLinkParams, key)) {
+        const paramSumm = summLinkParams[key];
+        result.push({
+          name_1: item.name,
+          name_2: anotherParam.name,
+          coeff: getCorrelation(paramSumm, summOfSqrDevForDay[item.name], summOfSqrDevForDay[anotherParam.name])
+        });
+      }
     }
   });
-  console.log(result)
   return result;
 };
