@@ -15,12 +15,12 @@
                 <v-tab
                         :href="`#coeff`"
                 >
-                    Coefficients
+                    Сorrelations
                 </v-tab>
                 <v-tab
                         :href="`#average`"
                 >
-                    Average
+                    Mean
                 </v-tab>
 
                 <v-tab-item

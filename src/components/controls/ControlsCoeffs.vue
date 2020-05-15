@@ -1,5 +1,6 @@
 <template>
     <div class="pl-2">
+        <div class="subtitle-2">{{text}}</div>
         <v-radio-group v-model="period" v-on:change="setDates" class="radios">
             <v-radio
                     v-for="radio in this.radioButtons"
@@ -67,8 +68,10 @@
       radioButtons: [
         {type: 'week', label: 'Last week'},
         {type: 'year', label: 'Last year'},
+        {type: 'entire', label: 'Entire period'},
       ],
-      period: null
+      period: null,
+      text: 'Select a period to explore correlations between the parameters.'
     }),
     watch: {
       period: function (val) {
@@ -109,9 +112,13 @@
           case 'year':
             firstDate.setFullYear(firstDate.getFullYear() - 1);
             break;
+          case 'entire':
+            firstDate.setFullYear(2000, 0, 1);
+            break;
         }
-        this.date1 = firstDate.toISOString().substr(0, 10);
-        this.date2 = new Date().toISOString().substr(0, 10);
+          this.date1 = firstDate.toISOString().substr(0, 10);
+          this.date2 = new Date().toISOString().substr(0, 10);
+
       },
       allowedDatesStart: val => val < new Date().toISOString().substr(0, 10),
       allowedDatesFinish: val => val <= new Date().toISOString().substr(0, 10),
