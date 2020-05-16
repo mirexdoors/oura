@@ -18,7 +18,7 @@
                     Сorrelations
                 </v-tab>
                 <v-tab
-                        :href="`#average`"
+                        :href="`#mean`"
                 >
                     Mean
                 </v-tab>
@@ -32,9 +32,9 @@
 
                 <v-tab-item
                         class="pt-8"
-                        :value="'average'"
+                        :value="'mean'"
                 >
-                    <controls-average  @changeDrawer="setDrawer"></controls-average>
+                    <controls-mean @changeDrawer="setDrawer" />
                 </v-tab-item>
             </v-tabs>
             <v-divider></v-divider>
@@ -56,7 +56,7 @@
   import Authorization from "./components/Authorization";
   import Data from "./components/main/Data";
   import ControlsCoeff from "./components/controls/ControlsCoeffs";
-  import ControlsAverage from "./components/controls/ControlsAverage";
+  import ControlsMean from "./components/controls/ControlsMean";
   import preloader from "./components/preloader";
 
   export default {
@@ -113,7 +113,7 @@
       Data,
       Logout,
       ControlsCoeff,
-      ControlsAverage,
+      ControlsMean,
       preloader
     }
   };

@@ -1,12 +1,12 @@
 import axios from "axios";
-import {APINames} from "../../helpers/helper";
+
 
 const Sleep = {
   state: {
     preloader: false,
-    infoSleep: "",
-    categoryData: '',
-    average: ""
+    infoSleep: null,
+    categoryData: null,
+    infoMean: null,
   },
   mutations: {
     setCategoryData(state, payload) {
@@ -14,20 +14,11 @@ const Sleep = {
       state.categoryData = dataObj;
     },
     setInfoSleep(state, payload) {
-      const dataObj = getDataFromRaw(payload);
-      state.infoSleep = dataObj;
+      state.infoSleep = getDataFromRaw(payload);
     },
-    setAverageInfo(state, payload) {
-      let result = [];
-      payload.response.forEach(item => {
-        const tempArray = filterByParam(item.data, payload.parameter);
-        if (tempArray.length > 0) {
-          result = tempArray;
-        }
-      });
-      state.average = result;
+    setInfoMean(state, payload) {
+      state.infoMean = getDataFromRaw(payload);
     },
-
     setPreloader(state, payload) {
       if (!payload) {
         setTimeout(() => {
@@ -68,28 +59,10 @@ const Sleep = {
           ])
           .then(
               axios.spread(function (...response) {
+                if (payload.param === 'corr')
                 commit("setInfoSleep", response);
-                commit("setPreloader", false);
-              })
-          )
-          .catch(function (error) {
-            console.log(error);
-          });
-    },
-    getAverageInfo({commit}, payload) {
-      const token = this.state.Auth.token;
-      axios
-          .all([
-            getSleepAndActiveInfo(payload, token, "sleep"),
-            getSleepAndActiveInfo(payload, token, "activity"),
-            getSleepAndActiveInfo(payload, token, "readiness"),
-          ])
-          .then(
-              axios.spread(function (...response) {
-                commit("setAverageInfo", {
-                  response,
-                  parameter: payload.parameter
-                });
+                else if (payload.param === 'mean')
+                  commit("setInfoMean", response);
                 commit("setPreloader", false);
               })
           )
@@ -100,22 +73,6 @@ const Sleep = {
   },
 };
 
-function filterByParam(data, param) {
-  const result = [];
-  for (const category in data) {
-    data[category].forEach((day) => {
-      for (const apiParam in day) {
-        if (APINames[category][apiParam] === param) {
-          result.push({
-            [param]: day[apiParam],
-            date: day.summary_date,
-          });
-        }
-      }
-    });
-  }
-  return result;
-}
 
 function getDataFromRaw(payload) {
   let dataObj = {};

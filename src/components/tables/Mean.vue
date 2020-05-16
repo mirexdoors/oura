@@ -2,7 +2,7 @@
 
         <v-card v-if="items">
             <v-card-title>
-                Average data  (+1 day)
+                Mean
                 <v-spacer></v-spacer>
                 <v-text-field
                         v-model="search"
@@ -24,7 +24,7 @@
 
 <script>
   export default {
-    name: "Average",
+    name: "Mean",
     props: {
       items: Array,
     },
@@ -33,21 +33,19 @@
         search: '',
         headers: [
           {
-            text: 'Date',
-            align: 'start',
+            text: 'Parameter',
+            value: 'parameter',
             sortable: false,
-            value: 'date',
           },
           {
-            text: 'Average for year',
-            align: 'start',
+            text: 'Mean ± SD',
             sortable: false,
-            value: 'average',
+            value: 'mean',
           },
           {
-            text: 'Value for date',
-            value: 'value',
+            text: 'Range mean ± SD',
             sortable: false,
+            value: 'range',
           },
         ],
       }

@@ -1,13 +1,6 @@
 <template>
     <div class="pl-2">
-        <v-select
-                :items="items"
-                v-model="parameter"
-                @change="changeInput"
-                label="Choose parameter"
-                dense
-                outlined
-        ></v-select>
+        <div class="subtitle-2">{{text}}</div>
         <v-menu
                 ref="menu1"
                 v-model="menu1"
@@ -56,19 +49,16 @@
 </template>
 
 <script>
-    import {getParameters} from '../../helpers/helper';
-
-  export default {
-    name: "ControlsAverage",
+    export default {
+    name: "ControlsMean",
     data: () => ({
-      items: getParameters(),
       date1: null,
       date2: null,
-      parameter: null,
       menu1: false,
       menu2: false,
       period: null,
       isDisabled: true,
+      text: 'Enter a date range to compare with the data for the entire period.'
     }),
     computed: {
       getPreloader() {
@@ -81,7 +71,7 @@
           this.date1 = null;
         }
 
-        if (this.date1 && this.date2 && this.parameter) this.isDisabled = false;
+        if (this.date1 && this.date2) this.isDisabled = false;
       },
       upload() {
         this.isDisabled = true;
@@ -93,14 +83,13 @@
 
         const start = this.date1;
         const lastDate = new Date(this.date2);
-        const end = new Date(lastDate.setDate(lastDate.getDate() + 1)).toISOString().substr(0, 10);
-        const parameter = this.parameter;
+        const end = lastDate.toISOString().substr(0, 10);
         const date = new Date();
         const startYear = new Date((date.setFullYear(date.getFullYear() - 1))).toISOString().substr(0, 10);
         const endYear =  new Date().toISOString().substr(0, 10);
 
         this.$store.dispatch("getCategoryInfo", {start: startYear, end: endYear});
-        this.$store.dispatch("getAverageInfo", {start, end, parameter});
+        this.$store.dispatch("getSleepInfo", {start, end, param: 'mean'});
       },
       allowedDatesStart: val => val < new Date().toISOString().substr(0, 10),
       allowedDatesFinish: val => val <= new Date().toISOString().substr(0, 10),

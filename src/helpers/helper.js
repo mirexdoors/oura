@@ -35,15 +35,6 @@ export const APINames = {
     score: 'Readiness score'
   }
 };
-export const getParameters = () => {
-  const result = [];
-  for (const category in APINames) {
-    for (const param in APINames[category]) {
-      result.push(APINames[category][param]);
-    }
-  }
-  return result;
-};
 
 
 const getSecondsToday = (date) => {
@@ -56,69 +47,152 @@ const getCorrelation = (summ, deviationX, deviationY) => {
       .toFixed(3);
 };
 
-const getCategoryByParam = (parameter) => {
-  let result = null;
-  for (const category in APINames) {
-    for (const param in APINames[category]) {
-      if (APINames[category][param] === parameter) {
-        result = category;
-        break;
+
+const getParameters = (data) => {
+  const result = [];
+  for (const category in data) {
+    data[category].forEach(item => {
+      for (const param in item) {
+        const appName = APINames[category][param];
+        if (!result.includes(appName) && !['Bedtime', 'Get-out-of-bed time'].includes(appName)) {
+          result.push(appName);
+        }
       }
-    }
-    if (result) break;
-  }
-  return result;
-};
-const getParameter = (data) => {
-  let result;
-  for (const param in data[0]) {
-    if (param !== 'date') {
-      result = param;
-      break;
-    }
+    });
   }
   return result;
 };
 
-const getSummByParam = (array, parameter, category) => {
-  let summ = 0;
-  array.forEach((item) => {
-    for (const param in item) {
-
-      if (parameter === APINames[category][param]) {
-        summ += item[param];
-        break;
-      }
+const getAverageForParams = (summa, summaForParam) => {
+  const averageOfParam = {};
+  for (let index in summa) {
+    for (let param in summa[index]) {
+      averageOfParam[param] = (summaForParam[param] / (Number(index) + 1)).toFixed(2);
     }
+  }
+  return averageOfParam;
+};
+const getSummForParam = (summa) => {
+  //3. Вычисляем суму значений параметра
+  const summOfParam = {};
+  for (let index in summa) {
+    for (let param in summa[index]) {
+      if (!summOfParam[param]) summOfParam[param] = 0;
+      summOfParam[param] = summOfParam[param] + summa[index][param];
+    }
+  }
+  return summOfParam;
+};
+
+const getTempSumm = (data, isCorr = false) => {
+  const tempSumm = [];
+  //2.Данные сведем в одну таблицу:
+  for (const dataCategory in data) {
+    data[dataCategory].forEach((item, index) => {
+      for (const param in item) {
+        if (item[param] !== undefined) {
+          const appName = APINames[dataCategory][param];
+          if (!Object.prototype.hasOwnProperty.call(tempSumm, index)) tempSumm[index] = {};
+          tempSumm[index][appName] = item[param];
+          if (isCorr) {
+            if (data[dataCategory][index - 1])
+              tempSumm[index][appName + ' prev. day'] = data[dataCategory][index - 1][param];
+            if (data[dataCategory][index + 1])
+              tempSumm[index][appName + ' next day'] = data[dataCategory][index + 1][param];
+          }
+        }
+      }
+    });
+  }
+  return tempSumm;
+};
+
+export const getMeans = (data, summa) => {
+  const summOfParam = getSummForParam(summa)
+  return getAverageForParams(summa, summOfParam);
+};
+
+const getDevForDay = (summa, averages) => {
+  //5 Вычисляем для каждого испытуемого отклонения от
+  // среднего арифметического
+  const devForDay = {};
+  for (let day in summa) {
+    devForDay[day] = {};
+    for (let param in summa[day])
+      devForDay[day][param] = averages[param] - summa[day][param];
+  }
+  return devForDay;
+};
+
+const getSqrDevForDay = (devForDay) => {
+  //6 Возводим в квадрат каждое
+  const sqrDevForDay = {};
+  for (let day in devForDay) {
+    sqrDevForDay[day] = {};
+    for (let param in devForDay[day])
+      sqrDevForDay[day][param] = devForDay[day][param] * devForDay[day][param];
+  }
+  return sqrDevForDay;
+};
+
+const getSummOfSqrDevForDay = (sqrDevForDay) => {
+  //7 Потом рассчитываем сумма квадратов отклонений
+  const summOfSqrDevForDay = {};
+  for (let day in sqrDevForDay) {
+    for (let param in sqrDevForDay[day]) {
+      if (!summOfSqrDevForDay[param]) summOfSqrDevForDay[param] = 0;
+      summOfSqrDevForDay[param] = summOfSqrDevForDay[param] + sqrDevForDay[day][param];
+    }
+  }
+  return summOfSqrDevForDay;
+};
+
+const getDeviation = (summOfSqrDevForDay, length) => {
+  const deviation = {};
+  for (let param in summOfSqrDevForDay) {
+    deviation[param] = Math.sqrt(summOfSqrDevForDay[param]/length).toFixed(1);
+  }
+  return deviation;
+};
+
+const getSD = (summa, averages) => {
+  const length = summa.length;
+  const devForDay = getDevForDay(summa, averages);
+  console.log(devForDay)
+  const sqrDevForDay = getSqrDevForDay(devForDay);
+  const summOfSqrDevForDay = getSummOfSqrDevForDay(sqrDevForDay);
+  return getDeviation(summOfSqrDevForDay, length);
+};
+
+export const dataTableMeanInfo = (data, yearData) => {
+  const result = [];
+
+  const parameters = getParameters(data);
+  const tempSummData = getTempSumm(data);
+
+  const tempSummYearData = getTempSumm(yearData);
+  const means = getMeans(data, tempSummYearData);
+  const ranges = getMeans(yearData, tempSummData);
+  const meansSD = getSD(tempSummYearData, means);
+  const rangesSD = getSD(tempSummData, ranges);
+
+  parameters.forEach(item => {
+    const itemMean = means[item] + '±' + meansSD[item];
+    const itemRange = ranges[item] + '±' + rangesSD[item];
+    result.push({
+      parameter: item,
+      mean: itemMean,
+      range: itemRange
+    })
   });
-  return summ;
-};
 
-export const dataTableAverageInfo = (data, yearData) => {
-  //0 Определяем категорию параметра
-  const parameter = getParameter(data);
-  const category = getCategoryByParam(parameter);
-  const categoryDays = yearData[category];
-  const length = categoryDays.length;
-  const summ = getSummByParam(categoryDays, parameter, category);
-  const average = (summ/length).toFixed(2);
- const result = data.map((item) => {
-  return {
-    value: item[parameter],
-    date: item.date,
-    average
-  }
- });
-return result;
-  //2 находим среднее значение
-  //3 формируем результирующийц массив
+  return result;
 };
 
 export const dataTableCoeffHelper = (data) => {
   const result = [];
   const parameters = [];
   const tempNames = [];
-  let tempSumm = {};
   //1. Собираем все параметры в 1 массив в виде объекта
   for (const dataCategory in data) {
     data[dataCategory].forEach(item => {
@@ -135,18 +209,12 @@ export const dataTableCoeffHelper = (data) => {
             // для +-дня
             parameters.push({
               name: appName,
-              summ: 0,
-              deviation: 0
             });
             parameters.push({
               name: appName + ' prev. day',
-              summ: 0,
-              deviation: 0
             });
             parameters.push({
-              name: appName +  ' next day',
-              summ: 0,
-              deviation: 0
+              name: appName + ' next day',
             });
           }
         }
@@ -156,63 +224,16 @@ export const dataTableCoeffHelper = (data) => {
 
 
   //2.Данные сведем в одну таблицу:
-  for (const dataCategory in data) {
-    data[dataCategory].forEach((item, index) => {
-      for (const param in item) {
-        if (item[param] !== undefined) {
-          const appName = APINames[dataCategory][param];
-          if (!Object.prototype.hasOwnProperty.call(tempSumm, index)) tempSumm[index] = {};
-          tempSumm[index][appName] = item[param];
-          if (data[dataCategory][index-1])
-          tempSumm[index][appName + ' prev. day'] = data[dataCategory][index-1][param];
-          if (data[dataCategory][index+1])
-          tempSumm[index][appName + ' next day'] = data[dataCategory][index+1][param];
-        }
-      }
-    });
-  }
+  const tempSumm = getTempSumm(data, true);
 
   //3. Вычисляем суму значений параметра
-  const summOfParam = {};
-  for (let index in tempSumm) {
-    for (let param in tempSumm[index]) {
-      if (!summOfParam[param]) summOfParam[param] = 0;
-      summOfParam[param] = summOfParam[param] + tempSumm[index][param];
-    }
-  }
+  const summOfParam = getSummForParam(tempSumm);
 
   //4. Вычисляем среднее арифметическое
-  const averageOfParam = {};
-  for (let index in tempSumm) {
-    for (let param in tempSumm[index]) {
-      averageOfParam[param] = summOfParam[param] / (Number(index) + 1);
-    }
-  }
-
-  //5 Вычисляем для каждого испытуемого отклонения от
-  // среднего арифметического
-  const devForDay = {};
-  for (let day in tempSumm) {
-    devForDay[day] = {};
-    for (let param in tempSumm[day])
-      devForDay[day][param] = averageOfParam[param] - tempSumm[day][param];
-  }
-//6 Возводим в квадрат каждое
-  const sqrDevForDay = {};
-  for (let day in devForDay) {
-    sqrDevForDay[day] = {};
-    for (let param in devForDay[day])
-      sqrDevForDay[day][param] = devForDay[day][param] * devForDay[day][param];
-  }
-
-  //7 Потом рассчитываем сумма квадратов отклонений
-  const summOfSqrDevForDay = {};
-  for (let day in sqrDevForDay) {
-    for (let param in sqrDevForDay[day]) {
-      if (!summOfSqrDevForDay[param]) summOfSqrDevForDay[param] = 0;
-      summOfSqrDevForDay[param] = summOfSqrDevForDay[param] + sqrDevForDay[day][param];
-    }
-  }
+  const averageOfParam = getAverageForParams(tempSumm, summOfParam);
+  const devForDay = getDevForDay(tempSumm, averageOfParam);
+  const sqrDevForDay = getSqrDevForDay(devForDay);
+  const summOfSqrDevForDay = getSummOfSqrDevForDay(sqrDevForDay);
 
 
 //8.Рассчитываем для каждого наблюдения произведение
@@ -233,11 +254,11 @@ export const dataTableCoeffHelper = (data) => {
             ((param !== item + ' next day')) &&
             ((item !== param + ' next day'))
         ) {
-         {
+          {
 
-           const key = param + '$' + item;
-           linkParams[day][key] = devForDay[day][param] * devForDay[day][item];
-         }
+            const key = param + '$' + item;
+            linkParams[day][key] = devForDay[day][param] * devForDay[day][item];
+          }
         }
       });
     }

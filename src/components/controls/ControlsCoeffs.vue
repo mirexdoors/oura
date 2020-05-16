@@ -101,7 +101,7 @@
         }
         const start = this.date1;
         const end = this.date2;
-        this.$store.dispatch("getSleepInfo", {start, end});
+        this.$store.dispatch("getSleepInfo", {start, end, param: 'corr'});
       },
       setDates() {
         const firstDate = new Date();

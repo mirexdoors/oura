@@ -3,16 +3,16 @@
         <v-col cols="12" lg="6" v-if="infoSleep" class="pl-lg-6">
             <Coeffs :items="infoSleep" :preloader="getPreloader"/>
         </v-col>
-        <v-col cols="12" lg="6" class="pl-lg-6" v-if="infoAverage">
-            <Average :items="infoAverage" />
+        <v-col cols="12" lg="6" class="pl-lg-6" v-if="infoMean">
+            <Average :items="infoMean" />
         </v-col>
     </v-row>
 </template>
 
 <script>
   import Coeffs from "../tables/Coeffs";
-  import Average from "../tables/Average";
-  import {dataTableCoeffHelper, dataTableAverageInfo} from "../../helpers/helper";
+  import Average from "../tables/Mean";
+  import {dataTableCoeffHelper, dataTableMeanInfo} from "../../helpers/helper";
 
   export default {
     name: "Data",
@@ -26,9 +26,9 @@
         } else
           return false
       },
-      infoAverage() {
-        if (this.$store.state.Data.average && this.$store.state.Data.categoryData)
-          return dataTableAverageInfo(this.$store.state.Data.average, this.$store.state.Data.categoryData);
+      infoMean() {
+        if (this.$store.state.Data.infoMean && this.$store.state.Data.categoryData)
+          return dataTableMeanInfo(this.$store.state.Data.infoMean, this.$store.state.Data.categoryData);
         else return false;
       }
     },
