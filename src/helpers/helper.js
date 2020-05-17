@@ -158,7 +158,6 @@ const getDeviation = (summOfSqrDevForDay, length) => {
 const getSD = (summa, averages) => {
   const length = summa.length;
   const devForDay = getDevForDay(summa, averages);
-  console.log(devForDay)
   const sqrDevForDay = getSqrDevForDay(devForDay);
   const summOfSqrDevForDay = getSummOfSqrDevForDay(sqrDevForDay);
   return getDeviation(summOfSqrDevForDay, length);

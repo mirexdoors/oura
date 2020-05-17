@@ -76,12 +76,14 @@ const Sleep = {
 
 function getDataFromRaw(payload) {
   let dataObj = {};
-  payload.forEach(item => {
-    let obj = filteredData(item.data);
-    if (obj.sleep) dataObj.sleep = obj.sleep;
-    if (obj.activity) dataObj.activity = obj.activity;
-    if (obj.readiness) dataObj.readiness = obj.readiness;
-  });
+  if ( payload !== null) {
+    payload.forEach(item => {
+      let obj = filteredData(item.data);
+      if (obj.sleep) dataObj.sleep = obj.sleep;
+      if (obj.activity) dataObj.activity = obj.activity;
+      if (obj.readiness) dataObj.readiness = obj.readiness;
+    });
+  }
   return dataObj;
 }
 

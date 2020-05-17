@@ -95,12 +95,14 @@
       upload() {
         this.isDisabled = true;
         this.$store.commit("setPreloader", true);
+        this.$store.commit("setInfoMean", null);
 
         if (window.innerWidth < 768) {
           this.$emit("changeDrawer", false);
         }
         const start = this.date1;
         const end = this.date2;
+
         this.$store.dispatch("getSleepInfo", {start, end, param: 'corr'});
       },
       setDates() {

@@ -1,10 +1,8 @@
 <template>
     <v-row>
-        <v-col cols="12" lg="6" v-if="infoSleep" class="pl-lg-6">
+        <v-col cols="12" lg="6" class="pl-lg-6" v-if="!getPreloader">
             <Coeffs :items="infoSleep" :preloader="getPreloader"/>
-        </v-col>
-        <v-col cols="12" lg="6" class="pl-lg-6" v-if="infoMean">
-            <Average :items="infoMean" />
+            <Average :items="infoMean"/>
         </v-col>
     </v-row>
 </template>

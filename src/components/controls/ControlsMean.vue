@@ -42,7 +42,8 @@
                            @input="menu2 = false"></v-date-picker>
         </v-menu>
 
-        <v-btn :disabled="isDisabled" min-width="150" rounded color="primary" dark @click="upload()">
+        <v-btn :disabled="isDisabled && (!date1 && !date2)" min-width="150" rounded color="primary" dark
+               @click="upload()">
             Submit
         </v-btn>
     </div>
@@ -85,9 +86,9 @@
         const lastDate = new Date(this.date2);
         const end = lastDate.toISOString().substr(0, 10);
         const date = new Date();
-        const startYear = new Date((date.setFullYear(date.getFullYear() - 1))).toISOString().substr(0, 10);
+        const startYear = new Date((date.setFullYear(date.getFullYear() - 2))).toISOString().substr(0, 10);
         const endYear =  new Date().toISOString().substr(0, 10);
-
+        this.$store.commit("setInfoSleep", null);
         this.$store.dispatch("getCategoryInfo", {start: startYear, end: endYear});
         this.$store.dispatch("getSleepInfo", {start, end, param: 'mean'});
       },
