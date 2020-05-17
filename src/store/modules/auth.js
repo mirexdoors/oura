@@ -7,9 +7,9 @@ const Auth = {
       state: 'XXX',
       response_type: 'token',
       scope: 'daily',
-      redirect_uri:  location.origin + '/'
+      redirect_uri:  location.origin + '/'      
     },
-
+    token_lifetime: 29,
   },
   mutations: {
     saveToken(state, payload) {

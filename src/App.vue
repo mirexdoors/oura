@@ -52,6 +52,8 @@
 </template>
 
 <script>
+  import Cookies from 'js-cookie'
+
   import Logout from "./components/Logout";
   import Authorization from "./components/Authorization";
   import Data from "./components/main/Data";
@@ -83,16 +85,18 @@
       getTokenInHref() {
         let token;
         const href = decodeURIComponent(location.href);
+        const token_lifetime = this.$store.state.Auth.token_lifetime;
+
         if (href.includes("access_token")) {
           token = href.split("access_token=")[1].split("&")[0];
-          sessionStorage.setItem("token", token);
+          Cookies.set('token_oura', token, { expires: token_lifetime});
         }
         const url = location.origin + '/';
         history.pushState({page: 1}, document.title, url);
         return token;
       },
-      getToken() {
-        let token = sessionStorage.getItem("token") || null;
+      getToken() {        
+        let token = Cookies.get('token_oura') || null;
         if (!token) token = this.getTokenInHref();
         const url = location.origin + '/';
         history.pushState({page: 1}, document.title, url);
