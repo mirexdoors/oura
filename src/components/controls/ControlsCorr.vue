@@ -58,7 +58,7 @@
 
 <script>
   export default {
-    name: "Controls",
+    name: "ControlsCorr",
     data: () => ({
       date1: null,
       date2: new Date().toISOString().substr(0, 10),

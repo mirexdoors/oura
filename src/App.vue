@@ -9,18 +9,7 @@
         </v-row>
       </v-app-bar>
       <v-navigation-drawer :width="290" v-if="isAuth" v-model="drawer" app class="pa-4">
-        <v-tabs v-model="tab" background-color="accent-4">
-          <v-tab :href="`#coeff`">Сorrelations</v-tab>
-          <v-tab :href="`#mean`">Mean</v-tab>
-
-          <v-tab-item class="pt-8" :value="'coeff'">
-            <controls-coeff @changeDrawer="setDrawer" class="pb-4" />
-          </v-tab-item>
-
-          <v-tab-item class="pt-8" :value="'mean'">
-            <controls-mean @changeDrawer="setDrawer" />
-          </v-tab-item>
-        </v-tabs>
+       <Tabs  @changeDrawer="setDrawer" />
         <v-divider></v-divider>
         <Logout class="mt-8" />
       </v-navigation-drawer>
@@ -51,8 +40,8 @@ import axios from "axios";
 import Logout from "./components/Logout";
 import Authorization from "./components/Authorization";
 import Data from "./components/main/Data";
-import ControlsCoeff from "./components/controls/ControlsCoeffs";
-import ControlsMean from "./components/controls/ControlsMean";
+import Tabs from "./components/Tabs";
+
 import preloader from "./components/preloader";
 
 export default {
@@ -61,7 +50,6 @@ export default {
     return {
       auth: false,
       drawer: true,
-      tab: null,
       globalPreloader: true
     };
   },
@@ -129,8 +117,7 @@ export default {
     Authorization,
     Data,
     Logout,
-    ControlsCoeff,
-    ControlsMean,
+    Tabs,
     preloader
   }
 };

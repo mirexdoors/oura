@@ -157,6 +157,7 @@ const getDeviation = (summOfSqrDevForDay, length) => {
 
 const getSD = (summa, averages) => {
   const length = summa.length;
+
   const devForDay = getDevForDay(summa, averages);
   const sqrDevForDay = getSqrDevForDay(devForDay);
   const summOfSqrDevForDay = getSummOfSqrDevForDay(sqrDevForDay);
@@ -224,7 +225,7 @@ export const dataTableCoeffHelper = (data) => {
 
   //2.Данные сведем в одну таблицу:
   const tempSumm = getTempSumm(data, true);
-
+  console.log(tempSumm.length)
   //3. Вычисляем суму значений параметра
   const summOfParam = getSummForParam(tempSumm);
 

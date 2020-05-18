@@ -1,5 +1,6 @@
 <template>
     <div class="pl-2">
+        dfg
         <div class="subtitle-2">{{text}}</div>
         <v-menu
                 ref="menu1"
