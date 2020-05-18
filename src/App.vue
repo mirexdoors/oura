@@ -107,10 +107,12 @@ export default {
           this.globalPreloader = false;
         })
         .catch(e => {
-          console.log(e)
-          Cookies.remove("token_oura");
-          this.auth = false;
-          this.globalPreloader = false;
+          const codeError = new Error(e);
+          if (codeError.message.includes(401)) {
+            Cookies.remove("token_oura");
+            this.auth = false;
+            this.globalPreloader = false;
+          }
         });
     }
   },
