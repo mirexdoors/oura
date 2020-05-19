@@ -53,9 +53,11 @@ const getParameters = (data) => {
   for (const category in data) {
     data[category].forEach(item => {
       for (const param in item) {
-        const appName = APINames[category][param];
-        if (!result.includes(appName) && !['Bedtime', 'Get-out-of-bed time'].includes(appName)) {
-          result.push(appName);
+        if (APINames[category][param]) {
+          const appName = APINames[category][param];
+          if (!result.includes(appName) && !['Bedtime', 'Get-out-of-bed time', 'Medium+ METs'].includes(appName)) {
+            result.push(appName);
+          }
         }
       }
     });
@@ -91,7 +93,10 @@ const getTempSumm = (data, isCorr = false) => {
     data[dataCategory].forEach((item, index) => {
       for (const param in item) {
         if (item[param] !== undefined) {
-          const appName = APINames[dataCategory][param];
+            let appName = APINames[dataCategory][param];
+          if (param === 'summary_date') {
+            appName = 'summary_date';
+          }
           if (!Object.prototype.hasOwnProperty.call(tempSumm, index)) tempSumm[index] = {};
           tempSumm[index][appName] = item[param];
           if (isCorr) {
@@ -164,6 +169,45 @@ const getSD = (summa, averages) => {
   return getDeviation(summOfSqrDevForDay, length);
 };
 
+const getWeekDay = (date) => {
+  const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+  return days[new Date(date).getDay()];
+};
+const getSummByDay = (summa) => {
+const days = {
+  monday: {},
+  tuesday: {},
+  wednesday: {},
+  thursday: {},
+  friday: {},
+  saturday: {},
+  sunday: {}
+};
+ summa.forEach(item=> {
+   //определяем день недели
+   const weekDay = getWeekDay(item.summary_date);
+   for (const param in item) {
+     if (Object.prototype.hasOwnProperty.call(days[weekDay], param)) {
+       days[weekDay][param] += item[param];
+     } else {
+       days[weekDay][param] = item[param];
+     }
+   }
+ });
+
+
+return days;
+};
+const getMeanByDay = (days, length) => {
+  for (const day in days) {
+    for (const param in days[day]) {
+      days[day][param] =  (days[day][param]/length).toFixed(2);
+    }
+  }
+  console.log(days)
+  return days;
+};
+
 export const dataTableMeanInfo = (data, yearData) => {
   const result = [];
 
@@ -202,20 +246,22 @@ export const dataTableCoeffHelper = (data) => {
             if (new Date(item[param]) != 'Invalid Date')
               item[param] = getSecondsToday(item[param]);
           }
-          const appName = APINames[dataCategory][param];
-          if (!tempNames.includes(appName)) {
-            tempNames.push(appName);
-            //записываем текущий параметр и параметры
-            // для +-дня
-            parameters.push({
-              name: appName,
-            });
-            parameters.push({
-              name: appName + ' prev. day',
-            });
-            parameters.push({
-              name: appName + ' next day',
-            });
+          if (APINames[dataCategory][param]) {
+            const appName = APINames[dataCategory][param];
+            if (!tempNames.includes(appName)) {
+              tempNames.push(appName);
+              //записываем текущий параметр и параметры
+              // для +-дня
+              parameters.push({
+                name: appName,
+              });
+              parameters.push({
+                name: appName + ' prev. day',
+              });
+              parameters.push({
+                name: appName + ' next day',
+              });
+            }
           }
         }
       }
@@ -225,7 +271,6 @@ export const dataTableCoeffHelper = (data) => {
 
   //2.Данные сведем в одну таблицу:
   const tempSumm = getTempSumm(data, true);
-  console.log(tempSumm.length)
   //3. Вычисляем суму значений параметра
   const summOfParam = getSummForParam(tempSumm);
 
@@ -293,5 +338,28 @@ export const dataTableCoeffHelper = (data) => {
       }
     }
   });
+  return result;
+};
+
+export const dataTableDaysInfo = (data) => {
+  const result = [];
+  const tempSumm = getTempSumm(data);
+const summByDay =  getSummByDay(tempSumm);
+const meanByday = getMeanByDay(summByDay, tempSumm.length / 7);
+
+  const parameters = getParameters(data);
+  parameters.forEach(item => {
+    const element = {parameter: item};
+    for (const day in meanByday) {
+      if (Object.prototype.hasOwnProperty.call(meanByday[day], item)) {
+        if (meanByday[day][item] !== 'NaN' && meanByday[day][item] !== 'undefined') {
+          element[day] = meanByday[day][item];
+        }
+      }
+
+    }
+    result.push(element)
+  });
+  console.log(result)
   return result;
 };

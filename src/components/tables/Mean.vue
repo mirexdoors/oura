@@ -1,5 +1,4 @@
 <template>
-
         <v-card v-if="items">
             <v-card-title>
                 Mean

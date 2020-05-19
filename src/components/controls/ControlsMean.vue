@@ -1,6 +1,5 @@
 <template>
     <div class="pl-2">
-        dfg
         <div class="subtitle-2">{{text}}</div>
         <v-menu
                 ref="menu1"
@@ -90,6 +89,7 @@
         const startYear = new Date((date.setFullYear(date.getFullYear() - 2))).toISOString().substr(0, 10);
         const endYear =  new Date().toISOString().substr(0, 10);
         this.$store.commit("setInfoSleep", null);
+        this.$store.commit("setInfoDays", null);
         this.$store.dispatch("getCategoryInfo", {start: startYear, end: endYear});
         this.$store.dispatch("getSleepInfo", {start, end, param: 'mean'});
       },

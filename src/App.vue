@@ -26,9 +26,7 @@
       </v-content>
     </div>
     <div v-else class="my-auto">
-      <div class="text-center">
-        <v-progress-circular :size="90" :width="10" color="green" indeterminate></v-progress-circular>
-      </div>
+      <preloader class="mx-auto" />
     </div>
   </v-app>
 </template>

@@ -7,6 +7,7 @@ const Sleep = {
     infoSleep: null,
     categoryData: null,
     infoMean: null,
+    infoDays: null
   },
   mutations: {
     setCategoryData(state, payload) {
@@ -15,6 +16,9 @@ const Sleep = {
     },
     setInfoSleep(state, payload) {
       state.infoSleep = getDataFromRaw(payload);
+    },
+    setInfoDays(state, payload) {
+      state.infoDays = getDataFromRaw(payload);
     },
     setInfoMean(state, payload) {
       state.infoMean = getDataFromRaw(payload);
@@ -63,6 +67,8 @@ const Sleep = {
                 commit("setInfoSleep", response);
                 else if (payload.param === 'mean')
                   commit("setInfoMean", response);
+                else if (payload.param === 'days')
+                  commit("setInfoDays", response);
                 commit("setPreloader", false);
               })
           )
@@ -107,6 +113,7 @@ function filteredData(data) {
           light: item.light,
           rem: item.rem,
           deep: item.deep,
+          summary_date: item.summary_date,
           onset_latency: item.onset_latency,
           restless: item.restless,
           efficiency: item.efficiency,
@@ -128,6 +135,7 @@ function filteredData(data) {
           non_wear: item.non_wear,
           rest: item.rest,
           inactive: item.inactive,
+          summary_date: item.summary_date,
           steps: item.steps,
           cal_total: item.cal_total,
           cal_active: item.cal_active,
@@ -141,6 +149,7 @@ function filteredData(data) {
       readiness: data.readiness.map((item) => {
         return {
           score: item.score,
+          summary_date: item.summary_date,
         };
       }),
     };

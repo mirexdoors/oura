@@ -1,7 +1,7 @@
 <template>
     <v-card>
         <v-card-title>
-            Correlation coeffs
+            Days of the week
             <v-spacer></v-spacer>
             <v-text-field
                     v-model="search"
@@ -23,7 +23,7 @@
 
 <script>
   export default {
-    name: "Coeffs",
+    name: "DaysOfWeek",
     props: {
       items: Array,
     },
@@ -32,31 +32,46 @@
         search: '',
         headers: [
           {
-            text: 'Parameter 1',
-            align: 'start',
+            text: 'Parameter',
             sortable: false,
-            value: 'name_1',
+            value: 'parameter',
           },
           {
-            text: 'Parameter 2',
-            align: 'start',
+            text: 'Sunday',
+            value: 'sunday',
             sortable: false,
-            value: 'name_2',
           },
           {
-            text: 'Linear correlation coefficient ',
-            value: 'coeff',
+            text: 'Monday',
+            sortable: false,
+            value: 'monday',
+          },
+          {
+            text: 'Tuesday',
+            value: 'tuesday',
+            sortable: false,
+          },
+          {
+            text: 'Wednesday',
+            sortable: false,
+            value: 'wednesday',
+          },
+          {
+            text: 'Thursday',
+            value: 'thursday',
+            sortable: false,
+          },
+          {
+            text: 'Friday',
+            sortable: false,
+            value: 'friday',
+          },
+          {
+            text: 'Saturday',
+            value: 'saturday',
             sortable: false,
           },
         ],
-      }
-    },
-    methods: {
-      sortByAbs: (items) => {
-        items.sort((a, b) => {
-          return Math.abs(b['coeff']) - Math.abs(a['coeff']);
-        });
-        return items;
       }
     },
   }

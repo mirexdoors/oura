@@ -96,6 +96,7 @@
         this.isDisabled = true;
         this.$store.commit("setPreloader", true);
         this.$store.commit("setInfoMean", null);
+        this.$store.commit("setInfoDays", null);
 
         if (window.innerWidth < 768) {
           this.$emit("changeDrawer", false);

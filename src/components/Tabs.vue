@@ -5,9 +5,8 @@
             :center-active="true"
             centered
             :grow=true
-            @change="changeTab"
     >
-        <v-tabs-slider @change="changeTab" color="primary"></v-tabs-slider>
+        <v-tabs-slider color="primary"></v-tabs-slider>
         <v-tab :href="`#corr`">Сorrelations</v-tab>
         <v-tab :href="`#mean`">Mean</v-tab>
         <v-tab :href="`#week`">Days of week</v-tab>
@@ -41,9 +40,6 @@
       setDrawer() {
         this.$emit("changeDrawer", false);
       },
-      changeTab(){
-       console.log(121)
-      }
     },
     component: {
       ControlsCorr,
