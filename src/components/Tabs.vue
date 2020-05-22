@@ -1,42 +1,69 @@
 <template>
-    <v-tabs v-model="tab"
-            background-color="accent-4"
-            show-arrows
-            :center-active="true"
-            centered
-            :grow=true
-    >
-        <v-tabs-slider color="primary"></v-tabs-slider>
-        <v-tab :href="`#corr`">Сorrelations</v-tab>
-        <v-tab :href="`#mean`">Mean</v-tab>
-        <v-tab :href="`#week`">Days of week</v-tab>
+    <div>
+        <v-list
+                dense
+                nav
+        >
+            <v-list-item
+                    v-for="item in navs"
+                    :key="item.title"
+                    :href="item.href"
+                    @click="changeControls(item.href)"
+                    link
+            >
+                <v-list-item-content>
+                    <v-list-item-title class="primary--text">{{ item.title }}</v-list-item-title>
+                </v-list-item-content>
+            </v-list-item>
 
-        <v-tab-item class="pt-8" :value="'corr'">
-           <controls-corr  @changeDrawer="setDrawer" />
-        </v-tab-item>
+        </v-list>
 
-        <v-tab-item class="pt-8" :value="'mean'">
-        <controls-mean @changeDrawer="setDrawer" />
-        </v-tab-item>
-        <v-tab-item class="pt-8" :value="'week'">
-            <controls-week @changeDrawer="setDrawer" />
-        </v-tab-item>
-    </v-tabs>
+        <controls-corr v-if="controls.corr" @changeDrawer="setDrawer"/>
+        <controls-mean v-if="controls.mean" @changeDrawer="setDrawer"/>
+        <controls-week v-if="controls.week" @changeDrawer="setDrawer"/>
+    </div>
 </template>
 
 <script>
   import ControlsCorr from "./controls/ControlsCorr";
   import ControlsMean from "./controls/ControlsMean";
   import ControlsWeek from "./controls/ControlsWeek";
+
   export default {
     name: "Tabs",
     components: {ControlsWeek, ControlsMean, ControlsCorr},
     data() {
       return {
-        tab: null,
+        controls: {
+          corr: true,
+          mean: false,
+          week: false,
+        },
+        navs: [
+          {
+            title: 'Сorrelations',
+            href: '#corr'
+          },
+          {
+            title: 'Mean',
+            href: '#mean'
+          },
+          {
+            title: 'Days of week',
+            href: '#week'
+          },
+        ]
       }
     },
     methods: {
+      changeControls(href) {
+        href = href.replace(/#/g, '');
+        for (const control in this.controls) {
+          if ( this.controls[href] !== this.controls[control])
+          this.controls[control] = false;
+        }
+        this.controls[href] = true;
+      },
       setDrawer() {
         this.$emit("changeDrawer", false);
       },

@@ -8,7 +8,7 @@
           <v-app-bar-nav-icon class="primary--text" @click.stop="drawer = !drawer" />
         </v-row>
       </v-app-bar>
-      <v-navigation-drawer :width="290" v-if="isAuth" v-model="drawer" app class="pa-4">
+      <v-navigation-drawer :width="300" v-if="isAuth" v-model="drawer" app class="pa-4">
        <Tabs  @changeDrawer="setDrawer" />
         <v-divider></v-divider>
         <Logout class="mt-8" />
@@ -16,7 +16,7 @@
 
       <v-content>
         <v-card-title v-if="!getPreloader" class="text-center justify-center py-6">
-          <h1 class="font-weight-bold display-3 primary--text">
+          <h1 class="font-weight-bold display-3 primary--text text-break px-2">
             Health Board
           </h1>
         </v-card-title>
