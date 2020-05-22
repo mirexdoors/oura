@@ -3,7 +3,7 @@
     <div v-if="!globalPreloader">
       <preloader class="mx-auto" v-if="getPreloader" />
       <v-app-bar v-if="isAuth" app>
-        <v-toolbar-title class="primary--text">OURA APP</v-toolbar-title>
+        <v-toolbar-title class="primary--text">HEALTH BOARD APP</v-toolbar-title>
         <v-row class="d-flex justify-end">
           <v-app-bar-nav-icon class="primary--text" @click.stop="drawer = !drawer" />
         </v-row>
@@ -17,8 +17,7 @@
       <v-content>
         <v-card-title v-if="!getPreloader" class="text-center justify-center py-6">
           <h1 class="font-weight-bold display-3 primary--text">
-            OURA
-            <br />APP
+            Health Board
           </h1>
         </v-card-title>
         <Data v-if="isAuth" />

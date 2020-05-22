@@ -36,7 +36,9 @@ export const APINames = {
   }
 };
 
-
+const TIME_PARAMS = [
+  'Time asleep', 'Time in bed', 'Time awake in bed', 'Light sleep', 'REM sleep', 'Deep sleep', 'Sleep midpoint', 'Inactive time', 'Resting time', 'Non-wear time'
+];
 const getSecondsToday = (date) => {
   const d = new Date(date);
   return d.getHours() * 3600 + d.getMinutes() * 60 + d.getSeconds();
@@ -55,7 +57,7 @@ const getParameters = (data) => {
       for (const param in item) {
         if (APINames[category][param]) {
           const appName = APINames[category][param];
-          if (!result.includes(appName) && !['Bedtime', 'Get-out-of-bed time', 'Medium+ METs'].includes(appName)) {
+          if (!result.includes(appName) && !['Medium+ METs'].includes(appName)) {
             result.push(appName);
           }
         }
@@ -71,6 +73,8 @@ const getAverageForParams = (summa, summaForParam) => {
     for (let param in summa[index]) {
       averageOfParam[param] = (summaForParam[param] / (Number(index) + 1)).toFixed(2);
     }
+
+
   }
   return averageOfParam;
 };
@@ -85,7 +89,18 @@ const getSummForParam = (summa) => {
   }
   return summOfParam;
 };
-
+const getTimeFromSeconds = (time, isDay = false) => {
+  const hours = Math.floor(time / 60 / 60);
+  const minutes = Math.floor(time / 60) - (hours * 60);
+  let formattedHours = hours.toString().padStart(2, '0');
+  if (isDay && hours.toString().padStart(2, '0') > 23) {
+    formattedHours = 0;
+  }
+  return [
+    formattedHours,
+    minutes.toString().padStart(2, '0'),
+  ].join(':');
+};
 const getTempSumm = (data, isCorr = false) => {
   const tempSumm = [];
   //2.Данные сведем в одну таблицу:
@@ -93,10 +108,17 @@ const getTempSumm = (data, isCorr = false) => {
     data[dataCategory].forEach((item, index) => {
       for (const param in item) {
         if (item[param] !== undefined) {
-            let appName = APINames[dataCategory][param];
+          let appName = APINames[dataCategory][param];
           if (param === 'summary_date') {
             appName = 'summary_date';
           }
+          if (param == 'bedtime_start' || param == 'bedtime_end') {
+            item[param] = getSecondsToday(item[param]);
+          }
+          if (param == 'bedtime_start' && (item[param] < 43200))
+            item[param] = item[param] + 86400;
+
+
           if (!Object.prototype.hasOwnProperty.call(tempSumm, index)) tempSumm[index] = {};
           tempSumm[index][appName] = item[param];
           if (isCorr) {
@@ -109,6 +131,7 @@ const getTempSumm = (data, isCorr = false) => {
       }
     });
   }
+
   return tempSumm;
 };
 
@@ -155,7 +178,15 @@ const getSummOfSqrDevForDay = (sqrDevForDay) => {
 const getDeviation = (summOfSqrDevForDay, length) => {
   const deviation = {};
   for (let param in summOfSqrDevForDay) {
-    deviation[param] = Math.sqrt(summOfSqrDevForDay[param]/length).toFixed(1);
+    deviation[param] = Math.sqrt(summOfSqrDevForDay[param] / length).toFixed(1);
+
+    if (param === 'Bedtime' || param === 'Get-out-of-bed time') {
+      deviation[param] = getTimeFromSeconds(deviation[param]);
+    }
+    if (param === 'Inactive time' || param === 'Resting' +
+        ' time' || param === 'Non-wear time') deviation[param] = deviation[param] * 60;
+
+    if (TIME_PARAMS.includes(param)) deviation[param] = getTimeFromSeconds(deviation[param]);
   }
   return deviation;
 };
@@ -174,37 +205,51 @@ const getWeekDay = (date) => {
   return days[new Date(date).getDay()];
 };
 const getSummByDay = (summa) => {
-const days = {
-  monday: {},
-  tuesday: {},
-  wednesday: {},
-  thursday: {},
-  friday: {},
-  saturday: {},
-  sunday: {}
+  const days = {
+    monday: {},
+    tuesday: {},
+    wednesday: {},
+    thursday: {},
+    friday: {},
+    saturday: {},
+    sunday: {}
+  };
+  summa.forEach(item => {
+    //определяем день недели
+    const weekDay = getWeekDay(item.summary_date);
+    for (const param in item) {
+      if (Object.prototype.hasOwnProperty.call(days[weekDay], param)) {
+        days[weekDay][param] += item[param];
+      } else {
+        days[weekDay][param] = item[param];
+      }
+    }
+  });
+  return days;
 };
- summa.forEach(item=> {
-   //определяем день недели
-   const weekDay = getWeekDay(item.summary_date);
-   for (const param in item) {
-     if (Object.prototype.hasOwnProperty.call(days[weekDay], param)) {
-       days[weekDay][param] += item[param];
-     } else {
-       days[weekDay][param] = item[param];
-     }
-   }
- });
-
-
-return days;
+const getDaysWithParam = (parameter, tmpSumm) => {
+  let i = 0;
+  tmpSumm.forEach(item => {
+    if (item[parameter]) i++;
+  });
+  return i;
 };
-const getMeanByDay = (days, length) => {
+
+const getMeanByDay = (days, tmpSumm) => {
   for (const day in days) {
     for (const param in days[day]) {
-      days[day][param] =  (days[day][param]/length).toFixed(2);
+//найдем количество элементов, в которых встречается
+// параметр
+      const daysWithParam = getDaysWithParam(param, tmpSumm);
+      days[day][param] = (days[day][param] / (daysWithParam / 7)).toFixed(2);
+      if (param === 'Bedtime' || param === 'Get-out-of-bed time') {
+        days[day][param] = getTimeFromSeconds(days[day][param] - 3600, true);
+      }
+      if (param === 'Inactive time' || param === 'Resting' +
+          ' time' || param === 'Non-wear time') days[day][param] = days[day][param] * 60;
+      if (TIME_PARAMS.includes(param)) days[day][param] = getTimeFromSeconds(days[day][param]);
     }
   }
-  console.log(days)
   return days;
 };
 
@@ -221,6 +266,23 @@ export const dataTableMeanInfo = (data, yearData) => {
   const rangesSD = getSD(tempSummData, ranges);
 
   parameters.forEach(item => {
+
+    if (item === 'Bedtime' || item === 'Get-out-of-bed time') {
+      means[item] = getTimeFromSeconds(means[item], true);
+      ranges[item] = getTimeFromSeconds(ranges[item], true);
+    }
+
+    if (item === 'Inactive time' || item === 'Resting' +
+        ' time' || item === 'Non-wear time') {
+      means[item] = means[item] * 60;
+      ranges[item] = ranges[item] * 60;
+    }
+
+    if (TIME_PARAMS.includes(item)) {
+      means[item] = getTimeFromSeconds(means[item]);
+      ranges[item] = getTimeFromSeconds(ranges[item]);
+    }
+
     const itemMean = means[item] + '±' + meansSD[item];
     const itemRange = ranges[item] + '±' + rangesSD[item];
     result.push({
@@ -344,8 +406,10 @@ export const dataTableCoeffHelper = (data) => {
 export const dataTableDaysInfo = (data) => {
   const result = [];
   const tempSumm = getTempSumm(data);
-const summByDay =  getSummByDay(tempSumm);
-const meanByday = getMeanByDay(summByDay, tempSumm.length / 7);
+  console.log(tempSumm)
+  const summByDay = getSummByDay(tempSumm);
+
+  const meanByday = getMeanByDay(summByDay, tempSumm);
 
   const parameters = getParameters(data);
   parameters.forEach(item => {
@@ -360,6 +424,5 @@ const meanByday = getMeanByDay(summByDay, tempSumm.length / 7);
     }
     result.push(element)
   });
-  console.log(result)
   return result;
 };
