@@ -283,8 +283,8 @@ export const dataTableMeanInfo = (data, yearData) => {
       ranges[item] = getTimeFromSeconds(ranges[item]);
     }
 
-    const itemMean = means[item] + '±' + meansSD[item];
-    const itemRange = ranges[item] + '±' + rangesSD[item];
+    const itemMean = means[item] + ' ± ' + meansSD[item];
+    const itemRange = ranges[item] + ' ± ' + rangesSD[item];
     result.push({
       parameter: item,
       mean: itemMean,

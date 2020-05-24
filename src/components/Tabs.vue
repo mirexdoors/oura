@@ -8,6 +8,8 @@
                     v-for="item in navs"
                     :key="item.title"
                     :href="item.href"
+                    class="menu__item"
+                    :class="setActiveClass(item.is_active)"
                     @click="changeControls(item.href)"
                     link
             >
@@ -42,27 +44,41 @@
         navs: [
           {
             title: 'Сorrelations',
-            href: '#corr'
+            href: '#corr',
+            is_active: true,
           },
           {
             title: 'Mean',
-            href: '#mean'
+            href: '#mean',
+            is_active: false,
           },
           {
             title: 'Days of week',
-            href: '#week'
+            href: '#week',
+            is_active: false,
           },
         ]
       }
     },
     methods: {
+      setActiveClass(isActive) {
+        return isActive ? 'active' : '';
+      },
       changeControls(href) {
-        href = href.replace(/#/g, '');
+        const value = href.replace(/#/g, '');
         for (const control in this.controls) {
-          if ( this.controls[href] !== this.controls[control])
-          this.controls[control] = false;
+          if (this.controls[value] !== this.controls[control]) {
+            this.controls[control] = false;
+          }
         }
-        this.controls[href] = true;
+        this.controls[value] = true;
+        this.navs.forEach(nav => {
+          if (nav.href !== href)
+            nav.is_active = false;
+          else
+            nav.is_active = true;
+        });
+
       },
       setDrawer() {
         this.$emit("changeDrawer", false);
@@ -75,4 +91,12 @@
     }
   }
 </script>
+<style scoped>
+    .menu__item.active {
+        background-color: #356859;
+    }
 
+    .menu__item.active .primary--text {
+        color: #fff !important;
+    }
+</style>
