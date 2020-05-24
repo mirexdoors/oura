@@ -15,13 +15,13 @@ const Sleep = {
       state.categoryData = dataObj;
     },
     setInfoSleep(state, payload) {
-      state.infoSleep = getDataFromRaw(payload);
+      state.infoSleep = payload;
     },
     setInfoDays(state, payload) {
-      state.infoDays = getDataFromRaw(payload);
+      state.infoDays = payload;
     },
     setInfoMean(state, payload) {
-      state.infoMean = getDataFromRaw(payload);
+      state.infoMean = payload;
     },
     setPreloader(state, payload) {
       if (!payload) {
@@ -54,35 +54,48 @@ const Sleep = {
           });
     },
     getSleepInfo({commit}, payload) {
-      const token = this.state.Auth.token;
-      axios
-          .all([
-            getSleepAndActiveInfo(payload, token, "sleep"),
-            getSleepAndActiveInfo(payload, token, "activity"),
-            getSleepAndActiveInfo(payload, token, "readiness"),
-          ])
-          .then(
-              axios.spread(function (...response) {
-                if (payload.param === 'corr')
-                commit("setInfoSleep", response);
-                else if (payload.param === 'mean')
-                  commit("setInfoMean", response);
-                else if (payload.param === 'days')
-                  commit("setInfoDays", response);
-                commit("setPreloader", false);
-              })
-          )
-          .catch(function (error) {
-            console.log(error);
-          });
+      if (payload.dates.length > 0) {
+        const token = this.state.Auth.token;
+        getAllInfoFromDateArray(payload.dates, token).then((...data) => {
+          data = getDataFromRaw(data[0][0]);
+
+          if (payload.param === 'days')
+            commit("setInfoDays", data);
+          if (payload.param === 'corr')
+            commit("setInfoSleep", data);
+          else if (payload.param === 'mean')
+            commit("setInfoMean", data);
+          else if (payload.param === 'days')
+            commit("setInfoDays", data);
+
+          commit("setPreloader", false);
+        });
+      }
     },
   },
 };
 
+const getAllInfoFromDateArray = async (dates, token) => {
+  const result = [];
+  for (const date of dates) {
+    result.push(await getData(date, token));
+  }
+  return result;
+};
+
+const getData = async (dates, token) => {
+  return await axios
+      .all([
+        getSleepAndActiveInfo(dates, token, "sleep"),
+        getSleepAndActiveInfo(dates, token, "activity"),
+        getSleepAndActiveInfo(dates, token, "readiness"),
+      ])
+};
 
 function getDataFromRaw(payload) {
   let dataObj = {};
-  if ( payload !== null) {
+
+  if (payload !== null) {
     payload.forEach(item => {
       let obj = filteredData(item.data);
       if (obj.sleep) dataObj.sleep = obj.sleep;
@@ -93,8 +106,8 @@ function getDataFromRaw(payload) {
   return dataObj;
 }
 
-function getSleepAndActiveInfo(payload, token, request) {
-  return axios.get(
+async function getSleepAndActiveInfo(payload, token, request) {
+  return await axios.get(
       `https://api.ouraring.com/v1/${request}?access_token=${token}&start=${payload.start}&end=${payload.end}`
   );
 }

@@ -23,7 +23,9 @@
         this.$store.commit("setInfoMean", null);
         const start = new Date(2000, 0, 1).toISOString().substr(0, 10);
         const end = new Date().toISOString().substr(0, 10);
-        this.$store.dispatch("getSleepInfo", {start, end, param: 'days'});
+        const dates = [];
+        dates.push({start, end});
+        this.$store.dispatch("getSleepInfo", {dates, param: 'days'});
       }
     },
   }

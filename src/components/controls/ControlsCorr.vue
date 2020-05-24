@@ -103,8 +103,9 @@
         }
         const start = this.date1;
         const end = this.date2;
-
-        this.$store.dispatch("getSleepInfo", {start, end, param: 'corr'});
+        const dates = [];
+        dates.push({start, end});
+        this.$store.dispatch("getSleepInfo", {dates, param: 'corr'});
       },
       setDates() {
         const firstDate = new Date();
@@ -119,8 +120,8 @@
             firstDate.setFullYear(2000, 0, 1);
             break;
         }
-          this.date1 = firstDate.toISOString().substr(0, 10);
-          this.date2 = new Date().toISOString().substr(0, 10);
+        this.date1 = firstDate.toISOString().substr(0, 10);
+        this.date2 = new Date().toISOString().substr(0, 10);
 
       },
       allowedDatesStart: val => val < new Date().toISOString().substr(0, 10),

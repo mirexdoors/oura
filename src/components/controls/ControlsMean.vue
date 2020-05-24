@@ -88,10 +88,12 @@
         const date = new Date();
         const startYear = new Date((date.setFullYear(date.getFullYear() - 2))).toISOString().substr(0, 10);
         const endYear =  new Date().toISOString().substr(0, 10);
+        const dates = [];
+        dates.push({start, end});
         this.$store.commit("setInfoSleep", null);
         this.$store.commit("setInfoDays", null);
         this.$store.dispatch("getCategoryInfo", {start: startYear, end: endYear});
-        this.$store.dispatch("getSleepInfo", {start, end, param: 'mean'});
+        this.$store.dispatch("getSleepInfo", {dates, param: 'mean'});
       },
       allowedDatesStart: val => val < new Date().toISOString().substr(0, 10),
       allowedDatesFinish: val => val <= new Date().toISOString().substr(0, 10),

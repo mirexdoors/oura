@@ -406,7 +406,7 @@ export const dataTableCoeffHelper = (data) => {
 export const dataTableDaysInfo = (data) => {
   const result = [];
   const tempSumm = getTempSumm(data);
-  console.log(tempSumm)
+
   const summByDay = getSummByDay(tempSumm);
 
   const meanByday = getMeanByDay(summByDay, tempSumm);
