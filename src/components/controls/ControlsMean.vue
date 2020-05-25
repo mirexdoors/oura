@@ -48,34 +48,6 @@
             </v-menu>
         </div>
         <div v-else>
-<!--            <v-dialog-->
-<!--                    ref="dialog"-->
-<!--                    v-for="(menu, index) in customMenu"-->
-<!--                    v-model="menu.isActive"-->
-<!--                    :key="menu.input"-->
-<!--                    :return-value.sync="menu.isActive"-->
-<!--                    persistent-->
-<!--                    width="290px"-->
-<!--            >-->
-<!--                <template v-slot:activator="{ on }">-->
-<!--                    <v-text-field-->
-<!--                            v-model="menu.input"-->
-<!--                            label="Date"-->
-<!--                            prepend-icon="event"-->
-<!--                            :append-outer-icon="(index === customMenu.length - 1) ? 'mdi-plus-thick' :-->
-<!--                            'mdi-close-circle-outline'"-->
-<!--                            readonly-->
-<!--                            @click:append-outer="manageInput(index)"-->
-<!--                            v-on="on"-->
-<!--                    ></v-text-field>-->
-<!--                </template>-->
-<!--                <v-date-picker v-model="menu.input" scrollable range>-->
-<!--                    <v-spacer></v-spacer>-->
-<!--                    <v-btn text color="primary" @click="menu.isActive = false">Cancel</v-btn>-->
-<!--                    <v-btn text color="primary"  @click="$refs.dialog.save(menu.input)">OK</v-btn>-->
-<!--                </v-date-picker>-->
-<!--            </v-dialog>-->
-
             <v-dialog
                     ref="dialog"
                     v-model="modal"
