@@ -2,7 +2,7 @@
     <div class="pl-2">
         <div class="subtitle-2">{{text}}</div>
         <v-switch
-                :label="switchType ? 'Custom (under construction)' : 'Range'"
+                :label="switchType ? 'Custom' : 'Range'"
                 v-model="switchType"
         ></v-switch>
         <div v-if="!switchType">
@@ -31,8 +31,8 @@
                     :close-on-content-click="false"
                     transition="scale-transition"
                     offset-y
-                    max-width="290px"
-                    min-width="290px"
+                    max-width="300px"
+                    min-width="300px"
             >
                 <template v-slot:activator="{ on }">
                     <v-text-field
@@ -48,26 +48,30 @@
             </v-menu>
         </div>
         <div v-else>
+
             <v-dialog
-                    ref="dialog"
+                   ref="dialog"
+                   v-for="(menu, index) in customMenu"
+                   :key="index"
                     v-model="modal"
-                    v-for="(menu, index) in customMenu"
-                    :key="index"
                     :return-value.sync="menu.input"
-                    persistent
-                    width="290px"
+                    width="300px"
             >
                 <template v-slot:activator="{ on }">
                     <v-text-field
-                            v-model="menu.input"
-                            label="date"
-                            prepend-icon="event"
+                            v-model="menu.inputFormatted"
+                            label="Date"
+                            :append-icon="(index === customMenu.length - 1 && customMenu.length > 1) ?
+                            'mdi-close-circle-outline' : ''"
                             :append-outer-icon="(index === customMenu.length - 1) ? 'mdi-plus-thick' : 'mdi-close-circle-outline'"
-                             @click:append-outer="manageInput(index)"
+                            @click:append-outer="manageInput(index)"
+                            @click:append="manageInput(index, true)"
                             v-on="on"
-                    ></v-text-field>
+                    />
                 </template>
-                <v-date-picker v-model="menu.input" :allowed-dates="allowedDatesCustom" @input="changeCustomDate(index)" scrollable range>
+
+                <v-date-picker v-model="menu.input" :allowed-dates="allowedDatesCustom"
+                               @input="changeCustomDate(index)" scrollable range>
                     <v-spacer></v-spacer>
                     <v-btn text color="primary" @click="modal = false">Cancel</v-btn>
                     <v-btn text color="primary" @click="$refs.dialog[index].save(menu.input)">OK</v-btn>
@@ -94,7 +98,7 @@
       menu2: false,
       period: null,
       customMenu: [
-        {isActive: false, input: []}
+        {isActive: false, input: [], inputFormatted: ''}
       ],
       switchType: false,
       isDisabled: true,
@@ -106,14 +110,15 @@
       }
     },
     methods: {
-      save(time) {
-        this.$refs.dialog.save(time)
+      save(date) {
+        this.$refs.dialog.save(date);
       },
-      manageInput(index) {
-        if (index ===  this.customMenu.length -1) {
+      manageInput(index, isHardDel = false) {
+        if (index === this.customMenu.length - 1 && !isHardDel) {
           this.customMenu.push({
             isActive: false,
-            input: []
+            input: [],
+            inputFormatted: ''
           });
         } else {
           this.customMenu.splice(index, 1);
@@ -127,10 +132,12 @@
         if (this.date1 && this.date2) this.isDisabled = false;
       },
       changeCustomDate(index) {
+        this.customMenu[index].inputFormatted = this.customMenu[index].input.join(' — ');
         let date = this.customMenu[index].input;
-        if (date[0] > date[1]) {
+        if (new Date(date[0]) > new Date(date[1])) {
           const start = date[1];
           const end = date[0];
+
           this.customMenu[index].input[0] = start;
           this.customMenu[index].input[1] = end;
         }
@@ -138,7 +145,7 @@
         if (this.customMenu[index].input[0]) this.isDisabled = false;
       },
       upload() {
-        this.isDisabled = true;
+
         this.$store.commit("setPreloader", true);
 
         if (window.innerWidth < 768) {
@@ -146,12 +153,13 @@
         }
 
         const dates = this.switchType ? this.getCustomDate() : this.getRangeDate();
-        const yearDate = this.getYearDate();       
-        
+        const yearDate = this.getYearDate();
+
         if (!dates.length) return this.$store.commit("setPreloader", false);
-        
+
         this.$store.commit("setInfoSleep", null);
         this.$store.commit("setInfoDays", null);
+        this.$store.commit("setInfoMean", null);
         this.$store.dispatch("getCategoryInfo", yearDate);
         this.$store.dispatch("getSleepInfo", {dates, param: 'mean'});
       },
@@ -165,7 +173,7 @@
         let dates = [];
         this.customMenu.forEach(date => {
           dates = dates.concat(this.getDatesForArray(dates, date.input[0], date.input[1]));
-        })
+        });
         return dates;
       },
       getDatesForArray(dates, startDate, endDate) {
@@ -177,7 +185,7 @@
       },
       getYearDate() {
         const date = new Date();
-        const startYear = new Date((date.setFullYear(date.getFullYear() - 2))).toISOString().substr(0, 10);
+        const startYear = new Date((date.setFullYear(date.getFullYear() - 5))).toISOString().substr(0, 10);
         const endYear = new Date().toISOString().substr(0, 10);
         return {start: startYear, end: endYear};
       },
@@ -189,14 +197,14 @@
           flagDate = val <= new Date().toISOString().substr(0, 10);
         } else {
           this.customMenu.map(date => {
-            if (date.input[0]) {              
+            if (date.input[0]) {
               let start = date.input[0];
-              let end = date.input[1] ? date.input[1] : start; 
-              if (val > new Date().toISOString().substr(0, 10) || (val >= start && val <= end)) flagDate = false;                         
-            }     
+              let end = date.input[1] ? date.input[1] : start;
+              if (val > new Date().toISOString().substr(0, 10) || (val >= start && val <= end)) flagDate = false;
+            }
           });
-        }    
-        return flagDate;   
+        }
+        return flagDate;
       }
     },
   }

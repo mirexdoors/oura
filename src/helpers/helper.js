@@ -284,7 +284,11 @@ export const dataTableMeanInfo = (data, yearData) => {
     }
 
     const itemMean = means[item] + ' ± ' + meansSD[item];
-    const itemRange = ranges[item] + ' ± ' + rangesSD[item];
+    let itemRange = ranges[item] + ' ± ' + rangesSD[item];
+    // if (rangesSD[item] > 0 && rangesSD[item] !== '0:00') {
+    //   itemRange +=  ' ± ' + rangesSD[item];
+    // }
+
     result.push({
       parameter: item,
       mean: itemMean,
