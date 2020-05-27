@@ -67,7 +67,7 @@
                             v-on="on"
                     ></v-text-field>
                 </template>
-                <v-date-picker v-model="menu.input" scrollable range>
+                <v-date-picker v-model="menu.input" :allowed-dates="allowedDatesCustom" @input="changeCustomDate(index)" scrollable range>
                     <v-spacer></v-spacer>
                     <v-btn text color="primary" @click="modal = false">Cancel</v-btn>
                     <v-btn text color="primary" @click="$refs.dialog[index].save(menu.input)">OK</v-btn>
@@ -75,7 +75,7 @@
             </v-dialog>
         </div>
 
-        <v-btn v-if="!switchType" :disabled="isDisabled && (!date1 && !date2)" min-width="150" rounded
+        <v-btn :disabled="isDisabled" min-width="150" rounded
                color="primary" dark
                @click="upload()">
             Submit
@@ -126,6 +126,17 @@
 
         if (this.date1 && this.date2) this.isDisabled = false;
       },
+      changeCustomDate(index) {
+        let date = this.customMenu[index].input;
+        if (date[0] > date[1]) {
+          const start = date[1];
+          const end = date[0];
+          this.customMenu[index].input[0] = start;
+          this.customMenu[index].input[1] = end;
+        }
+
+        if (this.customMenu[index].input[0]) this.isDisabled = false;
+      },
       upload() {
         this.isDisabled = true;
         this.$store.commit("setPreloader", true);
@@ -134,21 +145,59 @@
           this.$emit("changeDrawer", false);
         }
 
+        const dates = this.switchType ? this.getCustomDate() : this.getRangeDate();
+        const yearDate = this.getYearDate();       
+        
+        if (!dates.length) return this.$store.commit("setPreloader", false);
+        
+        this.$store.commit("setInfoSleep", null);
+        this.$store.commit("setInfoDays", null);
+        this.$store.dispatch("getCategoryInfo", yearDate);
+        this.$store.dispatch("getSleepInfo", {dates, param: 'mean'});
+      },
+      getRangeDate() {
         const start = this.date1;
         const lastDate = new Date(this.date2);
         const end = lastDate.toISOString().substr(0, 10);
+        return [{start, end}];
+      },
+      getCustomDate() {
+        let dates = [];
+        this.customMenu.forEach(date => {
+          dates = dates.concat(this.getDatesForArray(dates, date.input[0], date.input[1]));
+        })
+        return dates;
+      },
+      getDatesForArray(dates, startDate, endDate) {
+        if (!startDate) return [];
+        let start = startDate;
+        let end;
+        end = endDate ? endDate : startDate;
+        return [{start, end}];
+      },
+      getYearDate() {
         const date = new Date();
         const startYear = new Date((date.setFullYear(date.getFullYear() - 2))).toISOString().substr(0, 10);
         const endYear = new Date().toISOString().substr(0, 10);
-        const dates = [];
-        dates.push({start, end});
-        this.$store.commit("setInfoSleep", null);
-        this.$store.commit("setInfoDays", null);
-        this.$store.dispatch("getCategoryInfo", {start: startYear, end: endYear});
-        this.$store.dispatch("getSleepInfo", {dates, param: 'mean'});
+        return {start: startYear, end: endYear};
       },
       allowedDatesStart: val => val < new Date().toISOString().substr(0, 10),
       allowedDatesFinish: val => val <= new Date().toISOString().substr(0, 10),
+      allowedDatesCustom(val) {
+        let flagDate = true;
+        if (this.customMenu.length <= 1) {
+          flagDate = val <= new Date().toISOString().substr(0, 10);
+        } else {
+          this.customMenu.map(date => {
+            if (date.input[0]) {              
+              let start = date.input[0];
+              let end = date.input[1] ? date.input[1] : start; 
+              if (val > new Date().toISOString().substr(0, 10) || (val >= start && val <= end)) flagDate = false;                         
+            }     
+          });
+        }    
+        return flagDate;   
+      }
     },
   }
 </script>
