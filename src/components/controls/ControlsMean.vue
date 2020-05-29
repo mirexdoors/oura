@@ -1,5 +1,5 @@
 <template>
-    <div class="pl-2">
+    <div class="pl-2 pb-8">
         <div class="subtitle-2">{{text}}</div>
         <v-switch
                 :label="switchType ? 'Custom' : 'Range'"
@@ -41,10 +41,10 @@
                             persistent-hint
                             readonly
                             v-on="on"
-                    ></v-text-field>
+                   />
                 </template>
                 <v-date-picker v-model="date2" :allowed-dates="allowedDatesFinish" @change="changeInput" no-title
-                               @input="menu2 = false"></v-date-picker>
+                               @input="menu2 = false" />
             </v-menu>
         </div>
         <div v-else>
@@ -53,7 +53,7 @@
                    ref="dialog"
                    v-for="(menu, index) in customMenu"
                    :key="index"
-                    v-model="modal"
+                    v-model="modal[index]"
                     :return-value.sync="menu.input"
                     width="300px"
             >
@@ -73,7 +73,8 @@
                 <v-date-picker v-model="menu.input" :allowed-dates="allowedDatesCustom"
                                @input="changeCustomDate(index)" scrollable range>
                     <v-spacer></v-spacer>
-                    <v-btn text color="primary" @click="modal = false">Cancel</v-btn>
+                    {{index}}
+                    <v-btn text color="primary" @click="modal[index] = false">Cancel</v-btn>
                     <v-btn text color="primary" @click="$refs.dialog[index].save(menu.input)">OK</v-btn>
                 </v-date-picker>
             </v-dialog>
@@ -94,7 +95,7 @@
       date1: null,
       date2: null,
       menu1: false,
-      modal: false,
+      modal: [false],
       menu2: false,
       period: null,
       customMenu: [
@@ -120,8 +121,10 @@
             input: [],
             inputFormatted: ''
           });
+          this.modal.push(false);
         } else {
           this.customMenu.splice(index, 1);
+          this.modal.splice(index, 1);
         }
       },
       changeInput() {
