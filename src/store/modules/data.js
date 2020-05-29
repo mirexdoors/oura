@@ -56,17 +56,23 @@ const Sleep = {
     getSleepInfo({commit}, payload) {
       if (payload.dates.length > 0) {
         const token = this.state.Auth.token;
+        const resultData = {sleep:[], activity:[], readiness: []};
         getAllInfoFromDateArray(payload.dates, token).then((...data) => {
-          data = getDataFromRaw(data[0][0]);
+         data[0].forEach(dataItem=> {
+           const tempItem = getDataFromRaw(dataItem);
+           for (const key in resultData) {
+             tempItem[key].forEach(tempItemElement => {
+               resultData[key].push(tempItemElement);
+             });
+           }
+          });
 
           if (payload.param === 'days')
-            commit("setInfoDays", data);
+            commit("setInfoDays", resultData);
           if (payload.param === 'corr')
-            commit("setInfoSleep", data);
+            commit("setInfoSleep", resultData);
           else if (payload.param === 'mean')
-            commit("setInfoMean", data);
-          else if (payload.param === 'days')
-            commit("setInfoDays", data);
+            commit("setInfoMean", resultData);
 
           commit("setPreloader", false);
         });
