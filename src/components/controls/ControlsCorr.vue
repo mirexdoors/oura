@@ -51,7 +51,7 @@
         </v-menu>
 
         <v-btn :disabled="isDisabled" min-width="150" rounded color="primary" dark @click="upload()">
-            Submit
+            Get
         </v-btn>
     </div>
 </template>

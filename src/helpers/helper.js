@@ -243,7 +243,7 @@ const getMeanByDay = (days, tmpSumm) => {
       const daysWithParam = getDaysWithParam(param, tmpSumm);
       days[day][param] = (days[day][param] / (daysWithParam / 7)).toFixed(2);
       if (param === 'Bedtime' || param === 'Get-out-of-bed time') {
-        days[day][param] = getTimeFromSeconds(days[day][param] - 3600, true);
+        days[day][param] = getTimeFromSeconds(days[day][param], true);
       }
       if (param === 'Inactive time' || param === 'Resting' +
           ' time' || param === 'Non-wear time') days[day][param] = days[day][param] * 60;

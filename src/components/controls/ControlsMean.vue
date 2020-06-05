@@ -73,7 +73,6 @@
                 <v-date-picker v-model="menu.input" :allowed-dates="allowedDatesCustom"
                                @input="changeCustomDate(index)" scrollable range>
                     <v-spacer></v-spacer>
-                    {{index}}
                     <v-btn text color="primary" @click="modal[index] = false">Cancel</v-btn>
                     <v-btn text color="primary" @click="$refs.dialog[index].save(menu.input)">OK</v-btn>
                 </v-date-picker>
@@ -83,7 +82,7 @@
         <v-btn :disabled="isDisabled" min-width="150" rounded
                color="primary" dark
                @click="upload()">
-            Submit
+            Get
         </v-btn>
     </div>
 </template>
