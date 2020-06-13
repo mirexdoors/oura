@@ -7,7 +7,7 @@
                     Email:
                 </v-col>
                 <v-col>
-                    {{email}}
+                    {{info.email}}
                 </v-col>
             </v-row>
             <v-row>
@@ -18,26 +18,28 @@
                     <v-autocomplete
                             v-model="country"
                             :items="itemsCountry"
-                            placeholder="Start typing to select country"
+                            :placeholder="countryPlaceholder ? countryPlaceholder : 'Start typing to select country'"
                             outlined
                             item-text="value"
                             item-value="iso"
+                            id="countrySelect"
                             return-object
                             :search-input.sync="searchCountry"
                     ></v-autocomplete>
                     <v-autocomplete
                             class="mt-n4"
                             v-model="city"
+                            id="citySelect"
                             :items="itemsCity"
-                            placeholder="Start typing to select city"
+                            :placeholder="cityPlaceholder ? cityPlaceholder : 'Start typing to select city'"
                             outlined
                             item-text="cityName"
                             item-lat="lat"
                             item-lon="lon"
                             return-object
                             :search-input.sync="searchCity"
-                    ></v-autocomplete>
-                    {{city}}
+                    >
+                    </v-autocomplete>
                 </v-col>
             </v-row>
             <v-row class="mt-n2">
@@ -53,7 +55,7 @@
                     GMT offset
                 </v-col>
                 <v-col>
-                    {{gmtOffset}}
+                    {{gtmOffset}}
                 </v-col>
             </v-row>
         </v-card-text>
@@ -69,7 +71,7 @@
             <v-btn
                     class="primary--text"
                     text
-                    @click="close"
+                    @click="save"
             >
                 save
             </v-btn>
@@ -80,6 +82,7 @@
 <script>
   import axios from 'axios';
   import {calcOffset} from '../helpers/helper';
+  import {db} from "../db";
 
   export default {
     name: "settings",
@@ -88,33 +91,70 @@
       city: '',
       dadataKey: '',
       timeZoneKey: '',
-      timeZone: '',
-      gmtOffset: '',
-      searchCountry: null,
-      searchCity: null,
+      cityPlaceholder: '',
+      countryPlaceholder: '',
+      searchCountry: false,
+      searchCity: false,
       entriesCountry: [],
       entriesCity: [],
+      isFirstUpdate: true
     }),
     mounted() {
       this.dadataKey = this.$store.state.Keys.dadata;
       this.timeZoneKey = this.$store.state.Keys.timeZone;
-      this.$store.dispatch('getEmail');
+      this.$store.dispatch('getInfo');
     },
     methods: {
+      save() {
+        const info = this.$store.state.Auth.info;
+        const userMail = info.email;
+        db.collection('locations')
+            .doc(userMail)
+            .get()
+            .then(snapshot => {
+              if (!snapshot.exists) {
+                db.collection('locations').add();
+                db.collection('locations')
+                    .doc(userMail)
+                    .set({
+                      city: this.city.cityName || '',
+                      country: this.country.value || '',
+                      timeZone: this.timeZone || '',
+                      gtmOffset: this.gtmOffset || ''
+                    })
+                    .then(() => {
+                      alert('Settings saved successfully!');
+                      this.$emit("closeSettings", true);
+                    })
+              } else {
+                db.collection('locations')
+                    .doc(userMail)
+                    .set({
+                      city: this.city.cityName || this.cityPlaceholder || '',
+                      country: this.country.value || this.countryPlaceholder || '',
+                      timeZone: this.timeZone || '',
+                      gtmOffset: this.gtmOffset || ''
+                    })
+                    .then(() => {
+                      alert('Settings saved successfully!');
+                      this.$emit("closeSettings", true);
+                    })
+              }
+            })
+      },
       close() {
         this.$emit("closeSettings", true);
       }
     },
     watch: {
       searchCountry(val) {
-
         axios.post('https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/address',
             {
-              "query": `${val}`,
+              query: `${val}`,
               language: "en",
-              "type": "ADDRESS",
-              "from_bound": {"value": "country"},
-              "to_bound": {"value": "country"},
+              type: "ADDRESS",
+              from_bound: {"value": "country"},
+              to_bound: {"value": "country"},
               locations: {country: "*"},
             },
             {
@@ -129,27 +169,30 @@
         })
       },
       searchCity(val) {
-        axios.post('https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/address',
-            {
-              "query": `${val}`,
-              language: "en",
-              "type": "ADDRESS",
-              "from_bound": {"value": "city"},
-              "to_bound": {"value": "city"},
-              locations: {
-                country_iso_code: this.country_iso_code
+
+        if (val) {
+          axios.post('https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/address',
+              {
+                "query": `${val}`,
+                language: "en",
+                "type": "ADDRESS",
+                "from_bound": {"value": "city"},
+                "to_bound": {"value": "city"},
+                locations: {
+                  country_iso_code: this.country_iso_code
+                },
               },
-            },
-            {
-              headers:
-                  {
-                    "Content-Type": "application/json",
-                    "Accept": "application/json",
-                    "Authorization": `Token ${this.dadataKey}`
-                  }
-            }).then(res => {
-          this.entriesCity = res.data.suggestions;
-        })
+              {
+                headers:
+                    {
+                      "Content-Type": "application/json",
+                      "Accept": "application/json",
+                      "Authorization": `Token ${this.dadataKey}`
+                    }
+              }).then(res => {
+            this.entriesCity = res.data.suggestions;
+          })
+        }
       },
       city() {
         if (!this.city) return false;
@@ -158,12 +201,30 @@
         const lon = this.city.lon;
         axios.get(`http://api.timezonedb.com/v2.1/get-time-zone?key=${this.timeZoneKey}&format=json&by=position&lat=${lat}&lng=${lon}`)
             .then(response => {
-              this.timeZone = response.data.zoneName;
-              this.gmtOffset = calcOffset(response.data.gmtOffset);
-            })
+              this.$store.commit('updateTimeZone', response.data.zoneName);
+              if (response.data.gmtOffset)
+                this.$store.commit('updateGmt', calcOffset(response.data.gmtOffset));
+            });
       },
     },
+    updated() {
+        this.cityPlaceholder = this.$store.state.Auth.info.city;
+        this.countryPlaceholder = this.$store.state.Auth.info.country;
+    },
     computed: {
+      timeZone: {
+        get() {
+          return this.$store.state.Auth.info.timeZone;
+        },
+      },
+      gtmOffset: {
+        get() {
+          return this.$store.state.Auth.info.gtmOffset;
+        },
+      },
+      info() {
+        return this.$store.state.Auth.info;
+      },
       country_iso_code() {
         return this.country ? this.country.iso : '*';
       },
@@ -184,9 +245,11 @@
           };
         })
       },
-      email() {
-        return this.$store.state.Auth.email
-      },
     },
   }
 </script>
+<style>
+    /*#countrySelect:not(.changing)::placeholder {*/
+    /*    color: #292929;*/
+    /*}*/
+</style>
