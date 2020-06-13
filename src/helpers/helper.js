@@ -228,20 +228,36 @@ const getSummByDay = (summa) => {
   return days;
 };
 const getDaysWithParam = (parameter, tmpSumm) => {
-  let i = 0;
+  console.log(tmpSumm)
+  const result = {
+    sunday: 0,
+    monday: 0,
+    tuesday: 0,
+    wednesday: 0,
+    thursday: 0,
+    friday: 0,
+    saturday: 0,
+  };
   tmpSumm.forEach(item => {
-    if (item[parameter]) i++;
+    if (item[parameter]) {
+      //определяем здесь день недели и записываем в свойство
+      const day = getWeekDay(item['summary_date']);
+      result[day]++;
+    }
   });
-  return i;
+  console.log(result);
+  return result;
 };
 
 const getMeanByDay = (days, tmpSumm) => {
   for (const day in days) {
     for (const param in days[day]) {
+
 //найдем количество элементов, в которых встречается
-// параметр
+// параметр пот дням недели
       const daysWithParam = getDaysWithParam(param, tmpSumm);
-      days[day][param] = (days[day][param] / (daysWithParam / 7)).toFixed(2);
+
+      days[day][param] = (days[day][param] / daysWithParam[day]).toFixed(2);
       if (param === 'Bedtime' || param === 'Get-out-of-bed time') {
         days[day][param] = getTimeFromSeconds(days[day][param], true);
       }
@@ -285,9 +301,8 @@ export const dataTableMeanInfo = (data, yearData) => {
 
     const itemMean = means[item] + ' ± ' + meansSD[item];
     let itemRange = ranges[item] + ' ± ' + rangesSD[item];
-    // if (rangesSD[item] > 0 && rangesSD[item] !== '0:00') {
-    //   itemRange +=  ' ± ' + rangesSD[item];
-    // }
+    // if (rangesSD[item] > 0 && rangesSD[item] !== '0:00')
+    // { itemRange +=  ' ± ' + rangesSD[item]; }
 
     result.push({
       parameter: item,
