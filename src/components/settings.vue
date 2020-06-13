@@ -31,16 +31,29 @@
                             :items="itemsCity"
                             placeholder="Start typing to select city"
                             outlined
+                            item-text="cityName"
+                            item-lat="lat"
+                            item-lon="lon"
+                            return-object
                             :search-input.sync="searchCity"
                     ></v-autocomplete>
+                    {{city}}
+                </v-col>
+            </v-row>
+            <v-row class="mt-n2">
+                <v-col class="primary--text">
+                    Time zone:
+                </v-col>
+                <v-col>
+                    {{timeZone}}
                 </v-col>
             </v-row>
             <v-row>
                 <v-col class="primary--text">
-                    Timezone:
+                    GMT offset
                 </v-col>
                 <v-col>
-                    under construction
+                    {{gmtOffset}}
                 </v-col>
             </v-row>
         </v-card-text>
@@ -66,18 +79,25 @@
 
 <script>
   import axios from 'axios';
+  import {calcOffset} from '../helpers/helper';
 
   export default {
     name: "settings",
     data: () => ({
       country: '',
       city: '',
+      dadataKey: '',
+      timeZoneKey: '',
+      timeZone: '',
+      gmtOffset: '',
       searchCountry: null,
       searchCity: null,
       entriesCountry: [],
       entriesCity: [],
     }),
     mounted() {
+      this.dadataKey = this.$store.state.Keys.dadata;
+      this.timeZoneKey = this.$store.state.Keys.timeZone;
       this.$store.dispatch('getEmail');
     },
     methods: {
@@ -87,6 +107,7 @@
     },
     watch: {
       searchCountry(val) {
+
         axios.post('https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/address',
             {
               "query": `${val}`,
@@ -101,7 +122,7 @@
                   {
                     "Content-Type": "application/json",
                     "Accept": "application/json",
-                    "Authorization": "Token 3de36a91f7aef570339858f9f9bb4c09e2be5efc"
+                    "Authorization": `Token ${this.dadataKey}`
                   }
             }).then(res => {
           this.entriesCountry = res.data.suggestions;
@@ -124,12 +145,23 @@
                   {
                     "Content-Type": "application/json",
                     "Accept": "application/json",
-                    "Authorization": "Token 3de36a91f7aef570339858f9f9bb4c09e2be5efc"
+                    "Authorization": `Token ${this.dadataKey}`
                   }
             }).then(res => {
           this.entriesCity = res.data.suggestions;
         })
-      }
+      },
+      city() {
+        if (!this.city) return false;
+
+        const lat = this.city.lat;
+        const lon = this.city.lon;
+        axios.get(`http://api.timezonedb.com/v2.1/get-time-zone?key=${this.timeZoneKey}&format=json&by=position&lat=${lat}&lng=${lon}`)
+            .then(response => {
+              this.timeZone = response.data.zoneName;
+              this.gmtOffset = calcOffset(response.data.gmtOffset);
+            })
+      },
     },
     computed: {
       country_iso_code() {
@@ -145,12 +177,16 @@
       },
       itemsCity() {
         return this.entriesCity.map(entry => {
-          return entry.data.city;
+          return {
+            cityName: entry.data.city,
+            lat: entry.data.geo_lat,
+            lon: entry.data.geo_lon,
+          };
         })
       },
       email() {
         return this.$store.state.Auth.email
-      }
+      },
     },
   }
 </script>

@@ -11,7 +11,7 @@
 
                   <v-dialog
                           v-model="isOpenSettings"
-                          max-width="290"
+                          max-width="300"
                   >
                     <settings @closeSettings="isOpenSettings = false" />
 

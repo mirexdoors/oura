@@ -445,3 +445,8 @@ export const dataTableDaysInfo = (data) => {
   });
   return result;
 };
+
+export const calcOffset = (offsetAtSeconds) => {
+  const offsetPosition = offsetAtSeconds > 0 ? '+' : '-';
+  return `UTC/GMT ${offsetPosition} ${getTimeFromSeconds(offsetAtSeconds)}`
+};
