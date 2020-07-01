@@ -7,7 +7,8 @@ const Sleep = {
     infoSleep: null,
     categoryData: null,
     infoMean: null,
-    infoDays: null
+    infoDays: null,
+    infoTravel: null,
   },
   mutations: {
     setCategoryData(state, payload) {
@@ -16,6 +17,9 @@ const Sleep = {
     },
     setInfoSleep(state, payload) {
       state.infoSleep = payload;
+    },
+    setInfoTravel(state, payload) {
+      state.infoTravel = payload;
     },
     setInfoDays(state, payload) {
       state.infoDays = payload;
@@ -73,6 +77,8 @@ const Sleep = {
             commit("setInfoSleep", resultData);
           else if (payload.param === 'mean')
             commit("setInfoMean", resultData);
+          else if (payload.param === 'travel')
+            commit("setInfoTravel", resultData);
 
           commit("setPreloader", false);
         });

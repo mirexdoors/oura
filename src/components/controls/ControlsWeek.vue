@@ -65,7 +65,7 @@
       period: null,
       isDisabled: true,
       radioButtons: [
-        {type: 'week', label: 'Last week'},
+        {type: 'month', label: 'Last month'},
         {type: 'year', label: 'Last year'},
         {type: 'entire', label: 'Entire period'},
       ],
@@ -87,8 +87,8 @@
       setDates() {
         const firstDate = new Date();
         switch (this.period) {
-          case 'week':
-            firstDate.setDate(firstDate.getDate() - 7);
+          case 'month':
+            firstDate.setMonth(firstDate.getMonth() - 1);
             break;
           case 'year':
             firstDate.setFullYear(firstDate.getFullYear() - 1);
@@ -130,7 +130,3 @@
     },
   }
 </script>
-
-<style scoped>
-
-</style>

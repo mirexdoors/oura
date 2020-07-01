@@ -23,6 +23,7 @@
         <controls-corr v-if="controls.corr" @changeDrawer="setDrawer"/>
         <controls-mean v-if="controls.mean" @changeDrawer="setDrawer"/>
         <controls-week v-if="controls.week" @changeDrawer="setDrawer"/>
+        <controls-travel v-if="controls.travel" @changeDrawer="setDrawer" />
     </div>
 </template>
 
@@ -30,16 +31,18 @@
   import ControlsCorr from "./controls/ControlsCorr";
   import ControlsMean from "./controls/ControlsMean";
   import ControlsWeek from "./controls/ControlsWeek";
+import ControlsTravel from "./controls/ControlsTravel";
 
   export default {
     name: "Tabs",
-    components: {ControlsWeek, ControlsMean, ControlsCorr},
+    components: {ControlsWeek, ControlsMean, ControlsCorr, ControlsTravel},
     data() {
       return {
         controls: {
           corr: true,
           mean: false,
           week: false,
+          travel: false
         },
         navs: [
           {
@@ -55,6 +58,11 @@
           {
             title: 'Days of week',
             href: '#week',
+            is_active: false,
+          },
+          {
+            title: 'Travel',
+            href: '#travel',
             is_active: false,
           },
         ]
@@ -84,11 +92,6 @@
         this.$emit("changeDrawer", false);
       },
     },
-    component: {
-      ControlsCorr,
-      ControlsMean,
-      ControlsWeek,
-    }
   }
 </script>
 <style scoped>

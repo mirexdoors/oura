@@ -10,6 +10,7 @@ const Auth = {
       city: '',
       timeZone: '',
       gtmOffset: '',
+      dst: '',
     },
     token: null,
     parameteres: {
@@ -31,12 +32,16 @@ const Auth = {
       state.info.city = payload.city;
       state.info.timeZone = payload.timeZone;
       state.info.gtmOffset = payload.gtmOffset;
+      state.info.dst = payload.dst;
     },
     updateTimeZone(state, payload) {
       state.info.timeZone = payload;
     },
     updateGmt(state, payload) {
       state.info.gtmOffset = payload;
+    },
+    updateDst(state, payload) {
+      state.info.dst = Number(payload);
     }
   },
   actions: {
@@ -56,6 +61,7 @@ const Auth = {
                     info.country = fireData.country;
                     info.timeZone = fireData.timeZone;
                     info.gtmOffset = fireData.gtmOffset;
+                    info.dst =  fireData.dst;
                   }
                   commit('saveInfo', info);
                 })

@@ -450,3 +450,7 @@ export const calcOffset = (offsetAtSeconds) => {
   const offsetPosition = offsetAtSeconds > 0 ? '+' : '';
   return `UTC/GMT ${offsetPosition} ${getTimeFromSeconds(offsetAtSeconds)}`
 };
+
+export const travelDaysHelper = () => {
+  return [1,2]
+}

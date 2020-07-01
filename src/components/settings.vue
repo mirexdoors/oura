@@ -58,6 +58,14 @@
                     {{gtmOffset}}
                 </v-col>
             </v-row>
+            <v-row>
+                <v-col class="primary--text">
+                    DST
+                </v-col>
+                <v-col>
+                    {{dst}}
+                </v-col>
+            </v-row>
         </v-card-text>
         <v-card-actions>
             <v-spacer/>
@@ -120,7 +128,8 @@
                       city: this.city.cityName || '',
                       country: this.country.value || '',
                       timeZone: this.timeZone || '',
-                      gtmOffset: this.gtmOffset || ''
+                      gtmOffset: this.gtmOffset || '',
+                      dst: this.dst==='Yes' ? 1 : 0,
                     })
                     .then(() => {
                       alert('Settings saved successfully!');
@@ -133,7 +142,8 @@
                       city: this.city.cityName || this.cityPlaceholder || '',
                       country: this.country.value || this.countryPlaceholder || '',
                       timeZone: this.timeZone || '',
-                      gtmOffset: this.gtmOffset || ''
+                      gtmOffset: this.gtmOffset || '',
+                      dst: this.dst==='Yes' ? 1 : 0,
                     })
                     .then(() => {
                       alert('Settings saved successfully!');
@@ -199,11 +209,14 @@
 
         const lat = this.city.lat;
         const lon = this.city.lon;
-        axios.get(`http://api.timezonedb.com/v2.1/get-time-zone?key=${this.timeZoneKey}&format=json&by=position&lat=${lat}&lng=${lon}`)
+        axios.get(`https://api.timezonedb.com/v2.1/get-time-zone?key=${this.timeZoneKey}&format=json&by=position&lat=${lat}&lng=${lon}`)
             .then(response => {
               this.$store.commit('updateTimeZone', response.data.zoneName);
               if (response.data.gmtOffset)
                 this.$store.commit('updateGmt', calcOffset(response.data.gmtOffset));
+
+              if (response.data.dst)
+                this.$store.commit('updateDst', response.data.dst);
             });
       },
     },
@@ -215,6 +228,11 @@
       timeZone: {
         get() {
           return this.$store.state.Auth.info.timeZone;
+        },
+      },
+      dst: {
+        get() {
+          return (this.$store.state.Auth.info.dst === 0 ? 'No' : 'Yes');
         },
       },
       gtmOffset: {

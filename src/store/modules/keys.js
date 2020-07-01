@@ -1,6 +1,6 @@
 const Keys = {
   state: {
-    dadata: '3de36a91f7aef570339858f9f9bb4c09e2be5efc',
+    dadata: '4004576a58cd5bd365d46b897cc818494fbea098',
     timeZone: 'R1UGF52YYDHY',
   },
 };
