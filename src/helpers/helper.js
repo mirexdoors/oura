@@ -18,6 +18,7 @@ export const APINames = {
     rmssd: 'Average HRV',
     breath_average: 'Respiratory rate',
     temperature_delta: 'Temperature dev',
+    timezone: 'timezone'
   },
   activity: {
     score: 'Activity score',
@@ -80,6 +81,7 @@ const getAverageForParams = (summa, summaForParam) => {
 };
 const getSummForParam = (summa) => {
   //3. Вычисляем суму значений параметра
+
   const summOfParam = {};
   for (let index in summa) {
     for (let param in summa[index]) {
@@ -101,13 +103,14 @@ const getTimeFromSeconds = (time, isDay = false) => {
     minutes.toString().padStart(2, '0'),
   ].join(':');
 };
-const getTempSumm = (data, isCorr = false) => {
+const getTempSumm = (data, isCorr = false, isForTimeZone = false) => {
   const tempSumm = [];
   //2.Данные сведем в одну таблицу:
   for (const dataCategory in data) {
     data[dataCategory].forEach((item, index) => {
       for (const param in item) {
         if (item[param] !== undefined) {
+
           let appName = APINames[dataCategory][param];
           if (param === 'summary_date') {
             appName = 'summary_date';
@@ -120,8 +123,14 @@ const getTempSumm = (data, isCorr = false) => {
 
 
           if (!Object.prototype.hasOwnProperty.call(tempSumm, index)) tempSumm[index] = {};
+
           tempSumm[index][appName] = item[param];
-          if (isCorr) {
+
+          if (!isForTimeZone && param === 'timezone') {
+            delete tempSumm[index].timezone
+          }
+
+          if (isCorr && param !== 'timezone') {
             if (data[dataCategory][index - 1])
               tempSumm[index][appName + ' prev. day'] = data[dataCategory][index - 1][param];
             if (data[dataCategory][index + 1])
@@ -282,33 +291,34 @@ export const dataTableMeanInfo = (data, yearData) => {
   const rangesSD = getSD(tempSummData, ranges);
 
   parameters.forEach(item => {
+    if (item !== 'timezone') {
+      if (item === 'Bedtime' || item === 'Get-out-of-bed time') {
+        means[item] = getTimeFromSeconds(means[item], true);
+        ranges[item] = getTimeFromSeconds(ranges[item], true);
+      }
 
-    if (item === 'Bedtime' || item === 'Get-out-of-bed time') {
-      means[item] = getTimeFromSeconds(means[item], true);
-      ranges[item] = getTimeFromSeconds(ranges[item], true);
+      if (item === 'Inactive time' || item === 'Resting' +
+          ' time' || item === 'Non-wear time') {
+        means[item] = means[item] * 60;
+        ranges[item] = ranges[item] * 60;
+      }
+
+      if (TIME_PARAMS.includes(item)) {
+        means[item] = getTimeFromSeconds(means[item]);
+        ranges[item] = getTimeFromSeconds(ranges[item]);
+      }
+
+      const itemMean = means[item] + ' ± ' + meansSD[item];
+      let itemRange = ranges[item] + ' ± ' + rangesSD[item];
+      // if (rangesSD[item] > 0 && rangesSD[item] !==
+      // '0:00') { itemRange +=  ' ± ' + rangesSD[item]; }
+
+      result.push({
+        parameter: item,
+        mean: itemMean,
+        range: itemRange
+      })
     }
-
-    if (item === 'Inactive time' || item === 'Resting' +
-        ' time' || item === 'Non-wear time') {
-      means[item] = means[item] * 60;
-      ranges[item] = ranges[item] * 60;
-    }
-
-    if (TIME_PARAMS.includes(item)) {
-      means[item] = getTimeFromSeconds(means[item]);
-      ranges[item] = getTimeFromSeconds(ranges[item]);
-    }
-
-    const itemMean = means[item] + ' ± ' + meansSD[item];
-    let itemRange = ranges[item] + ' ± ' + rangesSD[item];
-    // if (rangesSD[item] > 0 && rangesSD[item] !== '0:00')
-    // { itemRange +=  ' ± ' + rangesSD[item]; }
-
-    result.push({
-      parameter: item,
-      mean: itemMean,
-      range: itemRange
-    })
   });
 
   return result;
@@ -432,16 +442,18 @@ export const dataTableDaysInfo = (data) => {
 
   const parameters = getParameters(data);
   parameters.forEach(item => {
-    const element = {parameter: item};
-    for (const day in meanByday) {
-      if (Object.prototype.hasOwnProperty.call(meanByday[day], item)) {
-        if (meanByday[day][item] !== 'NaN' && meanByday[day][item] !== 'undefined') {
-          element[day] = meanByday[day][item];
+    if (item !== 'timezone') {
+      const element = {parameter: item};
+      for (const day in meanByday) {
+        if (Object.prototype.hasOwnProperty.call(meanByday[day], item)) {
+          if (meanByday[day][item] !== 'NaN' && meanByday[day][item] !== 'undefined') {
+            element[day] = meanByday[day][item];
+          }
         }
-      }
 
+      }
+      result.push(element)
     }
-    result.push(element)
   });
   return result;
 };
@@ -450,7 +462,67 @@ export const calcOffset = (offsetAtSeconds) => {
   const offsetPosition = offsetAtSeconds > 0 ? '+' : '';
   return `UTC/GMT ${offsetPosition} ${getTimeFromSeconds(offsetAtSeconds)}`
 };
+const getDaysAtTimeZones = (tmpData, timeZone) => {
+  const initialValue = 0;
+  const reducerNative = (accumulator, currentDay) => {
+    if (currentDay.timezone === timeZone) {
+      return 1 + accumulator;
+    } else return accumulator;
+  };
 
-export const travelDaysHelper = () => {
-  return [1,2]
-}
+  const reducerOutside = (accumulator, currentDay) => {
+    if (!!currentDay.timezone && currentDay.timezone !== timeZone) {
+      return 1 + accumulator;
+    } else return accumulator;
+  };
+
+  const reducerNoInfo = (accumulator, currentDay) => {
+    if (!currentDay.timezone) {
+      return 1 + accumulator;
+    } else return accumulator;
+  };
+
+  return {
+    native: tmpData.reduce(reducerNative, initialValue),
+    outside: tmpData.reduce(reducerOutside, initialValue),
+    noInfo: tmpData.reduce(reducerNoInfo, initialValue),
+  };
+};
+const getMinutesTimeZone = (timeZone) => {
+  const timeZoneArray = timeZone.split(':');
+  if (timeZone.indexOf('-') > -1)
+    return Number(timeZoneArray[0] * 60) - Number(timeZoneArray[1]);
+  else
+    return Number(timeZoneArray[0] * 60) + Number(timeZoneArray[1]);
+};
+export const travelDaysHelper = (data, info) => {
+  const timeZoneArray = info.gtmOffset.split(' ');
+  let timeZone = null;
+  if (timeZoneArray[1] === '+') {
+    timeZone = timeZoneArray[2];
+  } else {
+    timeZone = 0 - timeZoneArray[2];
+  }
+  const timeZoneAtMinutes = getMinutesTimeZone(timeZone);
+
+  const tempSumm = getTempSumm(data, false, true);
+  const infoTZ = getDaysAtTimeZones(tempSumm, timeZoneAtMinutes);
+  const result = [
+    {
+      name: 'Number of days in the native time zone' +
+          ' (including DST)',
+      value: infoTZ.native,
+    },
+    {
+      name: 'Number of days outside your home time zone' +
+          ' (amount)',
+      value: infoTZ.outside,
+    },
+    {
+      name: 'Number of days without timezone info',
+      value: infoTZ.noInfo,
+    },
+
+  ];
+  return result;
+};

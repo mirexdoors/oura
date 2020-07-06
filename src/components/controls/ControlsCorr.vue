@@ -97,6 +97,7 @@
         this.$store.commit("setPreloader", true);
         this.$store.commit("setInfoMean", null);
         this.$store.commit("setInfoDays", null);
+        this.$store.commit("setInfoTravel", null);
 
         if (window.innerWidth < 768) {
           this.$emit("changeDrawer", false);

@@ -266,8 +266,4 @@
     },
   }
 </script>
-<style>
-    /*#countrySelect:not(.changing)::placeholder {*/
-    /*    color: #292929;*/
-    /*}*/
-</style>
+

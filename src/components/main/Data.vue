@@ -1,12 +1,12 @@
 <template>
     <v-row>
         <v-col cols="12" lg="6" class="pl-lg-6" v-if="!getPreloader">
-            <Coeffs v-if="infoSleep.length" :items="infoSleep" />
+            <Coeffs v-if="infoSleep.length" :items="infoSleep"/>
             <Average v-if="infoMean.length" :items="infoMean"/>
-            <Travel v-if="infoTravel.length" :items="infoTravel" />
+            <Travel v-if="infoTravel.length" :items="infoTravel"/>
         </v-col>
-        <v-col cols="12"  lg="10"  class="pl-lg-6"  v-if="infoDays.length">
-            <DaysOfWeek :items="infoDays" />
+        <v-col cols="12" lg="10" class="pl-lg-6" v-if="infoDays.length">
+            <DaysOfWeek :items="infoDays"/>
         </v-col>
     </v-row>
 </template>
@@ -21,6 +21,9 @@
   export default {
     name: "Data",
     computed: {
+      userInfo() {
+        return this.$store.state.Auth.info;
+      },
       getPreloader: function () {
         return this.$store.state.Data.preloader;
       },
@@ -42,11 +45,14 @@
       },
       infoTravel() {
         if (this.$store.state.Data.infoTravel) {
-          return travelDaysHelper(this.$store.state.Data.infoSleep);
+          if (this.userInfo) {
+            return travelDaysHelper(this.$store.state.Data.infoTravel, this.userInfo);
+          }
+          else return [];
         } else
-          return []
+          return [];
       },
-      },
+    },
     components: {
       Coeffs,
       Average,

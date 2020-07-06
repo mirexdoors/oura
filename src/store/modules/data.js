@@ -70,7 +70,6 @@ const Sleep = {
              });
            }
           });
-
           if (payload.param === 'days')
             commit("setInfoDays", resultData);
           if (payload.param === 'corr')
@@ -148,6 +147,7 @@ function filteredData(data) {
           rmssd: item.rmssd,
           breath_average: item.breath_average,
           temperature_delta: item.temperature_delta,
+          timezone:item.timezone,
         };
       }),
     };

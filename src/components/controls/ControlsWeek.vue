@@ -72,12 +72,13 @@
     }),
     methods: {
       upload() {
-        this.$store.commit("setPreloader", true);
         if (window.innerWidth < 768) {
           this.$emit("changeDrawer", false);
         }
+        this.$store.commit("setPreloader", true);
         this.$store.commit("setInfoSleep", null);
         this.$store.commit("setInfoMean", null);
+        this.$store.commit("setInfoTravel", null);
         const start = this.date1;
         const end = this.date2;
         const dates = [];

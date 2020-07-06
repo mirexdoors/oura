@@ -162,6 +162,8 @@
         this.$store.commit("setInfoSleep", null);
         this.$store.commit("setInfoDays", null);
         this.$store.commit("setInfoMean", null);
+        this.$store.commit("setInfoTravel", null);
+
         this.$store.dispatch("getCategoryInfo", yearDate);
         this.$store.dispatch("getSleepInfo", {dates, param: 'mean'});
       },
