@@ -1,65 +1,79 @@
 <template>
     <div>
         <div class="pl-2">
-            <div class="subtitle-2">{{text}}</div>
+            <div v-if="hasSettings" class="subtitle-2">{{text}}</div>
+            <div v-else>
+            <div class="subtitle-2">To use this section please enter your home location in the <a
+                    @click.stop="isOpenSettings = !isOpenSettings" style="text-decoration: underline">Settings</a></div>
+                <v-dialog
+                        v-model="isOpenSettings"
+                        max-width="300"
+                >
+                    <settings @closeSettings="isOpenSettings = false" />
 
-            <v-radio-group v-model="period" v-on:change="setDates" class="radios">
-                <v-radio
-                        v-for="radio in this.radioButtons"
-                        :key="radio['type']"
-                        :label="radio['label']"
-                        :value="radio['type']"
-                ></v-radio>
-            </v-radio-group>
-            <v-menu
-                    ref="menu1"
-                    v-model="menu1"
-                    :close-on-content-click="false"
-                    transition="scale-transition"
-                    offset-y
-                    max-width="290px"
-                    min-width="290px"
-            >
-                <template v-slot:activator="{ on }">
-                    <v-text-field
-                            v-model="date1"
-                            label="Date Start"
-                            persistent-hint
-                            v-on="on"
-                    ></v-text-field>
-                </template>
-                <v-date-picker @change="changeDateInput" v-model="date1" :allowed-dates="allowedDatesStart" no-title
-                               @input="menu1 = false"></v-date-picker>
-            </v-menu>
-            <v-menu
-                    v-model="menu2"
-                    :close-on-content-click="false"
-                    transition="scale-transition"
-                    offset-y
-                    max-width="290px"
-                    min-width="290px"
-            >
-                <template v-slot:activator="{ on }">
-                    <v-text-field
-                            v-model="date2"
-                            label="Date End"
-                            persistent-hint
-                            readonly
-                            v-on="on"
-                    ></v-text-field>
-                </template>
-                <v-date-picker v-model="date2" :allowed-dates="allowedDatesFinish" @change="changeDateInput" no-title
-                               @input="menu2 = false"></v-date-picker>
-            </v-menu>
+                </v-dialog>
+            </div>
+            <div v-if="hasSettings">
+                <v-radio-group v-model="period" v-on:change="setDates" class="radios">
+                    <v-radio
+                            v-for="radio in this.radioButtons"
+                            :key="radio['type']"
+                            :label="radio['label']"
+                            :value="radio['type']"
+                    ></v-radio>
+                </v-radio-group>
+                <v-menu
+                        ref="menu1"
+                        v-model="menu1"
+                        :close-on-content-click="false"
+                        transition="scale-transition"
+                        offset-y
+                        max-width="290px"
+                        min-width="290px"
+                >
+                    <template v-slot:activator="{ on }">
+                        <v-text-field
+                                v-model="date1"
+                                label="Date Start"
+                                persistent-hint
+                                v-on="on"
+                        ></v-text-field>
+                    </template>
+                    <v-date-picker @change="changeDateInput" v-model="date1" :allowed-dates="allowedDatesStart" no-title
+                                   @input="menu1 = false"></v-date-picker>
+                </v-menu>
+                <v-menu
+                        v-model="menu2"
+                        :close-on-content-click="false"
+                        transition="scale-transition"
+                        offset-y
+                        max-width="290px"
+                        min-width="290px"
+                >
+                    <template v-slot:activator="{ on }">
+                        <v-text-field
+                                v-model="date2"
+                                label="Date End"
+                                persistent-hint
+                                readonly
+                                v-on="on"
+                        ></v-text-field>
+                    </template>
+                    <v-date-picker v-model="date2" :allowed-dates="allowedDatesFinish" @change="changeDateInput"
+                                   no-title
+                                   @input="menu2 = false"></v-date-picker>
+                </v-menu>
 
-            <v-btn :disabled="isDisabled" min-width="150" rounded color="primary" dark @click="upload()">
-                Get
-            </v-btn>
+                <v-btn :disabled="isDisabled" min-width="150" rounded color="primary" dark @click="upload()">
+                    Get
+                </v-btn>
+            </div>
         </div>
     </div>
 </template>
 
 <script>
+  import Settings from '../../components/settings';
   export default {
     name: "ControlsTravel",
     data: () => ({
@@ -67,6 +81,7 @@
       date2: new Date().toISOString().substr(0, 10),
       menu1: false,
       menu2: false,
+      isOpenSettings: false,
       isDisabled: true,
       radioButtons: [
         {type: 'month', label: 'Last month'},
@@ -95,6 +110,9 @@
     computed: {
       getPreloader() {
         return this.$store.state.Data.preloader;
+      },
+      hasSettings() {
+        return !!this.$store.state.Auth.info.gtmOffset;
       }
     },
     methods: {
@@ -145,5 +163,6 @@
         }
       }
     },
+    components: {Settings}
   }
 </script>
