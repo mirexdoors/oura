@@ -147,7 +147,6 @@ function filteredData(data) {
           rmssd: item.rmssd,
           breath_average: item.breath_average,
           temperature_delta: item.temperature_delta,
-          timezone:item.timezone,
         };
       }),
     };
@@ -166,6 +165,7 @@ function filteredData(data) {
           cal_active: item.cal_active,
           met_min_medium_plus: item.met_min_medium_plus,
           average_met: item.average_met,
+          timezone:item.timezone,
         };
       }),
     };

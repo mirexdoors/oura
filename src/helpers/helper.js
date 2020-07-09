@@ -18,7 +18,6 @@ export const APINames = {
     rmssd: 'Average HRV',
     breath_average: 'Respiratory rate',
     temperature_delta: 'Temperature dev',
-    timezone: 'timezone'
   },
   activity: {
     score: 'Activity score',
@@ -31,6 +30,7 @@ export const APINames = {
     cal_active: 'Activity burn',
     met_min_medium_plus: 'Medium+ METs',
     average_met: 'Average METs',
+    timezone: 'timezone'
   },
   readiness: {
     score: 'Readiness score'
@@ -525,4 +525,56 @@ export const travelDaysHelper = (data, info) => {
 
   ];
   return result;
+};
+const getGmtFromTimeZone = (minutes) => {
+  let gmt = '';
+
+  if (minutes > 0)
+    gmt += '+ ';
+  else
+    gmt += '- ';
+
+  let hours = Math.trunc(minutes / 60);
+  if (hours < 10) hours = '0' + hours;
+
+  gmt += hours + ':';
+
+  let gmtMinutes = minutes % 60;
+  if (gmtMinutes === 0) gmtMinutes = '00';
+  gmt += gmtMinutes;
+
+  gmt += ' GMT';
+  return gmt;
+};
+
+const getPeriods = (days) => {
+
+  const result = days.reduce((current, day, index, array) => {
+    if (index === 0) {
+      current.push({
+        gmt: getGmtFromTimeZone(day.timezone),
+        row: 1,
+        start: day.summary_date,
+        end: day.summary_date,
+      });
+    } else {
+      if ((getGmtFromTimeZone(day.timezone) === getGmtFromTimeZone(array[index - 1].timezone))) {
+        current[current.length - 1].row += 1;
+        current[current.length - 1].end = day.summary_date;
+      } else {
+
+        current.push({
+          gmt: getGmtFromTimeZone(day.timezone),
+          row: 1,
+          start: day.summary_date,
+          end: day.summary_date,
+        });
+      }
+    }
+    return current;
+  }, []);
+  return result;
+};
+export const getTravelPeriods = (data) => {
+  return getPeriods(data.activity);
 };

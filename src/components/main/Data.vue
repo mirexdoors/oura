@@ -3,7 +3,9 @@
         <v-col cols="12" lg="6" class="pl-lg-6" v-if="!getPreloader">
             <Coeffs v-if="infoSleep.length" :items="infoSleep"/>
             <Average v-if="infoMean.length" :items="infoMean"/>
-            <Travel v-if="infoTravel.length" :items="infoTravel"/>
+        </v-col>
+        <v-col cols="12" lg="12" class="pl-lg-6" v-if="!getPreloader">
+        <Travel v-if="infoTravel.length" :items="infoTravel" :periods="travelPeriods" />
         </v-col>
         <v-col cols="12" lg="10" class="pl-lg-6" v-if="infoDays.length">
             <DaysOfWeek :items="infoDays"/>
@@ -16,7 +18,7 @@
   import Average from "../tables/Mean";
   import DaysOfWeek from "../tables/DaysOfWeek";
   import Travel from "../tables/Travel";
-  import {dataTableCoeffHelper, dataTableMeanInfo, dataTableDaysInfo, travelDaysHelper} from "../../helpers/helper";
+  import {dataTableCoeffHelper, dataTableMeanInfo, dataTableDaysInfo, travelDaysHelper, getTravelPeriods} from "../../helpers/helper";
 
   export default {
     name: "Data",
@@ -52,6 +54,15 @@
         } else
           return [];
       },
+      travelPeriods() {
+        if (this.$store.state.Data.infoTravel) {
+          if (this.userInfo) {
+            return getTravelPeriods(this.$store.state.Data.infoTravel);
+          }
+          else return [];
+        } else
+          return [];
+      }
     },
     components: {
       Coeffs,

@@ -6,10 +6,10 @@
             <div class="subtitle-2">To use this section please enter your home location in the <a
                     @click.stop="isOpenSettings = !isOpenSettings" style="text-decoration: underline">Settings</a></div>
                 <v-dialog
-                        v-model="isOpenSettings"
+                        v-model="isOpenSettings "
                         max-width="300"
                 >
-                    <settings @closeSettings="isOpenSettings = false" />
+                    <settings />
 
                 </v-dialog>
             </div>
@@ -112,7 +112,7 @@
         return this.$store.state.Data.preloader;
       },
       hasSettings() {
-        return !!this.$store.state.Auth.info.gtmOffset;
+        return !!this.$store.state.Auth.info.gtmOffset && !this.isOpenSettings;
       }
     },
     methods: {
