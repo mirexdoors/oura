@@ -3,7 +3,12 @@
         <v-col>
             <v-card v-if="periods">
                 <v-card-title>
-                    Travel periods<br>
+                    Travel periods
+                    <v-btn class="mt-3 mt-lg-0 ml-0 ml-lg-3" @click="showParameters" min-width="150"
+                           rounded
+                           color="primary" dark>
+                        Get parameters by time zone
+                </v-btn>
                 </v-card-title>
                 <v-data-table
                         :headers="periodHeaders"
@@ -15,14 +20,6 @@
             <v-card v-if="items">
                 <v-card-title>
                     Travel info
-                    <v-spacer></v-spacer>
-                    <v-text-field
-                            v-model="search"
-                            append-icon="mdi-magnify"
-                            label="Search"
-                            single-line
-                            hide-details
-                    ></v-text-field>
                 </v-card-title>
                 <v-data-table
                         :headers="headers"
@@ -32,11 +29,16 @@
                 />
             </v-card>
         </v-col>
-
+        <v-col id="params" lg=12>
+            <v-card v-if="isTmpParameters">
+                parameters by time zone under construction
+            </v-card>
+        </v-col>
     </v-row>
 </template>
 
 <script>
+  import * as easings from 'vuetify/es5/services/goto/easing-patterns'
   export default {
     name: "Travel",
     props: {
@@ -45,7 +47,9 @@
     },
     data() {
       return {
-        search: '',
+        isTmpParameters: false,
+        easing: 'easeInOutCubic',
+        easings: Object.keys(easings),
         periodHeaders: [
           {
             text: 'Timezone',
@@ -82,6 +86,17 @@
         ],
       }
     },
+    computed: {
+      parameters() {
+        return true;
+      }
+    },
+    methods: {
+      showParameters() {
+        this.isTmpParameters = true;
+        this.$vuetify.goTo('#params');
+      }
+    }
   }
 </script>
 

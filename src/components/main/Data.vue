@@ -22,6 +22,9 @@
 
   export default {
     name: "Data",
+    mounted() {
+      this.$store.dispatch('getInfo');
+    },
     computed: {
       userInfo() {
         return this.$store.state.Auth.info;

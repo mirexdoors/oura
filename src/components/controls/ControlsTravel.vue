@@ -91,9 +91,6 @@
       period: null,
       text: 'Select a period to explore data about your travels',
     }),
-    mounted() {
-      this.$store.dispatch('getInfo');
-    },
     watch: {
       period: function (val) {
         if (val !== null) {

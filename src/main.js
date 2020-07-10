@@ -6,6 +6,7 @@ import {store} from './store/index';
 import 'material-design-icons-iconfont';
 
 Vue.use(firestorePlugin);
+Vue.use(vuetify);
 
 
 Vue.config.productionTip = false;
