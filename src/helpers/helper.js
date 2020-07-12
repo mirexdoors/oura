@@ -578,3 +578,27 @@ const getPeriods = (days) => {
 export const getTravelPeriods = (data) => {
   return getPeriods(data.activity);
 };
+export const getPeriodsForParams = (data) => {
+  return data.map((item, index)=>{
+    return  {
+        text: item.start + ' — ' + item.end,
+        value: 'period_' + index,
+        sortable: false,
+      }
+  })
+};
+export const getMeanParamsForTimeZone = (data) => {
+
+  const parameters = getParameters(data);
+  const tempSummData = getTempSumm(data);
+
+  console.log(tempSummData)
+//получать среднеи значения для дома
+  // получать средние значения "в гостях"
+  // передавать в фукнцию периоды и считать по ним
+  return parameters.map(item=> {
+    return  {
+      param: item,
+    }
+  })
+};
