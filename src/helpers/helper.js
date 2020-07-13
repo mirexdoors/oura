@@ -68,31 +68,64 @@ const getParameters = (data) => {
   return result;
 };
 
-const getAverageForParams = (summa, summaForParam) => {
+const getAverageForParams = (summa, summaForParam, timezone = false, isForAway = false) => {
   const averageOfParam = {};
+  let i = 1;
+
   for (let index in summa) {
     for (let param in summa[index]) {
-      averageOfParam[param] = (summaForParam[param] / (Number(index) + 1)).toFixed(2);
+      if (timezone) {
+        if (!isForAway) {
+          if (Number(summa[index].timezone) === timezone) {
+            averageOfParam[param] = (summaForParam[param] / i).toFixed(2);
+          }
+        } else {
+          if (Number(summa[index].timezone) !== timezone) {
+            averageOfParam[param] = (summaForParam[param] / i).toFixed(2);
+          }
+        }
+
+      } else {
+        averageOfParam[param] = (summaForParam[param] / (Number(index) + 1)).toFixed(2);
+      }
     }
-
-
+    if (timezone) {
+      if (!isForAway) {
+        if (Number(summa[index].timezone) === timezone) i++;
+      } else {
+        if (Number(summa[index].timezone) !== timezone) i++;
+      }
+    }
   }
   return averageOfParam;
 };
-const getSummForParam = (summa) => {
-  //3. Вычисляем суму значений параметра
+const getSummForParam = (summa, timezone = false, isForAwayTimeZone = false) => {
 
   const summOfParam = {};
   for (let index in summa) {
     for (let param in summa[index]) {
-      if (!summOfParam[param]) summOfParam[param] = 0;
-      summOfParam[param] = summOfParam[param] + summa[index][param];
+      if (timezone) {
+        if (!summOfParam[param]) summOfParam[param] = 0;
+        if (!isForAwayTimeZone) {
+          if (Number(summa[index].timezone) === timezone) {
+            summOfParam[param] = summOfParam[param] + Number(summa[index][param]);
+          }
+        } else {
+          if (Number(summa[index].timezone) !== timezone) {
+            summOfParam[param] =summOfParam[param] +  Number(summa[index][param]);
+          }
+        }
+      } else {
+        if (!summOfParam[param]) summOfParam[param] = 0;
+        summOfParam[param] = summOfParam[param] + summa[index][param];
+      }
+
     }
   }
   return summOfParam;
 };
 const getTimeFromSeconds = (time, isDay = false) => {
-  const hours = Math.floor(time / 60 / 60);
+  const hours = Math.floor(time / 3600);
   const minutes = Math.floor(time / 60) - (hours * 60);
   let formattedHours = hours.toString().padStart(2, '0');
   if (isDay && hours.toString().padStart(2, '0') > 23) {
@@ -104,10 +137,12 @@ const getTimeFromSeconds = (time, isDay = false) => {
   ].join(':');
 };
 const getTempSumm = (data, isCorr = false, isForTimeZone = false) => {
+
+  const tempData = JSON.parse(JSON.stringify(data));
   const tempSumm = [];
   //2.Данные сведем в одну таблицу:
-  for (const dataCategory in data) {
-    data[dataCategory].forEach((item, index) => {
+  for (const dataCategory in tempData) {
+    tempData[dataCategory].forEach((item, index) => {
       for (const param in item) {
         if (item[param] !== undefined) {
 
@@ -131,10 +166,10 @@ const getTempSumm = (data, isCorr = false, isForTimeZone = false) => {
           }
 
           if (isCorr && param !== 'timezone') {
-            if (data[dataCategory][index - 1])
-              tempSumm[index][appName + ' prev. day'] = data[dataCategory][index - 1][param];
-            if (data[dataCategory][index + 1])
-              tempSumm[index][appName + ' next day'] = data[dataCategory][index + 1][param];
+            if (tempData[dataCategory][index - 1])
+              tempSumm[index][appName + ' prev. day'] = tempData[dataCategory][index - 1][param];
+            if (tempData[dataCategory][index + 1])
+              tempSumm[index][appName + ' next day'] = tempData[dataCategory][index + 1][param];
           }
         }
       }
@@ -144,8 +179,8 @@ const getTempSumm = (data, isCorr = false, isForTimeZone = false) => {
   return tempSumm;
 };
 
-export const getMeans = (data, summa) => {
-  const summOfParam = getSummForParam(summa)
+export const getMeans = (summa) => {
+  const summOfParam = getSummForParam(summa);
   return getAverageForParams(summa, summOfParam);
 };
 
@@ -202,7 +237,6 @@ const getDeviation = (summOfSqrDevForDay, length) => {
 
 const getSD = (summa, averages) => {
   const length = summa.length;
-
   const devForDay = getDevForDay(summa, averages);
   const sqrDevForDay = getSqrDevForDay(devForDay);
   const summOfSqrDevForDay = getSummOfSqrDevForDay(sqrDevForDay);
@@ -237,7 +271,6 @@ const getSummByDay = (summa) => {
   return days;
 };
 const getDaysWithParam = (parameter, tmpSumm) => {
-  console.log(tmpSumm)
   const result = {
     sunday: 0,
     monday: 0,
@@ -254,7 +287,6 @@ const getDaysWithParam = (parameter, tmpSumm) => {
       result[day]++;
     }
   });
-  console.log(result);
   return result;
 };
 
@@ -283,10 +315,10 @@ export const dataTableMeanInfo = (data, yearData) => {
 
   const parameters = getParameters(data);
   const tempSummData = getTempSumm(data);
-
   const tempSummYearData = getTempSumm(yearData);
-  const means = getMeans(data, tempSummYearData);
-  const ranges = getMeans(yearData, tempSummData);
+
+  const means = getMeans(tempSummYearData);
+  const ranges = getMeans(tempSummData);
   const meansSD = getSD(tempSummYearData, means);
   const rangesSD = getSD(tempSummData, ranges);
 
@@ -310,8 +342,6 @@ export const dataTableMeanInfo = (data, yearData) => {
 
       const itemMean = means[item] + ' ± ' + meansSD[item];
       let itemRange = ranges[item] + ' ± ' + rangesSD[item];
-      // if (rangesSD[item] > 0 && rangesSD[item] !==
-      // '0:00') { itemRange +=  ' ± ' + rangesSD[item]; }
 
       result.push({
         parameter: item,
@@ -488,22 +518,30 @@ const getDaysAtTimeZones = (tmpData, timeZone) => {
     noInfo: tmpData.reduce(reducerNoInfo, initialValue),
   };
 };
-const getMinutesTimeZone = (timeZone) => {
+const getMinutesTimeZone = (gmt) => {
+  const timeZone = getMinutesTimeZoneHelper(gmt);
+
   const timeZoneArray = timeZone.split(':');
   if (timeZone.indexOf('-') > -1)
     return Number(timeZoneArray[0] * 60) - Number(timeZoneArray[1]);
   else
     return Number(timeZoneArray[0] * 60) + Number(timeZoneArray[1]);
 };
-export const travelDaysHelper = (data, info) => {
-  const timeZoneArray = info.gtmOffset.split(' ');
+
+const getMinutesTimeZoneHelper = (gmt) => {
+  const timeZoneArray = gmt.split(' ');
   let timeZone = null;
   if (timeZoneArray[1] === '+') {
     timeZone = timeZoneArray[2];
   } else {
     timeZone = 0 - timeZoneArray[2];
   }
-  const timeZoneAtMinutes = getMinutesTimeZone(timeZone);
+  return timeZone;
+};
+
+export const travelDaysHelper = (data, info) => {
+
+  const timeZoneAtMinutes = getMinutesTimeZone(info.gtmOffset);
 
   const tempSumm = getTempSumm(data, false, true);
   const infoTZ = getDaysAtTimeZones(tempSumm, timeZoneAtMinutes);
@@ -579,26 +617,66 @@ export const getTravelPeriods = (data) => {
   return getPeriods(data.activity);
 };
 export const getPeriodsForParams = (data) => {
-  return data.map((item, index)=>{
-    return  {
-        text: item.start + ' — ' + item.end,
-        value: 'period_' + index,
-        sortable: false,
-      }
-  })
-};
-export const getMeanParamsForTimeZone = (data) => {
-
-  const parameters = getParameters(data);
-  const tempSummData = getTempSumm(data);
-
-  console.log(tempSummData)
-//получать среднеи значения для дома
-  // получать средние значения "в гостях"
-  // передавать в фукнцию периоды и считать по ним
-  return parameters.map(item=> {
-    return  {
-      param: item,
+  return data.map((item, index) => {
+    return {
+      text: item.start + ' — ' + item.end,
+      value: 'period_' + index,
+      sortable: false,
     }
   })
+};
+
+export const getMeansByTimezone = (summ, timezone, isForAway = false) => {
+  const summOfParam = getSummForParam(summ, timezone, isForAway);
+  return getAverageForParams(summ, summOfParam, timezone, isForAway);
+};
+
+export const getMeanParamsForTimeZone = (data, timezone) => {
+  const result = [];
+  const timeZoneAtMinutes = getMinutesTimeZone(timezone);
+  const parameters = getParameters(data);
+  const tempSummData = getTempSumm(data, false, true);
+  const meansHome = getMeansByTimezone(tempSummData, timeZoneAtMinutes);
+  const meansAway = getMeansByTimezone(tempSummData, timeZoneAtMinutes, true);
+  const meansHomeSD = getSD(tempSummData, meansHome);
+  const meansAwaySD = getSD(tempSummData, meansAway);
+
+  // получать средние значения "в гостях"
+  // передавать в фукнцию периоды и считать по ним
+
+  parameters.map(item => {
+    if (item !== 'timezone') {
+      if (item === 'Bedtime' || item === 'Get-out-of-bed time') {
+        meansHome[item] = getTimeFromSeconds(meansHome[item], true);
+        if (meansAway[item] !== undefined)
+          meansAway[item] = getTimeFromSeconds(meansAway[item], true);
+      }
+
+      if (item === 'Inactive time' || item === 'Resting' +
+          ' time' || item === 'Non-wear time') {
+        meansHome[item] = meansHome[item] * 60;
+        if (meansAway[item] !== undefined)
+          meansAway[item] = meansAway[item] * 60;
+      }
+
+      if (TIME_PARAMS.includes(item)) {
+        meansHome[item] = getTimeFromSeconds(meansHome[item]);
+        if (meansAway[item] !== undefined)
+          meansAway[item] = getTimeFromSeconds(meansAway[item]);
+      }
+
+      const itemHome = meansHome[item] + ' ± ' + meansHomeSD[item];
+
+      let itemAway = 'no data';
+      if (meansAway[item] !== undefined)
+        itemAway = meansAway[item] + ' ± ' + meansAwaySD[item];
+
+      result.push({
+        param: item,
+        home_mean: itemHome,
+        away_mean: itemAway
+      })
+    }
+  });
+  return result;
 };

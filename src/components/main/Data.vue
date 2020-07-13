@@ -5,7 +5,7 @@
             <Average v-if="infoMean.length" :items="infoMean"/>
         </v-col>
         <v-col cols="12" lg="12" class="pl-lg-6" v-if="!getPreloader">
-        <Travel v-if="infoTravel.length" :items="infoTravel" :periods="travelPeriods" />
+            <Travel v-if="infoTravel.length" :items="infoTravel" :periods="travelPeriods"/>
         </v-col>
         <v-col cols="12" lg="10" class="pl-lg-6" v-if="infoDays.length">
             <DaysOfWeek :items="infoDays"/>
@@ -18,7 +18,13 @@
   import Average from "../tables/Mean";
   import DaysOfWeek from "../tables/DaysOfWeek";
   import Travel from "../tables/Travel";
-  import {dataTableCoeffHelper, dataTableMeanInfo, dataTableDaysInfo, travelDaysHelper, getTravelPeriods} from "../../helpers/helper";
+  import {
+    dataTableCoeffHelper,
+    dataTableMeanInfo,
+    dataTableDaysInfo,
+    travelDaysHelper,
+    getTravelPeriods
+  } from "../../helpers/helper";
 
   export default {
     name: "Data",
@@ -34,35 +40,34 @@
       },
       infoSleep() {
         if (this.$store.state.Data.infoSleep) {
-          return dataTableCoeffHelper(this.$store.state.Data.infoSleep);
+          return dataTableCoeffHelper(Object.assign({}, this.$store.state.Data.infoSleep));
         } else
           return []
       },
       infoMean() {
         if (this.$store.state.Data.infoMean && this.$store.state.Data.categoryData)
-          return dataTableMeanInfo(this.$store.state.Data.infoMean, this.$store.state.Data.categoryData);
+          return dataTableMeanInfo(Object.assign({}, this.$store.state.Data.infoMean),
+              Object.assign({}, this.$store.state.Data.categoryData));
         else return [];
       },
       infoDays() {
         if (this.$store.state.Data.infoDays)
-          return dataTableDaysInfo(this.$store.state.Data.infoDays);
+          return dataTableDaysInfo(Object.assign({}, this.$store.state.Data.infoDays));
         else return [];
       },
       infoTravel() {
         if (this.$store.state.Data.infoTravel) {
           if (this.userInfo) {
-            return travelDaysHelper(this.$store.state.Data.infoTravel, this.userInfo);
-          }
-          else return [];
+            return travelDaysHelper(JSON.parse(JSON.stringify(this.$store.state.Data.infoTravel)), this.userInfo);
+          } else return [];
         } else
           return [];
       },
       travelPeriods() {
         if (this.$store.state.Data.infoTravel) {
           if (this.userInfo) {
-            return getTravelPeriods(this.$store.state.Data.infoTravel);
-          }
-          else return [];
+            return getTravelPeriods(JSON.parse(JSON.stringify(this.$store.state.Data.infoTravel)));
+          } else return [];
         } else
           return [];
       }

@@ -12,8 +12,7 @@ const Sleep = {
   },
   mutations: {
     setCategoryData(state, payload) {
-      const dataObj = getDataFromRaw(payload);
-      state.categoryData = dataObj;
+      state.categoryData = getDataFromRaw(payload);
     },
     setInfoSleep(state, payload) {
       state.infoSleep = payload;
