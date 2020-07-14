@@ -40,7 +40,12 @@ export const APINames = {
 const TIME_PARAMS = [
   'Time asleep', 'Time in bed', 'Time awake in bed', 'Light sleep', 'REM sleep', 'Deep sleep', 'Sleep midpoint', 'Inactive time', 'Resting time', 'Non-wear time'
 ];
-const getSecondsToday = (date) => {
+const getSecondsToday = (date, userTimezone = false) => {
+  // передаём сюда параметр родной таймзоны пользователя
+  // для даты получаем таймзону. если она не равна
+  // таймзоне пользователя, то вычитаем её из таймзоны
+
+  console.log(userTimezone)
   const d = new Date(date);
   return d.getHours() * 3600 + d.getMinutes() * 60 + d.getSeconds();
 };
@@ -151,7 +156,7 @@ const getTempSumm = (data, isCorr = false, isForTimeZone = false) => {
             appName = 'summary_date';
           }
           if (param == 'bedtime_start' || param == 'bedtime_end') {
-            item[param] = getSecondsToday(item[param]);
+            item[param] = getSecondsToday(item[param], param);
           }
           if (param == 'bedtime_start' && (item[param] < 43200))
             item[param] = item[param] + 86400;
@@ -237,6 +242,17 @@ const getDeviation = (summOfSqrDevForDay, length) => {
 
 const getSD = (summa, averages) => {
   const length = summa.length;
+  summa = JSON.parse(JSON.stringify(summa));
+  // if (timezone !== null) {
+  //   summa = summa.filter(item=> {
+  //     if (!isForAway)
+  //       return item.timezone === timezone;
+  //     else
+  //       return  item.timezone !== timezone;
+  //
+  //   })
+  // }
+
   const devForDay = getDevForDay(summa, averages);
   const sqrDevForDay = getSqrDevForDay(devForDay);
   const summOfSqrDevForDay = getSummOfSqrDevForDay(sqrDevForDay);
@@ -636,10 +652,16 @@ export const getMeanParamsForTimeZone = (data, timezone) => {
   const timeZoneAtMinutes = getMinutesTimeZone(timezone);
   const parameters = getParameters(data);
   const tempSummData = getTempSumm(data, false, true);
-  const meansHome = getMeansByTimezone(tempSummData, timeZoneAtMinutes);
-  const meansAway = getMeansByTimezone(tempSummData, timeZoneAtMinutes, true);
-  const meansHomeSD = getSD(tempSummData, meansHome);
-  const meansAwaySD = getSD(tempSummData, meansAway);
+  const tempSummDataHome = tempSummData.filter((item) =>{
+    return item.timezone === timeZoneAtMinutes;
+  });
+  const tempSummDataAway = tempSummData.filter((item) =>{
+    return item.timezone !== timeZoneAtMinutes;
+  });
+  const meansHome = getMeansByTimezone(tempSummDataHome, timeZoneAtMinutes);
+  const meansAway = getMeansByTimezone(tempSummDataAway, timeZoneAtMinutes, true);
+  const meansHomeSD = getSD(tempSummDataHome, meansHome);
+  const meansAwaySD = getSD(tempSummDataAway, meansAway);
 
   // получать средние значения "в гостях"
   // передавать в фукнцию периоды и считать по ним
