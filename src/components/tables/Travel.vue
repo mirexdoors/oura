@@ -53,7 +53,7 @@
     },
     data() {
       return {
-        isTmpParameters: true,
+        isTmpParameters: false,
         easing: 'easeInOutCubic',
         easings: Object.keys(easings),
         isBtnParamsDisabled: false,

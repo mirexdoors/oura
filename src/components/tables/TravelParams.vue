@@ -1,11 +1,25 @@
 <template>
+    <v-card>
+    <v-card-title>
+        Parameters in travels
+        <v-spacer></v-spacer>
+        <v-text-field
+                v-model="search"
+                append-icon="mdi-magnify"
+                label="Search"
+                single-line
+                hide-details
+        ></v-text-field>
+    </v-card-title>
     <v-data-table
             :headers="headers"
             :items="items"
+            :search="search"
             :calculate-widths="true"
             :items-per-page="7"
             class="paramsTable elevation-1"
     />
+    </v-card>
 </template>
 
 <script>
@@ -14,6 +28,11 @@
     props: {
       items: Array,
       headers: Array,
+    },
+    data() {
+      return {
+        search: '',
+      }
     },
   }
 </script>
