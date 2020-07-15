@@ -40,14 +40,35 @@ export const APINames = {
 const TIME_PARAMS = [
   'Time asleep', 'Time in bed', 'Time awake in bed', 'Light sleep', 'REM sleep', 'Deep sleep', 'Sleep midpoint', 'Inactive time', 'Resting time', 'Non-wear time'
 ];
-const getSecondsToday = (date, userTimezone = false) => {
-  // передаём сюда параметр родной таймзоны пользователя
-  // для даты получаем таймзону. если она не равна
-  // таймзоне пользователя, то вычитаем её из таймзоны
+const getSecondsToday = (date) => {
 
-  console.log(userTimezone)
+  const getOffset = (s) => {
+    return (s.match(/z$|[+-]\d\d:\d\d$/i) || [])[0];
+  };
+
+  const offsetToMins = (offset) => {
+    // Deal with Z or z
+    if (/z/i.test(offset)) return 0;
+    // Deal +/-HH:mm
+    const sign = /^-/.test(offset) ? '1' : '-1';
+    const [h, m] = offset.slice(-5).split(':');
+    return sign * h * 60 + +m;
+  };
+
+  const userTimezone = new Date().getTimezoneOffset();
   const d = new Date(date);
-  return d.getHours() * 3600 + d.getMinutes() * 60 + d.getSeconds();
+
+  const offset = getOffset(date);
+  if (offset !== undefined) {
+    const dateTimeZone = offsetToMins(offset);
+    let resultSeconds = d.getHours() * 3600 + d.getMinutes() * 60 + d.getSeconds();
+
+    if (dateTimeZone !== userTimezone) {
+      resultSeconds = resultSeconds + (userTimezone * 60);
+    }
+
+    return resultSeconds;
+  }
 };
 
 const getCorrelation = (summ, deviationX, deviationY) => {
@@ -117,7 +138,7 @@ const getSummForParam = (summa, timezone = false, isForAwayTimeZone = false) => 
           }
         } else {
           if (Number(summa[index].timezone) !== timezone) {
-            summOfParam[param] =summOfParam[param] +  Number(summa[index][param]);
+            summOfParam[param] = summOfParam[param] + Number(summa[index][param]);
           }
         }
       } else {
@@ -155,8 +176,8 @@ const getTempSumm = (data, isCorr = false, isForTimeZone = false) => {
           if (param === 'summary_date') {
             appName = 'summary_date';
           }
-          if (param == 'bedtime_start' || param == 'bedtime_end') {
-            item[param] = getSecondsToday(item[param], param);
+          if (param === 'bedtime_start' || param === 'bedtime_end') {
+            item[param] = getSecondsToday(item[param]);
           }
           if (param == 'bedtime_start' && (item[param] < 43200))
             item[param] = item[param] + 86400;
@@ -379,10 +400,6 @@ export const dataTableCoeffHelper = (data) => {
     data[dataCategory].forEach(item => {
       for (const param in item) {
         if (item[param] !== undefined) {
-          if (typeof item[param] !== 'number') {
-            if (new Date(item[param]) != 'Invalid Date')
-              item[param] = getSecondsToday(item[param]);
-          }
           if (APINames[dataCategory][param]) {
             const appName = APINames[dataCategory][param];
             if (!tempNames.includes(appName)) {
@@ -652,10 +669,10 @@ export const getMeanParamsForTimeZone = (data, timezone) => {
   const timeZoneAtMinutes = getMinutesTimeZone(timezone);
   const parameters = getParameters(data);
   const tempSummData = getTempSumm(data, false, true);
-  const tempSummDataHome = tempSummData.filter((item) =>{
+  const tempSummDataHome = tempSummData.filter((item) => {
     return item.timezone === timeZoneAtMinutes;
   });
-  const tempSummDataAway = tempSummData.filter((item) =>{
+  const tempSummDataAway = tempSummData.filter((item) => {
     return item.timezone !== timeZoneAtMinutes;
   });
   const meansHome = getMeansByTimezone(tempSummDataHome, timeZoneAtMinutes);
