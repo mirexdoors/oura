@@ -55,16 +55,19 @@ const getSecondsToday = (date) => {
     return sign * h * 60 + +m;
   };
 
+
   const userTimezone = new Date().getTimezoneOffset();
   const d = new Date(date);
 
   const offset = getOffset(date);
+
   if (offset !== undefined) {
     const dateTimeZone = offsetToMins(offset);
+
     let resultSeconds = d.getHours() * 3600 + d.getMinutes() * 60 + d.getSeconds();
 
     if (dateTimeZone !== userTimezone) {
-      resultSeconds = resultSeconds + (userTimezone * 60);
+      resultSeconds = resultSeconds + ((userTimezone - dateTimeZone) * 60);
     }
 
     return resultSeconds;
@@ -97,7 +100,6 @@ const getParameters = (data) => {
 const getAverageForParams = (summa, summaForParam, timezone = false, isForAway = false) => {
   const averageOfParam = {};
   let i = 1;
-
   for (let index in summa) {
     for (let param in summa[index]) {
       if (timezone) {
@@ -123,6 +125,7 @@ const getAverageForParams = (summa, summaForParam, timezone = false, isForAway =
       }
     }
   }
+
   return averageOfParam;
 };
 const getSummForParam = (summa, timezone = false, isForAwayTimeZone = false) => {
@@ -179,8 +182,9 @@ const getTempSumm = (data, isCorr = false, isForTimeZone = false) => {
           if (param === 'bedtime_start' || param === 'bedtime_end') {
             item[param] = getSecondsToday(item[param]);
           }
-          if (param == 'bedtime_start' && (item[param] < 43200))
+          if (param == 'bedtime_start' && (item[param] < 43200)) {
             item[param] = item[param] + 86400;
+          }
 
 
           if (!Object.prototype.hasOwnProperty.call(tempSumm, index)) tempSumm[index] = {};
@@ -653,7 +657,7 @@ export const getPeriodsForParams = (data) => {
   return data.map((item, index) => {
     return {
       text: item.start + ' — ' + item.end,
-      value: 'period_' + index,
+      value: 'period' + index,
       sortable: false,
     }
   })
@@ -664,7 +668,7 @@ export const getMeansByTimezone = (summ, timezone, isForAway = false) => {
   return getAverageForParams(summ, summOfParam, timezone, isForAway);
 };
 
-export const getMeanParamsForTimeZone = (data, timezone) => {
+export const getMeanParamsForTimeZone = (data, timezone, periods) => {
   const result = [];
   const timeZoneAtMinutes = getMinutesTimeZone(timezone);
   const parameters = getParameters(data);
@@ -680,9 +684,30 @@ export const getMeanParamsForTimeZone = (data, timezone) => {
   const meansHomeSD = getSD(tempSummDataHome, meansHome);
   const meansAwaySD = getSD(tempSummDataAway, meansAway);
 
-  // получать средние значения "в гостях"
-  // передавать в фукнцию периоды и считать по ним
+  //разбиваем общий массив дат по параметрам
+  const dataByPeriods = periods.map(period => {
 
+    return tempSummData.filter(day => {
+      return new Date(day.summary_date) >= new Date(period.start) && new Date(day.summary_date) <= new Date(period.end);
+    })
+  });
+
+  // передаём в sd
+
+  const meansByPeriods = dataByPeriods.map((period) => {
+    let meanData = [];
+    if (period[0].timezone === timeZoneAtMinutes) {
+      meanData = getMeansByTimezone(period, timeZoneAtMinutes);
+    } else {
+      meanData = getMeansByTimezone(period, timeZoneAtMinutes, true);
+    }
+    return {
+      mean: meanData,
+      sd: getSD(period, meanData)
+    };
+  });
+
+  console.log(meansByPeriods)
   parameters.map(item => {
     if (item !== 'timezone') {
       if (item === 'Bedtime' || item === 'Get-out-of-bed time') {
@@ -710,11 +735,31 @@ export const getMeanParamsForTimeZone = (data, timezone) => {
       if (meansAway[item] !== undefined)
         itemAway = meansAway[item] + ' ± ' + meansAwaySD[item];
 
-      result.push({
+      const paramValue = {
         param: item,
         home_mean: itemHome,
-        away_mean: itemAway
-      })
+        away_mean: itemAway,
+      };
+
+      meansByPeriods.forEach((period, index) => {
+        if (item === 'Bedtime' || item === 'Get-out-of-bed time') {
+          period.mean[item] = getTimeFromSeconds(period.mean[item], true);
+        }
+
+        if (item === 'Inactive time' || item === 'Resting' +
+            ' time' || item === 'Non-wear time') {
+          period.mean[item] = period.mean[item] * 60;
+        }
+
+        if (TIME_PARAMS.includes(item)) {
+          period.mean[item] = getTimeFromSeconds(period.mean[item]);
+        }
+        if (period.mean[item] === undefined || period.mean[item] === 'NaN:NaN') paramValue['period' + index] = 'no data';
+        else
+          paramValue['period' + index] = period.mean[item] + ' ± ' + period.sd[item];
+      });
+
+      result.push(paramValue);
     }
   });
   return result;

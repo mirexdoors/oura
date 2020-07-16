@@ -34,7 +34,7 @@
         </v-col>
         <v-col id="params" cols="12" lg=12>
             <v-card v-if="isTmpParameters">
-                <TravelParams :items="parameters.items" :headers="parameters.headers" />
+                <TravelParams :items="parameters.items"  :headers="parameters.headers" />
             </v-card>
         </v-col>
     </v-row>
@@ -119,7 +119,7 @@
         const paramsInfo = Object.assign({}, this.$store.state.Data.infoTravel);
         const timezone = this.$store.state.Auth.info.gtmOffset;
         this.parameters.headers =  this.parameters.headers.concat(getPeriodsForParams(this.periods))
-        this.parameters.items = getMeanParamsForTimeZone(paramsInfo, timezone);
+        this.parameters.items = getMeanParamsForTimeZone(paramsInfo, timezone, this.periods);
         this.$vuetify.goTo('#params');
         this.isBtnParamsDisabled = true;
       }
