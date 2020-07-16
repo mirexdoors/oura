@@ -655,8 +655,9 @@ export const getTravelPeriods = (data) => {
 };
 export const getPeriodsForParams = (data) => {
   return data.map((item, index) => {
+    console.log(item)
     return {
-      text: item.start + ' — ' + item.end,
+      text: item.start + ' — ' + item.end + ' (' + item.gmt + ')',
       value: 'period' + index,
       sortable: false,
     }
@@ -707,7 +708,6 @@ export const getMeanParamsForTimeZone = (data, timezone, periods) => {
     };
   });
 
-  console.log(meansByPeriods)
   parameters.map(item => {
     if (item !== 'timezone') {
       if (item === 'Bedtime' || item === 'Get-out-of-bed time') {

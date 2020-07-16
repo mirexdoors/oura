@@ -43,7 +43,11 @@
         }
         .paramsTable th {
             display: table-cell;
-            min-width: 130px;
+            min-width: 110px;
         }
+    }
+
+    .paramsTable tbody tr:nth-of-type(odd) {
+        background-color:  rgb(0,0,0,.1)!important;;
     }
 </style>
