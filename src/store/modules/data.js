@@ -18,6 +18,7 @@ const Sleep = {
       state.infoSleep = payload;
     },
     setInfoTravel(state, payload) {
+      console.log(payload)
       state.infoTravel = payload;
     },
     setInfoDays(state, payload) {

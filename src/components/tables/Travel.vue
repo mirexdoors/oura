@@ -119,6 +119,7 @@
         const paramsInfo = Object.assign({}, this.$store.state.Data.infoTravel);
         const timezone = this.$store.state.Auth.info.gtmOffset;
         this.parameters.headers =  this.parameters.headers.concat(getPeriodsForParams(this.periods))
+
         this.parameters.items = getMeanParamsForTimeZone(paramsInfo, timezone, this.periods);
         this.$vuetify.goTo('#params');
         this.isBtnParamsDisabled = true;

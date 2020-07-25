@@ -96,61 +96,88 @@ const getParameters = (data) => {
   }
   return result;
 };
+const getIterationCount = (param, summa, timezone = false,  isForAway = false) => {
+  let i = 0;
 
+  summa.forEach(item => {
+    if (!timezone) {
+      if (Object.prototype.hasOwnProperty.call(item, param)) i++;
+    } else {
+      if (!isForAway) {
+        if (item.timezone === timezone && Object.prototype.hasOwnProperty.call(item, param)) i++;
+      } else {
+        if (item.timezone !== timezone && Object.prototype.hasOwnProperty.call(item, param)) i++;
+      }
+    }
+  });
+  return i;
+};
 const getAverageForParams = (summa, summaForParam, timezone = false, isForAway = false) => {
   const averageOfParam = {};
-  let i = 1;
+
+
   for (let index in summa) {
     for (let param in summa[index]) {
-      if (timezone) {
-        if (!isForAway) {
-          if (Number(summa[index].timezone) === timezone) {
-            averageOfParam[param] = (summaForParam[param] / i).toFixed(2);
+      const coeff = getIterationCount(param, summa, timezone, isForAway);
+
+
+      if (summa[index][param]) {
+        if (timezone) {
+          if (!isForAway) {
+            if (Number(summa[index].timezone) === timezone) {
+              averageOfParam[param] = (summaForParam[param] / coeff).toFixed(2);
+            }
+          } else {
+            if (Number(summa[index].timezone) !== timezone) {
+              averageOfParam[param] = (summaForParam[param] / coeff).toFixed(2);
+            }
           }
+
         } else {
-          if (Number(summa[index].timezone) !== timezone) {
-            averageOfParam[param] = (summaForParam[param] / i).toFixed(2);
-          }
+
+          averageOfParam[param] = (summaForParam[param] / (coeff)).toFixed(2);
         }
 
-      } else {
-        averageOfParam[param] = (summaForParam[param] / (Number(index) + 1)).toFixed(2);
       }
+
     }
     if (timezone) {
       if (!isForAway) {
-        if (Number(summa[index].timezone) === timezone) i++;
+       // if (Number(summa[index].timezone) ===
+        // timezone) i++;
       } else {
-        if (Number(summa[index].timezone) !== timezone) i++;
+      //  if (Number(summa[index].timezone) !==
+        //  timezone) i++;
       }
     }
   }
-
   return averageOfParam;
 };
 const getSummForParam = (summa, timezone = false, isForAwayTimeZone = false) => {
 
   const summOfParam = {};
-  for (let index in summa) {
+  summa.forEach((day, index) => {
     for (let param in summa[index]) {
-      if (timezone) {
-        if (!summOfParam[param]) summOfParam[param] = 0;
-        if (!isForAwayTimeZone) {
-          if (Number(summa[index].timezone) === timezone) {
-            summOfParam[param] = summOfParam[param] + Number(summa[index][param]);
+      if (param !== 'summary_date') {
+        if (timezone) {
+          if (!summOfParam[param]) summOfParam[param] = 0;
+          if (!isForAwayTimeZone) {
+            if (Number(summa[index].timezone) === timezone) {
+              summOfParam[param] = summOfParam[param] + Number(summa[index][param]);
+            }
+          } else {
+            if (Number(summa[index].timezone) !== timezone) {
+              summOfParam[param] = summOfParam[param] + Number(summa[index][param]);
+            }
           }
         } else {
-          if (Number(summa[index].timezone) !== timezone) {
-            summOfParam[param] = summOfParam[param] + Number(summa[index][param]);
-          }
+          if (!summOfParam[param]) summOfParam[param] = 0;
+          summOfParam[param] = summOfParam[param] + summa[index][param];
         }
-      } else {
-        if (!summOfParam[param]) summOfParam[param] = 0;
-        summOfParam[param] = summOfParam[param] + summa[index][param];
       }
-
     }
-  }
+  });
+
   return summOfParam;
 };
 const getTimeFromSeconds = (time, isDay = false) => {
@@ -168,10 +195,20 @@ const getTimeFromSeconds = (time, isDay = false) => {
 const getTempSumm = (data, isCorr = false, isForTimeZone = false) => {
 
   const tempData = JSON.parse(JSON.stringify(data));
-  const tempSumm = [];
+  let tempSummDates = [];
+
+  //заполним дни по датам
+  tempData.activity.forEach((item) => {
+        tempSummDates.push({
+          summary_date: item.summary_date
+        });
+      }
+  );
+
   //2.Данные сведем в одну таблицу:
   for (const dataCategory in tempData) {
     tempData[dataCategory].forEach((item, index) => {
+
       for (const param in item) {
         if (item[param] !== undefined) {
 
@@ -187,26 +224,28 @@ const getTempSumm = (data, isCorr = false, isForTimeZone = false) => {
           }
 
 
-          if (!Object.prototype.hasOwnProperty.call(tempSumm, index)) tempSumm[index] = {};
+          const currentItem = tempSummDates.filter(current => {
+            return current.summary_date === item.summary_date;
+          });
 
-          tempSumm[index][appName] = item[param];
+          if (currentItem[0] && appName !== 'summary_date')
+            currentItem[0][appName] = item[param];
 
           if (!isForTimeZone && param === 'timezone') {
-            delete tempSumm[index].timezone
+            delete currentItem[0].timezone
           }
 
           if (isCorr && param !== 'timezone') {
             if (tempData[dataCategory][index - 1])
-              tempSumm[index][appName + ' prev. day'] = tempData[dataCategory][index - 1][param];
+              currentItem[0][appName + ' prev. day'] = tempData[dataCategory][index - 1][param];
             if (tempData[dataCategory][index + 1])
-              tempSumm[index][appName + ' next day'] = tempData[dataCategory][index + 1][param];
+              currentItem[0][appName + ' next day'] = tempData[dataCategory][index + 1][param];
           }
         }
       }
     });
   }
-
-  return tempSumm;
+  return tempSummDates;
 };
 
 export const getMeans = (summa) => {
@@ -298,9 +337,11 @@ const getSummByDay = (summa) => {
     saturday: {},
     sunday: {}
   };
+
   summa.forEach(item => {
     //определяем день недели
     const weekDay = getWeekDay(item.summary_date);
+
     for (const param in item) {
       if (Object.prototype.hasOwnProperty.call(days[weekDay], param)) {
         days[weekDay][param] += item[param];
@@ -309,6 +350,7 @@ const getSummByDay = (summa) => {
       }
     }
   });
+
   return days;
 };
 const getDaysWithParam = (parameter, tmpSumm) => {
@@ -332,6 +374,7 @@ const getDaysWithParam = (parameter, tmpSumm) => {
 };
 
 const getMeanByDay = (days, tmpSumm) => {
+
   for (const day in days) {
     for (const param in days[day]) {
 
@@ -488,11 +531,13 @@ export const dataTableCoeffHelper = (data) => {
       }
       if (Object.prototype.hasOwnProperty.call(summLinkParams, key)) {
         const paramSumm = summLinkParams[key];
-        result.push({
-          name_1: item.name,
-          name_2: anotherParam.name,
-          coeff: getCorrelation(paramSumm, summOfSqrDevForDay[item.name], summOfSqrDevForDay[anotherParam.name])
-        });
+        if (getCorrelation(paramSumm, summOfSqrDevForDay[item.name], summOfSqrDevForDay[anotherParam.name]) != 'NaN') {
+          result.push({
+            name_1: item.name,
+            name_2: anotherParam.name,
+            coeff: getCorrelation(paramSumm, summOfSqrDevForDay[item.name], summOfSqrDevForDay[anotherParam.name])
+          });
+        }
       }
     }
   });
@@ -508,6 +553,8 @@ export const dataTableDaysInfo = (data) => {
   const meanByday = getMeanByDay(summByDay, tempSumm);
 
   const parameters = getParameters(data);
+
+
   parameters.forEach(item => {
     if (item !== 'timezone') {
       const element = {parameter: item};
@@ -655,7 +702,6 @@ export const getTravelPeriods = (data) => {
 };
 export const getPeriodsForParams = (data) => {
   return data.map((item, index) => {
-    console.log(item)
     return {
       text: item.start + ' — ' + item.end + ' (' + item.gmt + ')',
       value: 'period' + index,
@@ -665,7 +711,10 @@ export const getPeriodsForParams = (data) => {
 };
 
 export const getMeansByTimezone = (summ, timezone, isForAway = false) => {
+
+
   const summOfParam = getSummForParam(summ, timezone, isForAway);
+
   return getAverageForParams(summ, summOfParam, timezone, isForAway);
 };
 
@@ -681,6 +730,7 @@ export const getMeanParamsForTimeZone = (data, timezone, periods) => {
     return item.timezone !== timeZoneAtMinutes;
   });
   const meansHome = getMeansByTimezone(tempSummDataHome, timeZoneAtMinutes);
+
   const meansAway = getMeansByTimezone(tempSummDataAway, timeZoneAtMinutes, true);
   const meansHomeSD = getSD(tempSummDataHome, meansHome);
   const meansAwaySD = getSD(tempSummDataAway, meansAway);
