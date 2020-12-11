@@ -5,7 +5,12 @@
             <v-app-bar v-if="isAuth" app>
                 <v-row class="d-flex justify-space-between">
                     <v-app-bar-nav-icon class="primary--text" @click.stop="drawer = !drawer"/>
-                    <v-toolbar-title class="primary--text d-flex align-center">HEALTH BOARD APP</v-toolbar-title>
+                    <v-toolbar-title class="primary--text d-flex align-center">
+                        <a class="text-decoration-none" target="_blank"
+                           href="https://vllesh.medium.com/healthboard-tech-user-manual-5d075d46c408"><span
+                                class="text-decoration-underline">
+                            READ USER MANUAL</span> &#128214;</a>
+                    </v-toolbar-title>
 
                     <v-icon class="primary--text mr-6" @click.stop="isOpenSettings = !isOpenSettings">settings</v-icon>
 
