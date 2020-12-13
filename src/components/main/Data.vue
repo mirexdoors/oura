@@ -1,14 +1,17 @@
 <template>
     <v-row>
-        <v-col cols="12" lg="6" class="pl-lg-6" v-if="!getPreloader">
+        <v-col v-if="!getPreloader" cols="12" lg="6" class="pl-lg-6" >
             <Coeffs v-if="infoSleep.length" :items="infoSleep"/>
             <Average v-if="infoMean.length" :items="infoMean"/>
         </v-col>
-        <v-col cols="12" lg="12" class="pl-lg-6" v-if="!getPreloader">
+        <v-col v-if="!getPreloader" cols="12" lg="12" class="pl-lg-6" >
             <Travel v-if="infoTravel.length" :items="infoTravel" :periods="travelPeriods"/>
         </v-col>
-        <v-col cols="12" lg="10" class="pl-lg-6" v-if="infoDays.length">
+        <v-col v-if="infoDays.length" cols="12" lg="10" class="pl-lg-6" >
             <DaysOfWeek :items="infoDays"/>
+        </v-col>
+        <v-col v-if="infoSearch.length" cols="12" lg="6" class="pl-lg-6" >
+            <AdvancedSearch :items="infoSearch" />
         </v-col>
     </v-row>
 </template>
@@ -18,6 +21,7 @@
   import Average from "../tables/Mean";
   import DaysOfWeek from "../tables/DaysOfWeek";
   import Travel from "../tables/Travel";
+  import AdvancedSearch from "../tables/AdvancedSearch";
   import {
     dataTableCoeffHelper,
     dataTableMeanInfo,
@@ -70,13 +74,18 @@
           } else return [];
         } else
           return [];
-      }
+      },
+
+      infoSearch() {
+        return [1, 2];
+      },
     },
     components: {
       Coeffs,
       Average,
       DaysOfWeek,
-      Travel
+      Travel,
+      AdvancedSearch
     }
   };
 </script>

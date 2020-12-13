@@ -1,6 +1,5 @@
 <template>
-    <div>
-        <div class="pl-2">
+        <div class="pl-2 pb-4 pr-2">
             <div v-if="hasSettings" class="subtitle-2">{{text}}</div>
             <div v-else>
             <div class="subtitle-2">To use this section please enter your home location in the <a
@@ -69,7 +68,6 @@
                 </v-btn>
             </div>
         </div>
-    </div>
 </template>
 
 <script>
@@ -96,11 +94,7 @@
         if (val !== null) {
           this.isDisabled = false
         } else {
-          if (this.date1 && this.date2) {
-            this.isDisabled = false
-          } else {
-            this.isDisabled = true;
-          }
+          this.isDisabled = !(this.date1 && this.date2);
         }
       }
     },

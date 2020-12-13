@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import Vuetify from 'vuetify/lib';
+import minifyTheme from 'minify-css-string';
 
 Vue.use(Vuetify);
 
@@ -10,6 +11,7 @@ export default new Vuetify({
         primary: '#356859',
         secondary: '#fffbe6',
       }
-    }
+    },
+    options: {minifyTheme}
   },
 });

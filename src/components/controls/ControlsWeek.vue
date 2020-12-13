@@ -1,5 +1,5 @@
 <template>
-    <div class="pl-2 pb-2">
+    <div class="pl-2 pb-4 pr-2">
         <div class="subtitle-2">{{text}}</div>
         <v-radio-group v-model="period" v-on:change="setDates" class="radios">
             <v-radio
@@ -116,16 +116,13 @@
         }
       }
     },
+
     watch: {
       period: function (val) {
         if (val !== null) {
           this.isDisabled = false
         } else {
-          if (this.date1 && this.date2) {
-            this.isDisabled = false
-          } else {
-            this.isDisabled = true;
-          }
+          this.isDisabled = !(this.date1 && this.date2);
         }
       }
     },

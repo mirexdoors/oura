@@ -41,7 +41,6 @@ const TIME_PARAMS = [
   'Time asleep', 'Time in bed', 'Time awake in bed', 'Light sleep', 'REM sleep', 'Deep sleep', 'Sleep midpoint', 'Inactive time', 'Resting time', 'Non-wear time'
 ];
 const getSecondsToday = (date) => {
-
   const getOffset = (s) => {
     return (s.match(/z$|[+-]\d\d:\d\d$/i) || [])[0];
   };
@@ -55,10 +54,8 @@ const getSecondsToday = (date) => {
     return sign * h * 60 + +m;
   };
 
-
   const userTimezone = new Date().getTimezoneOffset();
   const d = new Date(date);
-
   const offset = getOffset(date);
 
   if (offset !== undefined) {
@@ -140,15 +137,6 @@ const getAverageForParams = (summa, summaForParam, timezone = false, isForAway =
 
       }
 
-    }
-    if (timezone) {
-      if (!isForAway) {
-       // if (Number(summa[index].timezone) ===
-        // timezone) i++;
-      } else {
-      //  if (Number(summa[index].timezone) !==
-        //  timezone) i++;
-      }
     }
   }
   return averageOfParam;
@@ -307,15 +295,6 @@ const getDeviation = (summOfSqrDevForDay, length) => {
 const getSD = (summa, averages) => {
   const length = summa.length;
   summa = JSON.parse(JSON.stringify(summa));
-  // if (timezone !== null) {
-  //   summa = summa.filter(item=> {
-  //     if (!isForAway)
-  //       return item.timezone === timezone;
-  //     else
-  //       return  item.timezone !== timezone;
-  //
-  //   })
-  // }
 
   const devForDay = getDevForDay(summa, averages);
   const sqrDevForDay = getSqrDevForDay(devForDay);
@@ -629,7 +608,7 @@ export const travelDaysHelper = (data, info) => {
 
   const tempSumm = getTempSumm(data, false, true);
   const infoTZ = getDaysAtTimeZones(tempSumm, timeZoneAtMinutes);
-  const result = [
+  return [
     {
       name: 'Number of days in the native time zone' +
           ' (including DST)',
@@ -644,9 +623,7 @@ export const travelDaysHelper = (data, info) => {
       name: 'Number of days without timezone info',
       value: infoTZ.noInfo,
     },
-
   ];
-  return result;
 };
 const getGmtFromTimeZone = (minutes) => {
   let gmt = '';
@@ -671,7 +648,7 @@ const getGmtFromTimeZone = (minutes) => {
 
 const getPeriods = (days) => {
 
-  const result = days.reduce((current, day, index, array) => {
+  return days.reduce((current, day, index, array) => {
     if (index === 0) {
       current.push({
         gmt: getGmtFromTimeZone(day.timezone),
@@ -695,7 +672,6 @@ const getPeriods = (days) => {
     }
     return current;
   }, []);
-  return result;
 };
 export const getTravelPeriods = (data) => {
   return getPeriods(data.activity);
@@ -711,10 +687,7 @@ export const getPeriodsForParams = (data) => {
 };
 
 export const getMeansByTimezone = (summ, timezone, isForAway = false) => {
-
-
   const summOfParam = getSummForParam(summ, timezone, isForAway);
-
   return getAverageForParams(summ, summOfParam, timezone, isForAway);
 };
 

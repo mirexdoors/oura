@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="ml-2">
         <v-list
                 dense
                 nav
@@ -23,7 +23,8 @@
         <controls-corr v-if="controls.corr" @changeDrawer="setDrawer"/>
         <controls-mean v-if="controls.mean" @changeDrawer="setDrawer"/>
         <controls-week v-if="controls.week" @changeDrawer="setDrawer"/>
-        <controls-travel v-if="controls.travel" @changeDrawer="setDrawer" />
+        <controls-travel v-if="controls.travel" @changeDrawer="setDrawer"/>
+        <controls-advanced-search v-if="controls.search" @changeDrawer="setDrawer"/>
     </div>
 </template>
 
@@ -31,18 +32,20 @@
   import ControlsCorr from "./controls/ControlsCorr";
   import ControlsMean from "./controls/ControlsMean";
   import ControlsWeek from "./controls/ControlsWeek";
-import ControlsTravel from "./controls/ControlsTravel";
+  import ControlsTravel from "./controls/ControlsTravel";
+  import ControlsAdvancedSearch from "./controls/ControlsAdvancedSearch/ControlsAdvancedSearch";
 
   export default {
     name: "Tabs",
-    components: {ControlsWeek, ControlsMean, ControlsCorr, ControlsTravel},
+    components: {ControlsWeek, ControlsMean, ControlsCorr, ControlsTravel, ControlsAdvancedSearch},
     data() {
       return {
         controls: {
           corr: true,
           mean: false,
           week: false,
-          travel: false
+          travel: false,
+          search: false,
         },
         navs: [
           {
@@ -65,6 +68,11 @@ import ControlsTravel from "./controls/ControlsTravel";
             href: '#travel',
             is_active: false,
           },
+          {
+            title: 'Advanced search',
+            href: '#search',
+            is_active: false,
+          },
         ]
       }
     },
@@ -81,10 +89,7 @@ import ControlsTravel from "./controls/ControlsTravel";
         }
         this.controls[value] = true;
         this.navs.forEach(nav => {
-          if (nav.href !== href)
-            nav.is_active = false;
-          else
-            nav.is_active = true;
+          nav.is_active = nav.href === href;
         });
 
       },

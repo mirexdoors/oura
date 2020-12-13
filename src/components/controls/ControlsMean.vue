@@ -1,5 +1,5 @@
 <template>
-    <div class="pl-2 pb-8">
+    <div class="pl-2 pb-4 pr-2">
         <div class="subtitle-2">{{text}}</div>
         <v-switch
                 :label="switchType ? 'Custom' : 'Range'"
