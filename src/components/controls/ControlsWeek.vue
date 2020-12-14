@@ -75,16 +75,21 @@
         if (window.innerWidth < 768) {
           this.$emit("changeDrawer", false);
         }
+
         this.$store.commit("setPreloader", true);
+
         this.$store.commit("setInfoSleep", null);
         this.$store.commit("setInfoMean", null);
         this.$store.commit("setInfoTravel", null);
+        this.$store.commit("setInfoSearch", null);
+
         const start = this.date1;
         const end = this.date2;
         const dates = [];
         dates.push({start, end});
         this.$store.dispatch("getSleepInfo", {dates, param: 'days'});
       },
+
       setDates() {
         const firstDate = new Date();
         switch (this.period) {
@@ -102,8 +107,11 @@
         this.date2 = new Date().toISOString().substr(0, 10);
 
       },
+
       allowedDatesStart: val => val < new Date().toISOString().substr(0, 10),
+
       allowedDatesFinish: val => val <= new Date().toISOString().substr(0, 10),
+
       changeDateInput() {
         //убираем выбранное значение radio
         this.period = null;

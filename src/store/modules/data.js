@@ -1,6 +1,5 @@
 import axios from "axios";
 
-
 const Sleep = {
   state: {
     preloader: false,
@@ -9,24 +8,38 @@ const Sleep = {
     infoMean: null,
     infoDays: null,
     infoTravel: null,
+    infoSearch: null,
+    infoSearchParams:[],
   },
   mutations: {
     setCategoryData(state, payload) {
       state.categoryData = getDataFromRaw(payload);
     },
+
     setInfoSleep(state, payload) {
       state.infoSleep = payload;
     },
+
     setInfoTravel(state, payload) {
-      console.log(payload)
       state.infoTravel = payload;
     },
+
     setInfoDays(state, payload) {
       state.infoDays = payload;
     },
+
     setInfoMean(state, payload) {
       state.infoMean = payload;
     },
+
+    setInfoSearch(state, payload) {
+      state.infoSearch = payload;
+    },
+
+    setInfoSearchParams(state, payload) {
+      state.infoSearchParams = payload;
+    },
+
     setPreloader(state, payload) {
       if (!payload) {
         setTimeout(() => {
@@ -60,24 +73,40 @@ const Sleep = {
     getSleepInfo({commit}, payload) {
       if (payload.dates.length > 0) {
         const token = this.state.Auth.token;
-        const resultData = {sleep:[], activity:[], readiness: []};
+        const resultData = {
+          sleep: [],
+          activity: [],
+          readiness: []
+        };
         getAllInfoFromDateArray(payload.dates, token).then((...data) => {
-         data[0].forEach(dataItem=> {
-           const tempItem = getDataFromRaw(dataItem);
-           for (const key in resultData) {
-             tempItem[key].forEach(tempItemElement => {
-               resultData[key].push(tempItemElement);
-             });
-           }
+          data[0].forEach(dataItem => {
+            const tempItem = getDataFromRaw(dataItem);
+            for (const key in resultData) {
+              tempItem[key].forEach(tempItemElement => {
+                resultData[key].push(tempItemElement);
+              });
+            }
           });
-          if (payload.param === 'days')
-            commit("setInfoDays", resultData);
-          if (payload.param === 'corr')
-            commit("setInfoSleep", resultData);
-          else if (payload.param === 'mean')
-            commit("setInfoMean", resultData);
-          else if (payload.param === 'travel')
-            commit("setInfoTravel", resultData);
+
+          switch (payload.param) {
+            case "days":
+              commit("setInfoDays", resultData);
+              break;
+            case "travel":
+              commit("setInfoTravel", resultData);
+              break;
+            case "corr":
+              commit("setInfoSleep", resultData);
+              break;
+            case "mean":
+              commit("setInfoMean", resultData);
+              break;
+            case "search":
+              commit("setInfoSearch", resultData);
+              commit("setInfoSearchParams", payload.parameters);
+              break;
+          }
+
 
           commit("setPreloader", false);
         });
@@ -165,7 +194,7 @@ function filteredData(data) {
           cal_active: item.cal_active,
           met_min_medium_plus: item.met_min_medium_plus,
           average_met: item.average_met,
-          timezone:item.timezone,
+          timezone: item.timezone,
         };
       }),
     };

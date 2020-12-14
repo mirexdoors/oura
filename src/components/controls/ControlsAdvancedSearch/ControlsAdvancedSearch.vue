@@ -3,7 +3,6 @@
         <div class="subtitle-2">Select parameter(s) to search. Use ">" and SDFSSD symbols to specify required value
             range
         </div>
-        {{selectedValues}}
         <control-advanced-search-item
                 v-for="control in selectedValues"
                 :key="control.id"
@@ -30,7 +29,7 @@
 
         <div class="py-4">
             <v-btn :disabled="checkDisable()" min-width="150" rounded color="primary"
-                   @click="processSearch()">
+                   @click="upload()">
                 Get
             </v-btn>
         </div>
@@ -67,10 +66,22 @@
     },
 
     methods: {
-      processSearch() {
+      upload() {
         if (window.innerWidth < 768) {
           this.$emit("changeDrawer", false);
         }
+        this.$store.commit("setPreloader", true);
+
+        this.$store.commit("setInfoSleep", null);
+        this.$store.commit("setInfoMean", null);
+        this.$store.commit("setInfoDays", null);
+        this.$store.commit("setInfoTravel", null);
+
+        const start =  new Date(2000, 0, 1).toISOString().substr(0, 10);
+        const end = new Date().toISOString().substr(0, 10);
+        const dates = [];
+        dates.push({start, end});
+        this.$store.dispatch("getSleepInfo", {dates, param: 'search', parameters: this.selectedValues});
       },
 
       processParameterItem(payload) {

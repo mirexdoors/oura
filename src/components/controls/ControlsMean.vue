@@ -104,15 +104,11 @@
       isDisabled: true,
       text: 'Enter a date range or select custom dates to compare with the data for the entire period.'
     }),
-    computed: {
-      getPreloader() {
-        return this.$store.state.Data.preloader;
-      }
-    },
     methods: {
       save(date) {
         this.$refs.dialog.save(date);
       },
+
       manageInput(index, isHardDel = false) {
         if (index === this.customMenu.length - 1 && !isHardDel) {
           this.customMenu.push({
@@ -126,6 +122,7 @@
           this.modal.splice(index, 1);
         }
       },
+
       changeInput() {
         if (this.date1 >= this.date2) {
           this.date1 = null;
@@ -133,6 +130,7 @@
 
         if (this.date1 && this.date2) this.isDisabled = false;
       },
+
       changeCustomDate(index) {
         this.customMenu[index].inputFormatted = this.customMenu[index].input.join(' — ');
         let date = this.customMenu[index].input;
@@ -146,8 +144,8 @@
 
         if (this.customMenu[index].input[0]) this.isDisabled = false;
       },
-      upload() {
 
+      upload() {
         this.$store.commit("setPreloader", true);
 
         if (window.innerWidth < 768) {
@@ -163,16 +161,19 @@
         this.$store.commit("setInfoDays", null);
         this.$store.commit("setInfoMean", null);
         this.$store.commit("setInfoTravel", null);
+        this.$store.commit("setInfoSearch", null);
 
         this.$store.dispatch("getCategoryInfo", yearDate);
         this.$store.dispatch("getSleepInfo", {dates, param: 'mean'});
       },
+
       getRangeDate() {
         const start = this.date1;
         const lastDate = new Date(this.date2);
         const end = lastDate.toISOString().substr(0, 10);
         return [{start, end}];
       },
+
       getCustomDate() {
         let dates = [];
         this.customMenu.forEach(date => {
@@ -180,6 +181,7 @@
         });
         return dates;
       },
+
       getDatesForArray(dates, startDate, endDate) {
         if (!startDate) return [];
         let start = startDate;
@@ -187,14 +189,18 @@
         end = endDate ? endDate : startDate;
         return [{start, end}];
       },
+
       getYearDate() {
         const date = new Date();
         const startYear = new Date((date.setFullYear(date.getFullYear() - 5))).toISOString().substr(0, 10);
         const endYear = new Date().toISOString().substr(0, 10);
         return {start: startYear, end: endYear};
       },
+
       allowedDatesStart: val => val < new Date().toISOString().substr(0, 10),
+
       allowedDatesFinish: val => val <= new Date().toISOString().substr(0, 10),
+
       allowedDatesCustom(val) {
         let flagDate = true;
         if (this.customMenu.length <= 1) {

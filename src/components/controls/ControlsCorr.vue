@@ -82,18 +82,16 @@
         }
       }
     },
-    computed: {
-      getPreloader() {
-        return this.$store.state.Data.preloader;
-      }
-    },
+
     methods: {
       upload() {
         this.isDisabled = true;
         this.$store.commit("setPreloader", true);
+
         this.$store.commit("setInfoMean", null);
         this.$store.commit("setInfoDays", null);
         this.$store.commit("setInfoTravel", null);
+        this.$store.commit("setInfoSearch", null);
 
         if (window.innerWidth < 768) {
           this.$emit("changeDrawer", false);
@@ -104,6 +102,7 @@
         dates.push({start, end});
         this.$store.dispatch("getSleepInfo", {dates, param: 'corr'});
       },
+
       setDates() {
         const firstDate = new Date();
         switch (this.period) {
@@ -121,8 +120,11 @@
         this.date2 = new Date().toISOString().substr(0, 10);
 
       },
+
       allowedDatesStart: val => val < new Date().toISOString().substr(0, 10),
+
       allowedDatesFinish: val => val <= new Date().toISOString().substr(0, 10),
+
       changeDateInput() {
         //убираем выбранное значение radio
         this.period = null;

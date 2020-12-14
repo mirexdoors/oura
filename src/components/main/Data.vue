@@ -30,6 +30,7 @@
     getTravelPeriods
   } from "../../helpers/helper";
 
+
   export default {
     name: "Data",
     mounted() {
@@ -39,26 +40,31 @@
       userInfo() {
         return this.$store.state.Auth.info;
       },
+
       getPreloader: function () {
         return this.$store.state.Data.preloader;
       },
+
       infoSleep() {
         if (this.$store.state.Data.infoSleep) {
           return dataTableCoeffHelper(Object.assign({}, this.$store.state.Data.infoSleep));
         } else
           return []
       },
+
       infoMean() {
         if (this.$store.state.Data.infoMean && this.$store.state.Data.categoryData)
           return dataTableMeanInfo(Object.assign({}, this.$store.state.Data.infoMean),
               Object.assign({}, this.$store.state.Data.categoryData));
         else return [];
       },
+
       infoDays() {
         if (this.$store.state.Data.infoDays)
           return dataTableDaysInfo(Object.assign({}, this.$store.state.Data.infoDays));
         else return [];
       },
+
       infoTravel() {
         if (this.$store.state.Data.infoTravel) {
           if (this.userInfo) {
@@ -67,6 +73,7 @@
         } else
           return [];
       },
+
       travelPeriods() {
         if (this.$store.state.Data.infoTravel) {
           if (this.userInfo) {
@@ -77,7 +84,11 @@
       },
 
       infoSearch() {
-        return [1, 2];
+        if (this.$store.state.Data.infoSearch && this.$store.state.Data.infoSearchParams) {
+          console.log(this.$store.state.Data.infoSearch) //фильтр по параметрам
+          return this.$store.state.Data.infoSearch;
+        }
+        return [];
       },
     },
     components: {
