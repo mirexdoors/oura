@@ -29,7 +29,7 @@
   export default {
     name: "ControlAdvancedSearchItem",
 
-    props: {parameters: Array, id: String},
+    props: {parameters: Array, id: Number},
 
     data() {
       return {

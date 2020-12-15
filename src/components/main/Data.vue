@@ -1,17 +1,17 @@
 <template>
     <v-row>
-        <v-col v-if="!getPreloader" cols="12" lg="6" class="pl-lg-6" >
+        <v-col v-if="!getPreloader" cols="12" lg="6" class="pl-lg-6">
             <Coeffs v-if="infoSleep.length" :items="infoSleep"/>
             <Average v-if="infoMean.length" :items="infoMean"/>
         </v-col>
-        <v-col v-if="!getPreloader" cols="12" lg="12" class="pl-lg-6" >
+        <v-col v-if="!getPreloader" cols="12" lg="12" class="pl-lg-6">
             <Travel v-if="infoTravel.length" :items="infoTravel" :periods="travelPeriods"/>
         </v-col>
-        <v-col v-if="infoDays.length" cols="12" lg="10" class="pl-lg-6" >
+        <v-col v-if="infoDays.length" cols="12" lg="10" class="pl-lg-6">
             <DaysOfWeek :items="infoDays"/>
         </v-col>
-        <v-col v-if="infoSearch.length" cols="12" lg="6" class="pl-lg-6" >
-            <AdvancedSearch :items="infoSearch" />
+        <v-col v-if="infoSearch.length" cols="12" lg="6" class="pl-lg-6">
+            <AdvancedSearch :items="infoSearch"/>
         </v-col>
     </v-row>
 </template>
@@ -23,6 +23,7 @@
   import Travel from "../tables/Travel";
   import AdvancedSearch from "../tables/AdvancedSearch";
   import {
+    APINames,
     dataTableCoeffHelper,
     dataTableMeanInfo,
     dataTableDaysInfo,
@@ -85,12 +86,56 @@
 
       infoSearch() {
         if (this.$store.state.Data.infoSearch && this.$store.state.Data.infoSearchParams) {
-          console.log(this.$store.state.Data.infoSearch) //фильтр по параметрам
-          return this.$store.state.Data.infoSearch;
+          const res = [];
+          const params = this.$store.state.Data.infoSearch;
+          const apiParams = [];
+          for (let sectionName in APINames) {
+            const section = {
+              name: sectionName,
+              values: Object.fromEntries(Object.entries(APINames[sectionName]).map(([key, value]) => [value, key])),
+            };
+            apiParams.push(section);
+          }
+
+          const searchedQueries = this.$store.state.Data.infoSearchParams
+              .filter(item => !item.IsDirty)
+              .map(item => {
+                item.init = apiParams.filter(apiItem => apiItem.values?.[item.parameter]).map(apiValue => {
+                  apiValue.value = apiValue.values[item.parameter];
+                  delete apiValue.values;
+                  return apiValue;
+                })[0];
+                return item;
+              });
+
+          for (let key in params) {
+            if (searchedQueries.some(item => item.init.name === key)) {
+
+              res.push(...params[key].reduce((acc, day) => {
+                searchedQueries.forEach(query => {
+                  const resultDay = {};
+
+                  if (day?.[query.init.value]) {
+                    if (day[query.init.value] == query.value) {
+                      resultDay.date = day.summary_date;
+                      resultDay.dayOfWeek = 'wed';
+                      resultDay.searchedValues = day[query.init.value];
+                      acc.push(resultDay);
+                    }
+                  }
+                });
+                return acc;
+              }, []));
+            }
+          }
+          console.log(res);
+
+          return res;
         }
         return [];
       },
     },
+
     components: {
       Coeffs,
       Average,
