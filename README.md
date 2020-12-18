@@ -19,5 +19,4 @@ Return: табличка в формате date, day of the week, searched param
 - рефактор
 - разделить все разделы на модули
 - обьединить в один коммит обнуление всего
-- add touch events for nav drawer
  -------------------------

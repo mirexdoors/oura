@@ -72,10 +72,6 @@
     }),
     methods: {
       upload() {
-        if (window.innerWidth < 768) {
-          this.$emit("changeDrawer", false);
-        }
-
         this.$store.commit("setPreloader", true);
 
         this.$store.commit("setInfoSleep", null);
@@ -86,6 +82,7 @@
         const start = this.date1;
         const end = this.date2;
         const dates = [];
+
         dates.push({start, end});
         this.$store.dispatch("getSleepInfo", {dates, param: 'days'});
       },

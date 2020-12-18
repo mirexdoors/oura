@@ -93,12 +93,10 @@
         this.$store.commit("setInfoTravel", null);
         this.$store.commit("setInfoSearch", null);
 
-        if (window.innerWidth < 768) {
-          this.$emit("changeDrawer", false);
-        }
         const start = this.date1;
         const end = this.date2;
         const dates = [];
+
         dates.push({start, end});
         this.$store.dispatch("getSleepInfo", {dates, param: 'corr'});
       },
