@@ -40,6 +40,14 @@ export const APINames = {
 const TIME_PARAMS = [
   'Time asleep', 'Time in bed', 'Time awake in bed', 'Light sleep', 'REM sleep', 'Deep sleep', 'Sleep midpoint', 'Inactive time', 'Resting time', 'Non-wear time'
 ];
+
+export const getHHmmFromDateObject = (str) => new Date(str).toTimeString().split(' ')[0];
+
+export const getSecondsFromTime = (str) => {
+  const ar = str.split(':');
+  return ar[0]*3600 + ar[1]*60;
+};
+
 const getSecondsToday = (date) => {
   const getOffset = (s) => {
     return (s.match(/z$|[+-]\d\d:\d\d$/i) || [])[0];
@@ -76,7 +84,6 @@ const getCorrelation = (summ, deviationX, deviationY) => {
       .toFixed(3);
 };
 
-
 const getParameters = (data) => {
   const result = [];
   for (const category in data) {
@@ -93,9 +100,9 @@ const getParameters = (data) => {
   }
   return result;
 };
+
 const getIterationCount = (param, summa, timezone = false,  isForAway = false) => {
   let i = 0;
-
   summa.forEach(item => {
     if (!timezone) {
       if (Object.prototype.hasOwnProperty.call(item, param)) i++;
@@ -109,6 +116,7 @@ const getIterationCount = (param, summa, timezone = false,  isForAway = false) =
   });
   return i;
 };
+
 const getAverageForParams = (summa, summaForParam, timezone = false, isForAway = false) => {
   const averageOfParam = {};
 
@@ -129,18 +137,15 @@ const getAverageForParams = (summa, summaForParam, timezone = false, isForAway =
               averageOfParam[param] = (summaForParam[param] / coeff).toFixed(2);
             }
           }
-
         } else {
-
           averageOfParam[param] = (summaForParam[param] / (coeff)).toFixed(2);
         }
-
       }
-
     }
   }
   return averageOfParam;
 };
+
 const getSummForParam = (summa, timezone = false, isForAwayTimeZone = false) => {
 
   const summOfParam = {};
@@ -168,6 +173,7 @@ const getSummForParam = (summa, timezone = false, isForAwayTimeZone = false) => 
 
   return summOfParam;
 };
+
 const getTimeFromSeconds = (time, isDay = false) => {
   const hours = Math.floor(time / 3600);
   const minutes = Math.floor(time / 60) - (hours * 60);
@@ -180,8 +186,8 @@ const getTimeFromSeconds = (time, isDay = false) => {
     minutes.toString().padStart(2, '0'),
   ].join(':');
 };
-const getTempSumm = (data, isCorr = false, isForTimeZone = false) => {
 
+const getTempSumm = (data, isCorr = false, isForTimeZone = false) => {
   const tempData = JSON.parse(JSON.stringify(data));
   let tempSummDates = [];
 
@@ -211,10 +217,7 @@ const getTempSumm = (data, isCorr = false, isForTimeZone = false) => {
             item[param] = item[param] + 86400;
           }
 
-
-          const currentItem = tempSummDates.filter(current => {
-            return current.summary_date === item.summary_date;
-          });
+          const currentItem = tempSummDates.filter(current => current.summary_date === item.summary_date);
 
           if (currentItem[0] && appName !== 'summary_date')
             currentItem[0][appName] = item[param];
@@ -302,10 +305,11 @@ const getSD = (summa, averages) => {
   return getDeviation(summOfSqrDevForDay, length);
 };
 
-const getWeekDay = (date) => {
+export const getWeekDay = (date) => {
   const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
   return days[new Date(date).getDay()];
 };
+
 const getSummByDay = (summa) => {
   const days = {
     monday: {},
@@ -647,7 +651,6 @@ const getGmtFromTimeZone = (minutes) => {
 };
 
 const getPeriods = (days) => {
-
   return days.reduce((current, day, index, array) => {
     if (index === 0) {
       current.push({
@@ -673,9 +676,11 @@ const getPeriods = (days) => {
     return current;
   }, []);
 };
+
 export const getTravelPeriods = (data) => {
   return getPeriods(data.activity);
 };
+
 export const getPeriodsForParams = (data) => {
   return data.map((item, index) => {
     return {
@@ -696,12 +701,8 @@ export const getMeanParamsForTimeZone = (data, timezone, periods) => {
   const timeZoneAtMinutes = getMinutesTimeZone(timezone);
   const parameters = getParameters(data);
   const tempSummData = getTempSumm(data, false, true);
-  const tempSummDataHome = tempSummData.filter((item) => {
-    return item.timezone === timeZoneAtMinutes;
-  });
-  const tempSummDataAway = tempSummData.filter((item) => {
-    return item.timezone !== timeZoneAtMinutes;
-  });
+  const tempSummDataHome = tempSummData.filter((item) => item.timezone === timeZoneAtMinutes);
+  const tempSummDataAway = tempSummData.filter((item) => item.timezone !== timeZoneAtMinutes);
   const meansHome = getMeansByTimezone(tempSummDataHome, timeZoneAtMinutes);
 
   const meansAway = getMeansByTimezone(tempSummDataAway, timeZoneAtMinutes, true);
@@ -710,14 +711,12 @@ export const getMeanParamsForTimeZone = (data, timezone, periods) => {
 
   //разбиваем общий массив дат по параметрам
   const dataByPeriods = periods.map(period => {
-
     return tempSummData.filter(day => {
       return new Date(day.summary_date) >= new Date(period.start) && new Date(day.summary_date) <= new Date(period.end);
     })
   });
 
   // передаём в sd
-
   const meansByPeriods = dataByPeriods.map((period) => {
     let meanData = [];
     if (period[0].timezone === timeZoneAtMinutes) {

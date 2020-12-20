@@ -28,7 +28,10 @@
     dataTableMeanInfo,
     dataTableDaysInfo,
     travelDaysHelper,
-    getTravelPeriods
+    getTravelPeriods,
+    getWeekDay,
+    getSecondsFromTime,
+    getHHmmFromDateObject,
   } from "../../helpers/helper";
 
 
@@ -97,13 +100,13 @@
             apiParams.push(section);
           }
 
-          const searchedQueries = this.$store.state.Data.infoSearchParams
+          const searchedQueries = Object.assign([], this.$store.state.Data.infoSearchParams)
               .filter(item => !item.IsDirty)
               .map(item => {
                 item.init = apiParams.filter(apiItem => apiItem.values?.[item.parameter]).map(apiValue => {
-                  apiValue.value = apiValue.values[item.parameter];
-                  delete apiValue.values;
-                  return apiValue;
+                  const newVal = Object.assign({}, apiValue);
+                  newVal.value = newVal.values[item.parameter];
+                  return newVal;
                 })[0];
                 return item;
               });
@@ -116,10 +119,39 @@
                   const resultDay = {};
 
                   if (day?.[query.init.value]) {
-                    if (day[query.init.value] == query.value) {
+                    let condition = false;
+                    switch (query.operator) {
+                      case "=":
+                        if (query.isTime) {
+                          condition = getSecondsFromTime(getHHmmFromDateObject(day[query.init.value])) === getSecondsFromTime(query.value);
+                        } else {
+                          condition = day[query.init.value] == query.value;
+                        }
+                        break;
+                      case ">":
+                        if (query.isTime) {
+                          condition = getSecondsFromTime(getHHmmFromDateObject(day[query.init.value])) > getSecondsFromTime(query.value);
+                        } else {
+                          condition = day[query.init.value] > query.value;
+                        }
+                        break;
+                      case "<":
+                        if (query.isTime) {
+                          condition = getSecondsFromTime(getHHmmFromDateObject(day[query.init.value])) < getSecondsFromTime(query.value);
+                        } else {
+                          condition = day[query.init.value] < query.value;
+                        }
+                        break;
+                    }
+                    if (condition) {
                       resultDay.date = day.summary_date;
-                      resultDay.dayOfWeek = 'wed';
-                      resultDay.searchedValues = day[query.init.value];
+                      resultDay.dayOfWeek = getWeekDay(day.summary_date);
+                      resultDay.parameter = query.parameter;
+                      if (query.isTime) {
+                        resultDay.searchedValue = getHHmmFromDateObject(day[query.init.value]);
+                      } else {
+                        resultDay.searchedValue = day[query.init.value];
+                      }
                       acc.push(resultDay);
                     }
                   }
@@ -128,9 +160,23 @@
               }, []));
             }
           }
-          console.log(res);
+          return res.reduce((acc, item, i) => {
+            if (searchedQueries.length === 1) {
+              acc.push({...item, ...{searchedValues: `${item.parameter}: ${item.searchedValue}`}});
+            } else {
+              if (res.some((item2, j) => item.date === item2.date && i !== j)) {
+                const index = acc.findIndex(itemAdded => itemAdded.date === item.date);
+                if (index < 0) {
+                  acc.push({...item, ...{searchedValues: `${item.parameter}: ${item.searchedValue}`}});
+                } else {
+                  acc[index].searchedValues = `${acc[index].searchedValues}
+        ${item.parameter}: ${item.searchedValue}`;
+                }
+              }
+            }
+            return acc;
+          }, []);
 
-          return res;
         }
         return [];
       },

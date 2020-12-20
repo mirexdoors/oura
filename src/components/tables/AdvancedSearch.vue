@@ -5,9 +5,13 @@
             <v-spacer/>
         </v-card-title>
         <v-data-table
-            :headers="headers"
-            :items="items"
-            :items-per-page="10"/>
+                :headers="headers"
+                :items="items"
+                :items-per-page="10">
+            <template #item.searchedValues="{item}">
+                <span style="white-space: pre-line;">{{item.searchedValues}}</span>
+            </template>
+        </v-data-table>
     </v-card>
 </template>
 
@@ -23,7 +27,7 @@
           {
             text: 'Date',
             align: 'start',
-            sortable: false,
+            sortable: true,
             value: 'date',
           },
           {
@@ -35,7 +39,7 @@
           {
             text: 'Searched parameter values',
             value: 'searchedValues',
-            sortable: false,
+            sortable: true,
           },
         ],
       }

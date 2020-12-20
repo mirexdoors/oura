@@ -1,8 +1,9 @@
 <template>
     <div class="pl-2 pb-4 pr-2">
-        <div class="subtitle-2">Select parameter(s) to search. Use ">" and SDFSSD symbols to specify required value
+        <div class="subtitle-2">Select parameter(s) to search. Use "=", ">" and "&lt;" operators to specify required value
             range
         </div>
+
         <control-advanced-search-item
                 v-for="control in selectedValues"
                 :key="control.id"
@@ -76,6 +77,7 @@
         this.$store.commit("setInfoMean", null);
         this.$store.commit("setInfoDays", null);
         this.$store.commit("setInfoTravel", null);
+        this.$store.commit("setInfoSearchParams", []);
 
         const start =  new Date(2000, 0, 1).toISOString().substr(0, 10);
         const end = new Date().toISOString().substr(0, 10);
@@ -110,7 +112,7 @@
         return {
           id,
           parameter: '',
-          operand: '=',
+          operator: '=',
           isDirty: true,
         }
       }
