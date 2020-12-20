@@ -68,9 +68,7 @@
 
     methods: {
       upload() {
-        if (window.innerWidth < 768) {
-          this.$emit("changeDrawer", false);
-        }
+
         this.$store.commit("setPreloader", true);
 
         this.$store.commit("setInfoSleep", null);

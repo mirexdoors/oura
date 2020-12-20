@@ -8,10 +8,10 @@
                     v-for="item in navs"
                     :key="item.title"
                     :href="item.href"
-                    class="menu__item"
-                    :class="setActiveClass(item.is_active)"
-                    @click="changeControls(item.href)"
                     link
+                    :class="setActiveClass(item.is_active)"
+                    class="menu__item"
+                    @click="changeControls(item.href)"
             >
                 <v-list-item-content>
                     <v-list-item-title class="primary--text">{{ item.title }}</v-list-item-title>
@@ -20,11 +20,11 @@
 
         </v-list>
 
-        <controls-corr v-if="controls.corr" @changeDrawer="setDrawer"/>
-        <controls-mean v-if="controls.mean" @changeDrawer="setDrawer"/>
-        <controls-week v-if="controls.week" @changeDrawer="setDrawer"/>
-        <controls-travel v-if="controls.travel" @changeDrawer="setDrawer"/>
-        <controls-advanced-search v-if="controls.search" @changeDrawer="setDrawer"/>
+        <controls-corr v-if="controls.corr" />
+        <controls-mean v-if="controls.mean" />
+        <controls-week v-if="controls.week" />
+        <controls-travel v-if="controls.travel"/>
+        <controls-advanced-search v-if="controls.search" />
     </div>
 </template>
 
@@ -80,6 +80,7 @@
       setActiveClass(isActive) {
         return isActive ? 'active' : '';
       },
+
       changeControls(href) {
         const value = href.replace(/#/g, '');
         for (const control in this.controls) {
@@ -91,14 +92,11 @@
         this.navs.forEach(nav => {
           nav.is_active = nav.href === href;
         });
-
-      },
-      setDrawer() {
-        this.$emit("changeDrawer", false);
       },
     },
   }
 </script>
+
 <style scoped>
     .menu__item.active {
         background-color: #356859;

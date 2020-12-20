@@ -1,5 +1,5 @@
 <template>
-    <v-card class="py-5 text-center" flat>
+    <v-card class="py-5 text-center text-lg-h5" flat>
         <div class="px-4 px-md-0">
           <p>
               Analyse your sleep. To work, you will need to register at на Sign up at
