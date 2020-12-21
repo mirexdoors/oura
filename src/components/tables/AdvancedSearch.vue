@@ -16,37 +16,35 @@
 </template>
 
 <script>
-  export default {
-    name: "AdvancedSearch",
-    props: {
-      items: Array,
-    },
-    data: () => {
-      return {
-        headers: [
-          {
-            text: 'Date',
-            align: 'start',
-            sortable: true,
-            value: 'date',
-          },
-          {
-            text: 'Day of the week',
-            align: 'start',
-            sortable: false,
-            value: 'dayOfWeek',
-          },
-          {
-            text: 'Searched parameter values',
-            value: 'searchedValues',
-            sortable: true,
-          },
-        ],
-      }
-    },
-  }
+    export default {
+        name: "AdvancedSearch",
+
+        props: {
+            items: Array,
+        },
+
+        data: () => {
+            return {
+                headers: [
+                    {
+                        text: 'Date',
+                        align: 'start',
+                        sortable: true,
+                        value: 'date',
+                    },
+                    {
+                        text: 'Day of the week',
+                        align: 'start',
+                        sortable: false,
+                        value: 'dayOfWeek',
+                    },
+                    {
+                        text: 'Searched parameter values',
+                        value: 'searchedValues',
+                        sortable: true,
+                    },
+                ],
+            }
+        },
+    }
 </script>
-
-<style scoped>
-
-</style>

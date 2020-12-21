@@ -17,179 +17,189 @@
 </template>
 
 <script>
-  import Coeffs from "../tables/Coeffs";
-  import Average from "../tables/Mean";
-  import DaysOfWeek from "../tables/DaysOfWeek";
-  import Travel from "../tables/Travel";
-  import AdvancedSearch from "../tables/AdvancedSearch";
-  import {
-    APINames,
-    dataTableCoeffHelper,
-    dataTableMeanInfo,
-    dataTableDaysInfo,
-    travelDaysHelper,
-    getTravelPeriods,
-    getWeekDay,
-    getSecondsFromTime,
-    getHHmmFromDateObject,
-  } from "../../helpers/helper";
+    import Coeffs from "../tables/Coeffs";
+    import Average from "../tables/Mean";
+    import DaysOfWeek from "../tables/DaysOfWeek";
+    import Travel from "../tables/Travel";
+    import AdvancedSearch from "../tables/AdvancedSearch";
+    import {
+        APINames,
+        dataTableCoeffHelper,
+        dataTableMeanInfo,
+        dataTableDaysInfo,
+        travelDaysHelper,
+        getTravelPeriods,
+        getWeekDay,
+        getSecondsFromTime,
+        getHHmmFromDateObject,
+        getTimeFromSeconds,
+    } from "../../helpers/helper";
 
 
-  export default {
-    name: "Data",
-    mounted() {
-      this.$store.dispatch('getInfo');
-    },
-    computed: {
-      userInfo() {
-        return this.$store.state.Auth.info;
-      },
+    export default {
+        name: "Data",
+        mounted() {
+            this.$store.dispatch('getInfo');
+        },
+        computed: {
+            userInfo() {
+                return this.$store.state.Auth.info;
+            },
 
-      getPreloader: function () {
-        return this.$store.state.Data.preloader;
-      },
+            getPreloader: function () {
+                return this.$store.state.Data.preloader;
+            },
 
-      infoSleep() {
-        if (this.$store.state.Data.infoSleep) {
-          return dataTableCoeffHelper(Object.assign({}, this.$store.state.Data.infoSleep));
-        } else
-          return []
-      },
+            infoSleep() {
+                if (this.$store.state.Data.infoSleep) {
+                    return dataTableCoeffHelper(Object.assign({}, this.$store.state.Data.infoSleep));
+                } else
+                    return []
+            },
 
-      infoMean() {
-        if (this.$store.state.Data.infoMean && this.$store.state.Data.categoryData)
-          return dataTableMeanInfo(Object.assign({}, this.$store.state.Data.infoMean),
-              Object.assign({}, this.$store.state.Data.categoryData));
-        else return [];
-      },
+            infoMean() {
+                if (this.$store.state.Data.infoMean && this.$store.state.Data.categoryData)
+                    return dataTableMeanInfo(Object.assign({}, this.$store.state.Data.infoMean),
+                        Object.assign({}, this.$store.state.Data.categoryData));
+                else return [];
+            },
 
-      infoDays() {
-        if (this.$store.state.Data.infoDays)
-          return dataTableDaysInfo(Object.assign({}, this.$store.state.Data.infoDays));
-        else return [];
-      },
+            infoDays() {
+                if (this.$store.state.Data.infoDays)
+                    return dataTableDaysInfo(Object.assign({}, this.$store.state.Data.infoDays));
+                else return [];
+            },
 
-      infoTravel() {
-        if (this.$store.state.Data.infoTravel) {
-          if (this.userInfo) {
-            return travelDaysHelper(JSON.parse(JSON.stringify(this.$store.state.Data.infoTravel)), this.userInfo);
-          } else return [];
-        } else
-          return [];
-      },
+            infoTravel() {
+                if (this.$store.state.Data.infoTravel) {
+                    if (this.userInfo) {
+                        return travelDaysHelper(JSON.parse(JSON.stringify(this.$store.state.Data.infoTravel)), this.userInfo);
+                    } else return [];
+                } else
+                    return [];
+            },
 
-      travelPeriods() {
-        if (this.$store.state.Data.infoTravel) {
-          if (this.userInfo) {
-            return getTravelPeriods(JSON.parse(JSON.stringify(this.$store.state.Data.infoTravel)));
-          } else return [];
-        } else
-          return [];
-      },
+            travelPeriods() {
+                if (this.$store.state.Data.infoTravel) {
+                    if (this.userInfo) {
+                        return getTravelPeriods(JSON.parse(JSON.stringify(this.$store.state.Data.infoTravel)));
+                    } else return [];
+                } else
+                    return [];
+            },
 
-      infoSearch() {
-        if (this.$store.state.Data.infoSearch && this.$store.state.Data.infoSearchParams) {
-          const res = [];
-          const params = this.$store.state.Data.infoSearch;
-          const apiParams = [];
-          for (let sectionName in APINames) {
-            const section = {
-              name: sectionName,
-              values: Object.fromEntries(Object.entries(APINames[sectionName]).map(([key, value]) => [value, key])),
-            };
-            apiParams.push(section);
-          }
-
-          const searchedQueries = Object.assign([], this.$store.state.Data.infoSearchParams)
-              .filter(item => !item.IsDirty)
-              .map(item => {
-                item.init = apiParams.filter(apiItem => apiItem.values?.[item.parameter]).map(apiValue => {
-                  const newVal = Object.assign({}, apiValue);
-                  newVal.value = newVal.values[item.parameter];
-                  return newVal;
-                })[0];
-                return item;
-              });
-
-          for (let key in params) {
-            if (searchedQueries.some(item => item.init.name === key)) {
-
-              res.push(...params[key].reduce((acc, day) => {
-                searchedQueries.forEach(query => {
-                  const resultDay = {};
-
-                  if (day?.[query.init.value]) {
-                    let condition = false;
-                    switch (query.operator) {
-                      case "=":
-                        if (query.isTime) {
-                          condition = getSecondsFromTime(getHHmmFromDateObject(day[query.init.value])) === getSecondsFromTime(query.value);
-                        } else {
-                          condition = day[query.init.value] == query.value;
-                        }
-                        break;
-                      case ">":
-                        if (query.isTime) {
-                          condition = getSecondsFromTime(getHHmmFromDateObject(day[query.init.value])) > getSecondsFromTime(query.value);
-                        } else {
-                          condition = day[query.init.value] > query.value;
-                        }
-                        break;
-                      case "<":
-                        if (query.isTime) {
-                          condition = getSecondsFromTime(getHHmmFromDateObject(day[query.init.value])) < getSecondsFromTime(query.value);
-                        } else {
-                          condition = day[query.init.value] < query.value;
-                        }
-                        break;
+            infoSearch() {
+                if (this.$store.state.Data.infoSearch && this.$store.state.Data.infoSearchParams) {
+                    const res = [];
+                    const params = this.$store.state.Data.infoSearch;
+                    const apiParams = [];
+                    for (let sectionName in APINames) {
+                        const section = {
+                            name: sectionName,
+                            values: Object.fromEntries(Object.entries(APINames[sectionName]).map(([key, value]) => [value, key])),
+                        };
+                        apiParams.push(section);
                     }
-                    if (condition) {
-                      resultDay.date = day.summary_date;
-                      resultDay.dayOfWeek = getWeekDay(day.summary_date);
-                      resultDay.parameter = query.parameter;
-                      if (query.isTime) {
-                        resultDay.searchedValue = getHHmmFromDateObject(day[query.init.value]);
-                      } else {
-                        resultDay.searchedValue = day[query.init.value];
-                      }
-                      acc.push(resultDay);
+
+                    const searchedQueries = Object.assign([], this.$store.state.Data.infoSearchParams)
+                        .filter(item => !item.IsDirty)
+                        .map(item => {
+                            item.init = apiParams.filter(apiItem => apiItem.values?.[item.parameter]).map(apiValue => {
+                                const newVal = Object.assign({}, apiValue);
+                                newVal.value = newVal.values[item.parameter];
+                                return newVal;
+                            })[0];
+                            return item;
+                        });
+
+                    for (let key in params) {
+                        if (searchedQueries.some(item => item.init.name === key)) {
+
+                            res.push(...params[key].reduce((acc, day) => {
+                                searchedQueries.forEach(query => {
+                                    const resultDay = {};
+
+                                    if (day?.[query.init.value]) {
+                                        let condition = false;
+                                        switch (query.operator) {
+                                            case "=":
+                                                if (query.isTime) {
+                                                    condition = getSecondsFromTime(getHHmmFromDateObject(day[query.init.value])) === getSecondsFromTime(query.value);
+                                                } else if (query.isSeconds) {
+                                                    condition = day[query.init.value] === getSecondsFromTime(query.value);
+                                                } else {
+                                                    condition = day[query.init.value] == query.value;
+                                                }
+                                                break;
+                                            case ">":
+                                                if (query.isTime) {
+                                                    condition = getSecondsFromTime(getHHmmFromDateObject(day[query.init.value])) > getSecondsFromTime(query.value);
+                                                } else if (query.isSeconds) {
+                                                    condition = day[query.init.value] > getSecondsFromTime(query.value);
+                                                } else {
+                                                    condition = day[query.init.value] > query.value;
+                                                }
+                                                break;
+                                            case "<":
+                                                if (query.isTime) {
+                                                    condition = getSecondsFromTime(getHHmmFromDateObject(day[query.init.value])) < getSecondsFromTime(query.value);
+                                                } else if (query.isSeconds) {
+                                                    condition = day[query.init.value] < getSecondsFromTime(query.value);
+                                                } else {
+                                                    condition = day[query.init.value] < query.value;
+                                                }
+                                                break;
+                                        }
+                                        console.log(condition)
+                                        if (condition) {
+                                            resultDay.date = day.summary_date;
+                                            resultDay.dayOfWeek = getWeekDay(day.summary_date);
+                                            resultDay.parameter = query.parameter;
+                                            if (query.isTime) {
+                                                resultDay.searchedValue = getHHmmFromDateObject(day[query.init.value]);
+                                            } else if (query.isSeconds) {
+                                                resultDay.searchedValue = getTimeFromSeconds(day[query.init.value]);
+                                            } else {
+                                                resultDay.searchedValue = day[query.init.value];
+                                            }
+                                            acc.push(resultDay);
+                                        }
+                                    }
+                                });
+                                return acc;
+                            }, []));
+                        }
                     }
-                  }
-                });
-                return acc;
-              }, []));
-            }
-          }
-          return res.reduce((acc, item, i) => {
-            if (searchedQueries.length === 1) {
-              acc.push({...item, ...{searchedValues: `${item.parameter}: ${item.searchedValue}`}});
-            } else {
-              if (res.some((item2, j) => item.date === item2.date && i !== j)) {
-                const index = acc.findIndex(itemAdded => itemAdded.date === item.date);
-                if (index < 0) {
-                  acc.push({...item, ...{searchedValues: `${item.parameter}: ${item.searchedValue}`}});
-                } else {
-                  acc[index].searchedValues = `${acc[index].searchedValues}
+                    return res.reduce((acc, item, i) => {
+                        if (searchedQueries.length === 1) {
+                            acc.push({...item, ...{searchedValues: `${item.parameter}: ${item.searchedValue}`}});
+                        } else {
+                            if (res.some((item2, j) => item.date === item2.date && i !== j)) {
+                                const index = acc.findIndex(itemAdded => itemAdded.date === item.date);
+                                if (index < 0) {
+                                    acc.push({...item, ...{searchedValues: `${item.parameter}: ${item.searchedValue}`}});
+                                } else {
+                                    acc[index].searchedValues = `${acc[index].searchedValues}
         ${item.parameter}: ${item.searchedValue}`;
+                                }
+                            }
+                        }
+                        return acc;
+                    }, []);
+
                 }
-              }
-            }
-            return acc;
-          }, []);
+                return [];
+            },
+        },
 
+        components: {
+            Coeffs,
+            Average,
+            DaysOfWeek,
+            Travel,
+            AdvancedSearch
         }
-        return [];
-      },
-    },
-
-    components: {
-      Coeffs,
-      Average,
-      DaysOfWeek,
-      Travel,
-      AdvancedSearch
-    }
-  };
+    };
 </script>
 
 

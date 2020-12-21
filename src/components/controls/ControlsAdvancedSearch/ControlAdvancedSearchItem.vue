@@ -7,16 +7,19 @@
                 @change="emitData"
         />
         <v-row>
-            <v-col cols=3 sm="5" lg="3">
+            <v-col cols=3
+                   sm="5"
+                   lg="3">
                 <v-select
                         v-model="operator"
                         :items="['=', '>', '<']"
                         @change="emitData"
                 />
             </v-col>
-            <v-col cols="10" sm="6">
+            <v-col cols="10"
+                   sm="6">
                 <v-dialog
-                        v-if="isTime"
+                        v-if="isTime || isSeconds"
                         ref="dialog"
                         v-model="modal"
                         :return-value.sync="value"
@@ -60,54 +63,65 @@
                         </v-btn>
                     </v-time-picker>
                 </v-dialog>
-                <v-text-field v-else label="value" v-model="value" @input="emitData"/>
+                <v-text-field
+                        v-else
+                        label="value"
+                        v-model="value"
+                        @input="emitData"
+                />
             </v-col>
             <slot>
-                <v-col cols="10" sm="6"></v-col>
+                <v-col cols="10"
+                       sm="6"></v-col>
             </slot>
         </v-row>
     </div>
 </template>
 
 <script>
+    const timeParameters = ['Bedtime', 'Get-out-of-bed time'];
+    const secondsTimeParameters = ['Time asleep', 'Time in bed', 'REM sleep', 'Light sleep', 'Deep sleep', 'Sleep midpoint', 'Sleep latency'];
 
-  const timeParameters = ['Bedtime', 'Get-out-of-bed time'];
-  export default {
-    name: "ControlAdvancedSearchItem",
+    export default {
+        name: "ControlAdvancedSearchItem",
 
-    props: {parameters: Array, id: Number},
+        props: {parameters: Array, id: Number},
 
-    data() {
-      return {
-        parameter: '',
-        operator: '=',
-        value: '',
-        modal: false,
-      }
-    },
+        data() {
+            return {
+                parameter: '',
+                operator: '=',
+                value: '',
+                modal: false,
+            }
+        },
 
-    computed: {
-      isTime() {
-        return !!(this.parameter && timeParameters.some(item => item === this.parameter));
-      }
-    },
-    methods: {
-      emitData() {
-        const payload = {
-          id: this.id,
-          parameter: this.parameter,
-          operator: this.operator,
-          value: this.value,
-          isTime: !!this.isTime,
-          isDirty: false,
-        };
+        computed: {
+            isTime() {
+                return this.parameter && timeParameters.some(item => item === this.parameter);
+            },
+            isSeconds() {
+                return this.parameter && secondsTimeParameters.some(item => item === this.parameter);
+            },
+        },
+        methods: {
+            emitData() {
+                const payload = {
+                    id: this.id,
+                    parameter: this.parameter,
+                    operator: this.operator,
+                    value: this.value,
+                    isTime: !!this.isTime,
+                    isDirty: false,
+                    isSeconds: this.isSeconds,
+                };
 
-        if (!(this.parameter && this.operator && this.value)) {
-          payload.isDirty = true;
-        }
-        this.$emit('change', payload);
-      }
-    },
-  }
+                if (!(this.parameter && this.operator && this.value)) {
+                    payload.isDirty = true;
+                }
+                this.$emit('change', payload);
+            }
+        },
+    }
 </script>
 
