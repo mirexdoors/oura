@@ -1,31 +1,27 @@
 <template>
-    <div class="ml-2">
-        <v-list
-                dense
-                nav
-        >
-            <v-list-item
-                    v-for="item in navs"
-                    :key="item.title"
-                    :href="item.href"
-                    link
-                    :class="setActiveClass(item.is_active)"
-                    class="menu__item"
-                    @click="changeControls(item.href)"
-            >
-                <v-list-item-content>
-                    <v-list-item-title class="primary--text">{{ item.title }}</v-list-item-title>
-                </v-list-item-content>
-            </v-list-item>
+	<div>
+		<v-tabs show-arrows>
+			<v-tab
+				v-for="item in navs"
+				:key="item.title"
+				:href="item.href"
+				link
+				:class="setActiveClass(item.is_active)"
+				class="menu__item"
+				@click="changeControls(item.href)"
+			>
+				<div class="primary--text">{{ item.title }}</div>
+			</v-tab>
 
-        </v-list>
-
-        <controls-corr v-if="controls.corr" />
-        <controls-mean v-if="controls.mean" />
-        <controls-week v-if="controls.week" />
-        <controls-travel v-if="controls.travel"/>
-        <controls-advanced-search v-if="controls.search" />
-    </div>
+		</v-tabs>
+		<v-col class="py-5"  lg="4">
+			<controls-corr v-if="controls.corr"/>
+			<controls-mean v-if="controls.mean"/>
+			<controls-week v-if="controls.week"/>
+			<controls-travel v-if="controls.travel"/>
+			<controls-advanced-search v-if="controls.search"/>
+		</v-col>
+	</div>
 </template>
 
 <script>
@@ -98,11 +94,11 @@
 </script>
 
 <style scoped>
-    .menu__item.active {
-        background-color: #356859;
-    }
+	.menu__item.active {
+		background-color: #356859;
+	}
 
-    .menu__item.active .primary--text {
-        color: #fff !important;
-    }
+	.menu__item.active .primary--text {
+		color: #fff !important;
+	}
 </style>
