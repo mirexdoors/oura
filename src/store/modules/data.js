@@ -44,7 +44,7 @@ const Sleep = {
       if (!payload) {
         setTimeout(() => {
           state.preloader = payload
-        }, 700)
+        }, 1000)
       } else {
         state.preloader = payload;
       }
@@ -106,7 +106,6 @@ const Sleep = {
               commit("setInfoSearchParams", payload.parameters);
               break;
           }
-
 
           commit("setPreloader", false);
         });
