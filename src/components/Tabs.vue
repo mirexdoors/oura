@@ -1,15 +1,11 @@
 <template>
-    <v-col
-        cols="12"
-        lg="6"
-        class="d-flex flex-column mx-auto px-0 px-md-12 py-0"
-    >
         <v-card
             color="primary"
         >
             <v-tabs
                 show-arrows
-                color="secondary"
+                grow
+                color="primary"
             >
                 <v-tab
                     v-for="item in navs"
@@ -51,7 +47,6 @@
                 </controls-advanced-search>
             </v-col>
         </v-card>
-    </v-col>
 </template>
 
 <script>
@@ -138,5 +133,13 @@ export default {
 
 .menu__item.active .primary--text {
     color: #fff !important;
+}
+
+.v-tabs-slider-wrapper {
+    height: 0 !important;
+}
+
+.theme--light.v-tabs .v-tab--active:hover::before, .theme--light.v-tabs .v-tab--active::before {
+    opacity: 0 !important;
 }
 </style>

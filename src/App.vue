@@ -52,9 +52,15 @@
                         Health Board
                     </h1>
                 </v-card-title>
-
-                <Tabs v-if="isAuth"/>
-                <Data v-if="isAuth"/>
+                <v-col
+                    v-if="isAuth"
+                    cols="12"
+                    lg="7"
+                    class="d-flex flex-column mx-auto px-0 px-md-12 py-0"
+                >
+                    <Tabs/>
+                    <Data/>
+                </v-col>
                 <Authorization
                     v-else
                     class="mx-auto"
@@ -178,7 +184,6 @@ export default {
 
 <style>
 @media screen and (min-width: 991px) {
-
     ::-webkit-scrollbar-track {
         background: transparent
     }
@@ -203,5 +208,10 @@ export default {
 
 .white-input input {
     color: #fff !important;
+}
+
+.v-application .primary--text.white-input {
+    color: #ffffff;
+    caret-color: #fff;
 }
 </style>

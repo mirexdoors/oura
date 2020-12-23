@@ -1,11 +1,14 @@
 <template>
-    <div class="pl-2 pb-4 pr-2">
+    <div>
         <slot></slot>
-        <div class="subtitle-2">{{ text }}</div>
+
         <v-switch
-            :label="switchType ? 'Custom' : 'Range'"
             v-model="switchType"
-        ></v-switch>
+            color="secondary"
+        >
+            <template #label><span class="white--text">{{ switchType ? 'Custom' : 'Range' }}</span></template>
+        </v-switch>
+
         <div v-if="!switchType">
             <v-menu
                 ref="menu1"
@@ -21,12 +24,19 @@
                         v-model="date1"
                         label="Date Start"
                         persistent-hint
+                        class="white-input"
                         v-on="on"
-                    ></v-text-field>
+                    />
                 </template>
-                <v-date-picker @change="changeInput" v-model="date1" :allowed-dates="allowedDatesStart" no-title
-                               @input="menu1 = false"></v-date-picker>
+                <v-date-picker
+                    v-model="date1"
+                    :allowed-dates="allowedDatesStart"
+                    no-title
+                    @change="changeInput"
+                    @input="menu1 = false"
+                />
             </v-menu>
+
             <v-menu
                 v-model="menu2"
                 :close-on-content-click="false"
@@ -41,15 +51,20 @@
                         label="Date End"
                         persistent-hint
                         readonly
+                        class="white-input"
                         v-on="on"
                     />
                 </template>
-                <v-date-picker v-model="date2" :allowed-dates="allowedDatesFinish" @change="changeInput" no-title
-                               @input="menu2 = false"/>
+                <v-date-picker
+                    v-model="date2"
+                    :allowed-dates="allowedDatesFinish"
+                    no-title
+                    @change="changeInput"
+                    @input="menu2 = false"
+                />
             </v-menu>
         </div>
         <div v-else>
-
             <v-dialog
                 ref="dialog"
                 v-for="(menu, index) in customMenu"
@@ -67,30 +82,57 @@
                         :append-outer-icon="(index === customMenu.length - 1) ? 'mdi-plus-thick' : 'mdi-close-circle-outline'"
                         @click:append-outer="manageInput(index)"
                         @click:append="manageInput(index, true)"
+                        class="white-input"
                         v-on="on"
                     />
                 </template>
 
-                <v-date-picker v-model="menu.input" :allowed-dates="allowedDatesCustom"
-                               @input="changeCustomDate(index)" scrollable range>
-                    <v-spacer></v-spacer>
-                    <v-btn text color="primary" @click="modal[index] = false">Cancel</v-btn>
-                    <v-btn text color="primary" @click="$refs.dialog[index].save(menu.input)">OK</v-btn>
+                <v-date-picker
+                    v-model="menu.input"
+                    :allowed-dates="allowedDatesCustom"
+                    scrollable
+                    range
+                    @input="changeCustomDate(index)"
+                >
+
+                    <v-spacer/>
+
+                    <v-btn
+                        text
+                        color="primary"
+                        @click="modal[index] = false"
+                    >
+                        Cancel
+                    </v-btn>
+
+                    <v-btn
+                        text
+                        color="primary"
+                        @click="$refs.dialog[index].save(menu.input)"
+                    >
+                        OK
+                    </v-btn>
                 </v-date-picker>
             </v-dialog>
         </div>
 
-        <v-btn :disabled="isDisabled" min-width="150" rounded
-               color="primary" dark
-               @click="upload()">
-            Get
-        </v-btn>
+        <div class="text-center">
+            <v-btn
+                :disabled="isDisabled"
+                min-width="150"
+                color="dark"
+                @click="upload()"
+            >
+                Submit
+            </v-btn>
+        </div>
     </div>
 </template>
 
 <script>
 export default {
     name: "ControlsMean",
+
     data: () => ({
         date1: null,
         date2: null,
@@ -104,6 +146,7 @@ export default {
         switchType: false,
         isDisabled: true,
     }),
+
     methods: {
         save(date) {
             this.$refs.dialog.save(date);
@@ -214,8 +257,4 @@ export default {
     },
 }
 </script>
-<style>
-.v-icon.mdi-plus-thick {
-    color: #356859 !important;
-}
-</style>
+
