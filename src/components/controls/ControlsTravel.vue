@@ -1,6 +1,6 @@
 <template>
         <div class="pl-2 pb-4 pr-2">
-            <div v-if="hasSettings" class="subtitle-2">{{text}}</div>
+            <slot v-if="hasSettings"></slot>
             <div v-else>
             <div class="subtitle-2">To use this section please enter your home location in the <a
                     @click.stop="isOpenSettings = !isOpenSettings" style="text-decoration: underline">Settings</a></div>
@@ -87,7 +87,6 @@
         {type: 'entire', label: 'Entire period'},
       ],
       period: null,
-      text: 'Select a period to explore data about your travels',
     }),
     watch: {
       period: function (val) {

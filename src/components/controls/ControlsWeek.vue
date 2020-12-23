@@ -1,6 +1,6 @@
 <template>
     <div class="pl-2 pb-4 pr-2">
-        <div class="subtitle-2">{{text}}</div>
+        <slot></slot>
         <v-radio-group v-model="period" v-on:change="setDates" class="radios">
             <v-radio
                     v-for="radio in this.radioButtons"
@@ -61,7 +61,6 @@
     data: () => ({
       date1: null,
       date2: new Date().toISOString().substr(0, 10),
-      text: 'Select a period to get the mean of the parameters by days of the week',
       period: null,
       isDisabled: true,
       radioButtons: [

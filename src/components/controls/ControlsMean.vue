@@ -1,5 +1,6 @@
 <template>
     <div class="pl-2 pb-4 pr-2">
+        <slot></slot>
         <div class="subtitle-2">{{ text }}</div>
         <v-switch
             :label="switchType ? 'Custom' : 'Range'"
@@ -102,7 +103,6 @@ export default {
         ],
         switchType: false,
         isDisabled: true,
-        text: 'Enter a date range or select custom dates to compare with the data for the entire period.'
     }),
     methods: {
         save(date) {

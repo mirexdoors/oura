@@ -1,9 +1,6 @@
 <template>
     <div class="pl-2 pb-4 pr-2">
-        <div class="subtitle-2">Select parameter(s) to search. Use "=", ">" and "&lt;" operators to specify required value
-            range
-        </div>
-
+        <slot></slot>
         <control-advanced-search-item
                 v-for="control in selectedValues"
                 :key="control.id"
