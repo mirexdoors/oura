@@ -3,8 +3,8 @@
         <slot></slot>
         <v-radio-group
             v-model="period"
-            v-on:change="setDates"
             class="radios"
+            @change="setDates"
         >
             <v-radio
                 v-for="radio in this.radioButtons"
@@ -33,8 +33,13 @@
                     v-on="on"
                 />
             </template>
-            <v-date-picker @change="changeDateInput" v-model="date1" :allowed-dates="allowedDatesStart" no-title
-                           @input="menu1 = false"></v-date-picker>
+            <v-date-picker
+                v-model="date1"
+                :allowed-dates="allowedDatesStart"
+                no-title
+                @change="changeDateInput"
+                @input="menu1 = false"
+            />
         </v-menu>
         <v-menu
             v-model="menu2"
@@ -54,19 +59,32 @@
                     v-on="on"
                 />
             </template>
-            <v-date-picker v-model="date2" :allowed-dates="allowedDatesFinish" @change="changeDateInput" no-title
-                           @input="menu2 = false"></v-date-picker>
+            <v-date-picker
+                v-model="date2"
+                :allowed-dates="allowedDatesFinish"
+                no-title
+                @change="changeDateInput"
+                @input="menu2 = false"
+            />
         </v-menu>
 
-        <v-btn :disabled="isDisabled" min-width="150" rounded color="primary" dark @click="upload()">
-            Get
-        </v-btn>
+        <div class="text-center">
+            <v-btn
+                :disabled="isDisabled"
+                min-width="150"
+                color="dark"
+                @click="upload()"
+            >
+                Submit
+            </v-btn>
+        </div>
     </div>
 </template>
 
 <script>
 export default {
     name: "ControlsCorr",
+
     data: () => ({
         date1: null,
         date2: new Date().toISOString().substr(0, 10),
@@ -80,6 +98,7 @@ export default {
         ],
         period: null,
     }),
+
     watch: {
         period: function (val) {
             if (val !== null) {
@@ -110,6 +129,7 @@ export default {
 
         setDates() {
             const firstDate = new Date();
+
             switch (this.period) {
                 case 'month':
                     firstDate.setMonth(firstDate.getMonth() - 1);
@@ -121,9 +141,9 @@ export default {
                     firstDate.setFullYear(2000, 0, 1);
                     break;
             }
+
             this.date1 = firstDate.toISOString().substr(0, 10);
             this.date2 = new Date().toISOString().substr(0, 10);
-
         },
 
         allowedDatesStart: val => val < new Date().toISOString().substr(0, 10),

@@ -62,6 +62,9 @@
             </v-main>
             <v-footer
                 light
+                absolute
+                inset
+                app
                 min-height="50"
                 class="d-flex justify-center"
             >
@@ -91,6 +94,16 @@ import Preloader from "./components/Preloader";
 
 export default {
     name: "App",
+
+    components: {
+        Authorization,
+        Data,
+        Logout,
+        Tabs,
+        Preloader,
+        Settings
+    },
+
     data() {
         return {
             auth: false,
@@ -98,6 +111,7 @@ export default {
             isOpenSettings: false,
         };
     },
+
     computed: {
         isAuth: function () {
             return this.$store.state.Auth.token;
@@ -106,6 +120,17 @@ export default {
             return this.$store.state.Data.preloader;
         }
     },
+
+    mounted() {
+        let token = this.getToken();
+        if (token) {
+            this.checksTokenEnDecay(token);
+        } else {
+            this.auth = false;
+            this.globalPreloader = false;
+        }
+    },
+
     methods: {
         getTokenInHref() {
             let token;
@@ -148,25 +173,6 @@ export default {
                 });
         }
     },
-
-    mounted() {
-        let token = this.getToken();
-        if (token) {
-            this.checksTokenEnDecay(token);
-        } else {
-            this.auth = false;
-            this.globalPreloader = false;
-        }
-    },
-
-    components: {
-        Authorization,
-        Data,
-        Logout,
-        Tabs,
-        Preloader,
-        Settings
-    }
 };
 </script>
 
@@ -196,6 +202,6 @@ export default {
 }
 
 .white-input input {
-    color: #fff!important;
+    color: #fff !important;
 }
 </style>
