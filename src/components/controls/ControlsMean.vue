@@ -77,6 +77,7 @@
                     <v-text-field
                         v-model="menu.inputFormatted"
                         label="Date"
+                        color="secondary"
                         :append-icon="(index === customMenu.length - 1 && customMenu.length > 1) ?
                             'mdi-close-circle-outline' : ''"
                         :append-outer-icon="(index === customMenu.length - 1) ? 'mdi-plus-thick' : 'mdi-close-circle-outline'"
@@ -258,3 +259,11 @@ export default {
 }
 </script>
 
+<style>
+    .v-icon--link.mdi.mdi-plus-thick.theme--light {
+        color: #FFF;
+    }
+    .v-icon--link.mdi.mdi-close-circle-outline.theme--light {
+        color: #9e9e9e;
+    }
+</style>

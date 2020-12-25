@@ -80,7 +80,7 @@
                     v-else
                     v-model="value"
                     label="value"
-color="secondary"
+                    color="secondary"
                     class="white-input"
                     @input="emitData"
                 />
