@@ -174,7 +174,7 @@ const getSummForParam = (summa, timezone = false, isForAwayTimeZone = false) => 
   return summOfParam;
 };
 
-const getTimeFromSeconds = (time, isDay = false) => {
+export const getTimeFromSeconds = (time, isDay = false) => {
   const hours = Math.floor(time / 3600);
   const minutes = Math.floor(time / 60) - (hours * 60);
   let formattedHours = hours.toString().padStart(2, '0');
