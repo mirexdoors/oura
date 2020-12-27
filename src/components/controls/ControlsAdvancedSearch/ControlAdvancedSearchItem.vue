@@ -30,7 +30,7 @@
             <v-col cols="10"
                    sm="6">
                 <v-dialog
-                        v-if="isTime || isSeconds"
+                        v-if="isTime || isSeconds || isMinutes"
                         ref="dialog"
                         v-model="modal"
                         :return-value.sync="value"
@@ -98,6 +98,7 @@
 <script>
     const timeParameters = ['Bedtime', 'Get-out-of-bed time'];
     const secondsTimeParameters = ['Time asleep', 'Time in bed', 'REM sleep', 'Light sleep', 'Deep sleep', 'Sleep midpoint', 'Sleep latency'];
+    const minutesTimeParameters = ['Inactive time', 'Resting time', 'Non-wear time',];
 
     export default {
         name: "ControlAdvancedSearchItem",
@@ -117,9 +118,14 @@
             isTime() {
                 return this.parameter && timeParameters.some(item => item === this.parameter);
             },
+
             isSeconds() {
                 return this.parameter && secondsTimeParameters.some(item => item === this.parameter);
             },
+
+            isMinutes() {
+                return this.parameter && minutesTimeParameters.some(item => item === this.parameter);
+            }
         },
         methods: {
             emitData() {
@@ -131,6 +137,7 @@
                     isTime: !!this.isTime,
                     isDirty: false,
                     isSeconds: this.isSeconds,
+                    isMinutes: this.isMinutes,
                 };
 
                 if (!(this.parameter && this.operator && this.value)) {

@@ -74,8 +74,8 @@
                 min-height="50"
                 class="d-flex justify-center"
             >
-                Feedback Email:&nbsp;
-                <a href="mailto:feedback@healthboard.tech">feedback@healthboard.tech</a>
+                Feedback Email:
+                <a href="mailto:feedback@healthboard.tech" class="pl-2">feedback@healthboard.tech</a>
             </v-footer>
         </div>
         <div

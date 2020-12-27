@@ -44,8 +44,19 @@ const TIME_PARAMS = [
 export const getHHmmFromDateObject = (str) => new Date(str).toTimeString().split(' ')[0];
 
 export const getSecondsFromTime = (str) => {
-  const ar = str.split(':');
+  const ar = str.toString().split(':');
   return ar[0]*3600 + ar[1]*60;
+};
+
+export const getTimeFromMinutes = (time) => {
+  const hours = Math.floor(time / 60);
+  const minutes = time - hours*60;
+  let formattedHours = hours.toString().padStart(2, '0');
+
+  return [
+    formattedHours,
+    minutes.toString().padStart(2, '0'),
+  ].join(':');
 };
 
 const getSecondsToday = (date) => {

@@ -33,6 +33,7 @@
         getSecondsFromTime,
         getHHmmFromDateObject,
         getTimeFromSeconds,
+        getTimeFromMinutes,
     } from "../../helpers/helper";
 
 
@@ -121,12 +122,15 @@
 
                                     if (day?.[query.init.value]) {
                                         let condition = false;
+
                                         switch (query.operator) {
                                             case "=":
                                                 if (query.isTime) {
                                                     condition = getSecondsFromTime(getHHmmFromDateObject(day[query.init.value])) === getSecondsFromTime(query.value);
                                                 } else if (query.isSeconds) {
                                                     condition = day[query.init.value] === getSecondsFromTime(query.value);
+                                                } else if (query.isMinutes) {
+                                                    condition = day[query.init.value] * 60 == getSecondsFromTime(query.value);
                                                 } else {
                                                     condition = day[query.init.value] == query.value;
                                                 }
@@ -136,6 +140,8 @@
                                                     condition = getSecondsFromTime(getHHmmFromDateObject(day[query.init.value])) > getSecondsFromTime(query.value);
                                                 } else if (query.isSeconds) {
                                                     condition = day[query.init.value] > getSecondsFromTime(query.value);
+                                                } else if (query.isMinutes) {
+                                                    condition = day[query.init.value] * 60 > getSecondsFromTime(query.value);
                                                 } else {
                                                     condition = day[query.init.value] > query.value;
                                                 }
@@ -145,12 +151,14 @@
                                                     condition = getSecondsFromTime(getHHmmFromDateObject(day[query.init.value])) < getSecondsFromTime(query.value);
                                                 } else if (query.isSeconds) {
                                                     condition = day[query.init.value] < getSecondsFromTime(query.value);
+                                                } else if (query.isMinutes) {
+                                                    condition = day[query.init.value] * 60 < getSecondsFromTime(query.value);
                                                 } else {
                                                     condition = day[query.init.value] < query.value;
                                                 }
                                                 break;
                                         }
-                                        console.log(condition)
+
                                         if (condition) {
                                             resultDay.date = day.summary_date;
                                             resultDay.dayOfWeek = getWeekDay(day.summary_date);
@@ -159,6 +167,8 @@
                                                 resultDay.searchedValue = getHHmmFromDateObject(day[query.init.value]);
                                             } else if (query.isSeconds) {
                                                 resultDay.searchedValue = getTimeFromSeconds(day[query.init.value]);
+                                            } else if (query.isMinutes) {
+                                                resultDay.searchedValue =getTimeFromMinutes(day[query.init.value]);
                                             } else {
                                                 resultDay.searchedValue = day[query.init.value];
                                             }
