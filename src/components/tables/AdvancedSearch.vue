@@ -4,9 +4,10 @@
             Advanced Search
             <v-spacer/>
         </v-card-title>
+
         <v-data-table
                 :headers="headers"
-                :items="items"
+                :items="formattedItems"
                 :items-per-page="10">
             <template #item.searchedValues="{item}">
                 <span style="white-space: pre-line;">{{item.searchedValues}}</span>
@@ -45,6 +46,15 @@
                     },
                 ],
             }
+        },
+
+        computed: {
+            formattedItems() {
+                return this.items.map(item => {
+                    item.dayOfWeek = item.dayOfWeek.charAt(0).toUpperCase() + item.dayOfWeek.slice(1);
+                    return item;
+                });
+            },
         },
     }
 </script>

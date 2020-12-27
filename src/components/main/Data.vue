@@ -1,16 +1,16 @@
 <template>
-    <v-row>
-        <v-col v-if="!getPreloader" cols="12" lg="6" class="pl-lg-6">
+    <v-row justify="center">
+        <v-col v-if="!getPreloader && (infoSleep.length || infoMean.length)">
             <Coeffs v-if="infoSleep.length" :items="infoSleep"/>
             <Average v-if="infoMean.length" :items="infoMean"/>
         </v-col>
-        <v-col v-if="!getPreloader" cols="12" lg="12" class="pl-lg-6">
-            <Travel v-if="infoTravel.length" :items="infoTravel" :periods="travelPeriods"/>
+        <v-col v-if="!getPreloader && infoTravel.length">
+            <Travel :items="infoTravel" :periods="travelPeriods"/>
         </v-col>
-        <v-col v-if="infoDays.length" cols="12" lg="10" class="pl-lg-6">
+        <v-col v-if="infoDays.length">
             <DaysOfWeek :items="infoDays"/>
         </v-col>
-        <v-col v-if="infoSearch.length" cols="12" lg="6" class="pl-lg-6">
+        <v-col v-if="infoSearch.length">
             <AdvancedSearch :items="infoSearch"/>
         </v-col>
     </v-row>
