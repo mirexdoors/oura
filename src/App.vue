@@ -75,7 +75,7 @@
                 class="d-flex justify-center"
             >
                 Feedback Email:&nbsp;
-                <a href="mailto:expample@mail.ru">example@mail.ru</a>
+                <a href="mailto:feedback@healthboard.tech">feedback@healthboard.tech</a>
             </v-footer>
         </div>
         <div
