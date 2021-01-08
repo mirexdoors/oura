@@ -1,22 +1,8 @@
 # oura
-
-##TODO
+   Analyse your sleep. To work, you will need to register at на Sign up at <a href="https://cloud.ouraring.com/">https://cloud.ouraring.com/</a>
 
 -------------
-####Feature
-Input: parameter select (drop down list), value
- (= (по умолчанию), <, >)& and/or another parameter, up to 3.
-Return: табличка в формате date, day of the week, searched parameter values
-три поля parameter и 3 поля value (ручной ввод) есть изначально. При незаполненном первом параметре другие неактивны, при начале заполнения второго параметра - выбираешь будут ли параметры искать по логике and или or.  После выбора and/or соответствующая фраза загорается перед названием втрого.третьего параметра.
-Возле поля value есть описание (Use < and > symbols to specify required value
- range) 
-
-
-- кидать запрос
-- получать в контроллере и прокидывать в таблицу
-- прокидывать в компонент
-- выводить параметры запроса
-- рефактор
-- разделить все разделы на модули
-- обьединить в один коммит обнуление всего
- -------------------------
+##Roadmap
+- treeshaking
+- move to vue 3
+- move math calcs to TS
