@@ -5,9 +5,9 @@
     >
 
         <div class="px-4 px-md-0">
+            <div class="display-2 mb-4 primary--text"> Analyse your sleep.</div>
             <p>
-                Analyse your sleep. To work, you will need to register at на Sign up at
-                <a href="https://cloud.ouraring.com/">https://cloud.ouraring.com/</a>
+                Sign up at <a target="_blank" href="https://cloud.ouraring.com/">https://cloud.ouraring.com/</a>
             </p>
             <p>
                 If you already have an account, click on the link below.
