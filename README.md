@@ -3,6 +3,8 @@
 
 -------------
 ##Roadmap
+- average data values between players
 - treeshaking
 - move to vue 3
 - move math calcs to TS
+- move DB functions in module

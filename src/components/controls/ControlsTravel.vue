@@ -96,7 +96,7 @@
 </template>
 
 <script>
-import Settings from '../../components/settings';
+import Settings from '../Settings';
 
 export default {
     name: "ControlsTravel",
