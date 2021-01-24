@@ -63,12 +63,14 @@ const Auth = {
             }
         },
 
-        getInfo({commit}) {
+        getInfo({commit, dispatch}) {
             const token = this.state.Auth.token;
             axios.get(`https://api.ouraring.com/v1/userinfo?access_token=${token}`)
                 .then(response => {
                         const info = {};
                         info.email = response.data.email;
+
+                        dispatch('getDataByLastWeek',{email:  info.email});
 
                         db.collection('locations')
                             .where('email', '==', response.data.email)
@@ -90,6 +92,7 @@ const Auth = {
     },
     getters: {
         userInfo: state => state.info,
+        email: state => state.info.email,
     },
 };
 

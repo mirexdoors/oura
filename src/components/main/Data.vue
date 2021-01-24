@@ -39,15 +39,25 @@
 
     export default {
         name: "Data",
+
+        components: {
+            Coeffs,
+            Average,
+            DaysOfWeek,
+            Travel,
+            AdvancedSearch,
+        },
+
         mounted() {
             this.$store.dispatch('getInfo');
         },
+
         computed: {
             userInfo() {
                 return this.$store.state.Auth.info;
             },
 
-            getPreloader: function () {
+            getPreloader() {
                 return this.$store.state.Data.preloader;
             },
 
@@ -168,7 +178,7 @@
                                             } else if (query.isSeconds) {
                                                 resultDay.searchedValue = getTimeFromSeconds(day[query.init.value]);
                                             } else if (query.isMinutes) {
-                                                resultDay.searchedValue =getTimeFromMinutes(day[query.init.value]);
+                                                resultDay.searchedValue = getTimeFromMinutes(day[query.init.value]);
                                             } else {
                                                 resultDay.searchedValue = day[query.init.value];
                                             }
@@ -201,14 +211,6 @@
                 return [];
             },
         },
-
-        components: {
-            Coeffs,
-            Average,
-            DaysOfWeek,
-            Travel,
-            AdvancedSearch
-        }
     };
 </script>
 
