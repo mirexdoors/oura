@@ -43,7 +43,7 @@
                     <settings @closeSettings="isOpenSettings = false"/>
                 </v-dialog>
             </v-toolbar>
-            <ServiceEmails v-if="isAuth || _isService"/>
+            <ServiceEmails v-if="isAuth && _isService"/>
             <v-main :class="isAuth ? '' : 'align-center'">
                 <v-card-title
                         v-if="!getPreloader"
