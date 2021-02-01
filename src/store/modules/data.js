@@ -53,6 +53,7 @@ const Sleep = {
 
         },
     },
+
     actions: {
         getCategoryInfo({commit}, payload) {
             const token = this.state.Auth.token;
@@ -76,7 +77,7 @@ const Sleep = {
         getDataByLastWeek(context, email) {
             const dates = [
                 {
-                    start: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString().substr(0, 10), //date 7 days ago
+                    start: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().substr(0, 10), //date 7 days ago
                     end: new Date().toISOString().substr(0, 10)
                 }
             ];
@@ -109,7 +110,6 @@ const Sleep = {
                                             }
                                         });
                                     });
-
 
                                     db.collection('parameters').add(result);
                                 }

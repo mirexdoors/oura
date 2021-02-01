@@ -1,15 +1,26 @@
 <template>
-    <v-row justify="center">
-        <v-col v-if="!getPreloader && (infoSleep.length || infoMean.length)">
-            <Coeffs v-if="infoSleep.length" :items="infoSleep"/>
-            <Average v-if="infoMean.length" :items="infoMean"/>
+    <v-row
+            v-if="!getPreloader"
+            justify="center">
+        <v-col v-if="infoSleep.length ">
+            <Coeffs :items="infoSleep"/>
         </v-col>
-        <v-col v-if="!getPreloader && infoTravel.length">
-            <Travel :items="infoTravel" :periods="travelPeriods"/>
+
+        <v-col v-if="infoMean.length">
+            <Average  :items="infoMean"/>
         </v-col>
+
+        <v-col v-if="infoTravel.length">
+            <Travel
+                    :items="infoTravel"
+                    :periods="travelPeriods"
+            />
+        </v-col>
+
         <v-col v-if="infoDays.length">
             <DaysOfWeek :items="infoDays"/>
         </v-col>
+
         <v-col v-if="infoSearch.length">
             <AdvancedSearch :items="infoSearch"/>
         </v-col>
@@ -22,6 +33,7 @@
     import DaysOfWeek from "../tables/DaysOfWeek";
     import Travel from "../tables/Travel";
     import AdvancedSearch from "../tables/AdvancedSearch";
+
     import {
         APINames,
         dataTableCoeffHelper,
