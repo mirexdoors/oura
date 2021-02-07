@@ -1,6 +1,6 @@
 import axios from "axios";
 import {db} from "../../db";
-import {APINames} from "../../helpers/helper";
+import {getAverageWithoutSD} from "../../helpers/helper";
 
 const Sleep = {
     state: {
@@ -83,35 +83,40 @@ const Sleep = {
             ];
 
             if (email.email) {
+                const resultDataObj = {
+                    sleep: [],
+                    activity: [],
+                    readiness: []
+                };
                 getAllInfoFromDateArray(dates, this.state.Auth.token).then((...data) => {
                     if (data.length > 0) {
                         db.collection('parameters')
                             .where('email', '==', email.email)
                             .get()
                             .then(response => {
-                                let isEmailExist = false;
+                                let docId = null;
                                 response.forEach(doc => {
-                                    if (doc.data().email === email.email) isEmailExist = true;
+                                    if (doc.data().email === email.email) {
+                                        docId = doc.id;
+                                    }
                                 });
 
-                                if (!isEmailExist) {
-                                    const result = {};
-                                    result.email = email.email;
-                                    //TODO здесь необходимо считать среднее за неделю
-                                    // Пока что записываем последнее
-                                    data[0][0].forEach(category => {
-                                        const key = Object.keys(category.data)[0];
-                                        category.data[key].forEach(dataItem => {
-                                            for (const itemKey in dataItem) {
-                                                const tableKey = APINames[key]?.[itemKey];
-
-                                                if (tableKey)
-                                                    result[tableKey] = dataItem[itemKey];
-                                            }
+                                data[0].forEach(dataItem => {
+                                    const tempItem = getDataFromRaw(dataItem);
+                                    for (const key in resultDataObj) {
+                                        tempItem[key].forEach(tempItemElement => {
+                                            resultDataObj[key].push(tempItemElement);
                                         });
-                                    });
+                                    }
+                                });
 
-                                    db.collection('parameters').add(result);
+                                const averageData = getAverageWithoutSD(resultDataObj);
+                                averageData.email = email.email;
+
+                                if (!docId) {
+                                    db.collection('parameters').add(averageData);
+                                } else {
+                                    db.collection('parameters').doc(docId).update(averageData);
                                 }
                             });
                     }

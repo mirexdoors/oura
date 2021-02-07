@@ -75,10 +75,9 @@ export default {
     },
 
     infoSleep() {
-      if (this.$store.state.Data.infoSleep) {
+      if (this.$store.state.Data.infoSleep)
         return dataTableCoeffHelper(Object.assign({}, this.$store.state.Data.infoSleep));
-      } else
-        return []
+      else return [];
     },
 
     infoMean() {

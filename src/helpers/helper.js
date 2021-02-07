@@ -388,6 +388,36 @@ const getMeanByDay = (days, tmpSumm) => {
   return days;
 };
 
+export const getAverageWithoutSD = (data) => {
+  const result = {};
+
+  const parameters = getParameters(data);
+  const tempSummData = getTempSumm(data);
+  const means = getMeans(tempSummData);
+
+  parameters.forEach(item => {
+    if (item !== 'timezone') {
+      if (item === 'Bedtime' || item === 'Get-out-of-bed time') {
+        means[item] = getTimeFromSeconds(means[item], true);
+      }
+
+      if (item === 'Inactive time' || item === 'Resting' +
+          ' time' || item === 'Non-wear time') {
+        means[item] = means[item] * 60;
+      }
+
+      if (TIME_PARAMS.includes(item)) {
+        means[item] = getTimeFromSeconds(means[item]);
+      }
+
+      //TODO здесь сделать проверку на число и записывать в базу число
+      result[item] = means[item];
+    }
+  });
+
+  return result;
+};
+
 export const dataTableMeanInfo = (data, yearData) => {
   const result = [];
 
@@ -570,6 +600,7 @@ export const calcOffset = (offsetAtSeconds) => {
   const offsetPosition = offsetAtSeconds > 0 ? '+' : '';
   return `UTC/GMT ${offsetPosition} ${getTimeFromSeconds(offsetAtSeconds)}`
 };
+
 const getDaysAtTimeZones = (tmpData, timeZone) => {
   const initialValue = 0;
   const reducerNative = (accumulator, currentDay) => {
