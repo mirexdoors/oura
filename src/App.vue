@@ -43,7 +43,7 @@
                     <settings @closeSettings="isOpenSettings = false"/>
                 </v-dialog>
             </v-toolbar>
-            <ServiceEmails v-if="isAuth && _isService"/>
+
             <v-main :class="isAuth ? '' : 'align-center'">
                 <v-card-title
                         v-if="!getPreloader"
@@ -98,7 +98,6 @@
     import Tabs from "./components/Tabs";
     import Settings from './components/Settings';
     import Preloader from "./components/Preloader";
-    import ServiceEmails from "./components/ServiceEmails";
 
     export default {
         name: "App",
@@ -110,7 +109,6 @@
             Tabs,
             Preloader,
             Settings,
-            ServiceEmails,
         },
 
         data() {
@@ -129,13 +127,6 @@
             getPreloader: function () {
                 return this.$store.state.Data.preloader;
             },
-
-            _isService() {
-                // if (this.userInfo?.email) {
-                //     return  this.userInfo.email === '4everladyjane@gmail.com';
-                // }
-                return false;
-            }
         },
 
         mounted() {
