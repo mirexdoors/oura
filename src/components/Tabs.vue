@@ -93,26 +93,31 @@ export default {
           title: 'Сorrelations',
           href: '#corr',
           is_active: true,
+          is_dev: false,
         },
         {
           title: 'Mean',
           href: '#mean',
           is_active: false,
+          is_dev: false,
         },
         {
           title: 'Days of week',
           href: '#week',
           is_active: false,
+          is_dev: false,
         },
         {
           title: 'Travel',
           href: '#travel',
           is_active: false,
+          is_dev: false,
         },
         {
           title: 'Advanced search',
           href: '#search',
           is_active: false,
+          is_dev: false,
         },
         {
           title: 'Average of all users',
