@@ -397,21 +397,20 @@ export const getAverageWithoutSD = (data) => {
 
   parameters.forEach(item => {
     if (item !== 'timezone') {
-      if (item === 'Bedtime' || item === 'Get-out-of-bed time') {
-        means[item] = getTimeFromSeconds(means[item], true);
-      }
+      // if (item === 'Bedtime' || item === 'Get-out-of-bed time') {
+      //   means[item] = getTimeFromSeconds(means[item], true);
+      // }
 
       if (item === 'Inactive time' || item === 'Resting' +
           ' time' || item === 'Non-wear time') {
         means[item] = means[item] * 60;
       }
 
-      if (TIME_PARAMS.includes(item)) {
-        means[item] = getTimeFromSeconds(means[item]);
-      }
+      // if (TIME_PARAMS.includes(item)) {
+      //   means[item] = getTimeFromSeconds(means[item]);
+      // }
 
-      //TODO здесь сделать проверку на число и записывать в базу число
-      result[item] = means[item];
+      result[item] = Number(Number(means[item]).toFixed(2));
     }
   });
 
@@ -454,7 +453,7 @@ export const dataTableMeanInfo = (data, yearData) => {
       result.push({
         parameter: item,
         mean: itemMean,
-        range: itemRange
+        range: itemRange,
       })
     }
   });
