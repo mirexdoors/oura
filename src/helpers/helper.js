@@ -37,7 +37,7 @@ export const APINames = {
   }
 };
 
-const TIME_PARAMS = [
+export const TIME_PARAMS = [
   'Time asleep', 'Time in bed', 'Time awake in bed', 'Light sleep', 'REM sleep', 'Deep sleep', 'Sleep midpoint', 'Inactive time', 'Resting time', 'Non-wear time'
 ];
 
@@ -397,19 +397,6 @@ export const getAverageWithoutSD = (data) => {
 
   parameters.forEach(item => {
     if (item !== 'timezone') {
-      // if (item === 'Bedtime' || item === 'Get-out-of-bed time') {
-      //   means[item] = getTimeFromSeconds(means[item], true);
-      // }
-
-      if (item === 'Inactive time' || item === 'Resting' +
-          ' time' || item === 'Non-wear time') {
-        means[item] = means[item] * 60;
-      }
-
-      // if (TIME_PARAMS.includes(item)) {
-      //   means[item] = getTimeFromSeconds(means[item]);
-      // }
-
       result[item] = Number(Number(means[item]).toFixed(2));
     }
   });
