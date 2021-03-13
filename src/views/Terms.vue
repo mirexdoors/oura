@@ -1,5 +1,5 @@
 <template functional>
-    <div class="about">
+    <div class="text_block">
         <h1>Terms and Conditions</h1>
         <p>
             Welcome to healthboard.tech!

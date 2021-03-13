@@ -16,9 +16,9 @@
         >
             <header-app/>
 
-            <v-main class="d-flex flex-column justify-center align-center mt-4 px-md-12 mx-auto px-0">
+            <v-main class="d-flex flex-column justify-center align-center mt-8 px-md-12 mx-auto px-0">
                 <v-col
-                        cols="12"
+                        cols="11"
                         lg="8"
                         class="d-flex flex-column mx-auto px-0"
                 >
@@ -62,7 +62,7 @@
                 this.checksTokenEnDecay(token);
                 setTimeout(() => {
                     this.isGlobalPreloader = false;
-                }, 1000);
+                }, 500);
             } else {
                 this.isGlobalPreloader = false;
             }

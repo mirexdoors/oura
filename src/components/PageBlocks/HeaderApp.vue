@@ -1,5 +1,11 @@
 <template>
-    <v-app-bar app color="primary">
+    <v-app-bar
+            app
+            color="primary"
+            :prominent="isMobile"
+            class="d-flex justify-space-between py-2 align-center"
+            :class="isMobile ? 'pt-4' : ''"
+    >
         <v-btn>
             <a
                     class="text-decoration-none"
@@ -13,20 +19,22 @@
                 &#128214;
             </a>
         </v-btn>
-        <v-spacer></v-spacer>
-        <a href="/"  class="white--text headline  text-uppercase font-weight-bold toolbar-title">Healthboard</a>
-        <v-spacer></v-spacer>
 
-        <v-btn icon>
-            <v-icon
-                    settings
-                    class="secondary--text"
-                    @click.stop="isOpenSettings = !isOpenSettings">settings
-            </v-icon>
-        </v-btn>
-        <v-btn icon>
-            <Logout class="align-content-end secondary--text"/>
-        </v-btn>
+        <a href="/" class="white--text headline text-uppercase font-weight-bold toolbar-title">Healthboard</a>
+
+        <div>
+            <v-btn icon>
+                <v-icon
+                        settings
+                        class="secondary--text"
+                        @click.stop="isOpenSettings = !isOpenSettings">settings
+                </v-icon>
+            </v-btn>
+            <v-btn icon>
+                <Logout class="align-content-end secondary--text"/>
+            </v-btn>
+        </div>
+
         <v-dialog
                 v-model="isOpenSettings"
                 max-width="300"
@@ -48,11 +56,23 @@
                 isOpenSettings: false,
             }
         },
+        computed: {
+            isMobile() {
+                return this.$vuetify.breakpoint.xsOnly;
+            }
+        }
     }
 </script>
 
-<style scoped>
+<style>
     .toolbar-title {
         letter-spacing: 1px;
+    }
+
+    .v-toolbar__content {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        width: 100%;
     }
 </style>
