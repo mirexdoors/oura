@@ -1,6 +1,6 @@
 <template>
     <v-app app class="mx-lg-4">
-        <preloader-app v-if="isPreloader"/>
+        <preloader-app v-if="isGlobalPreloader"/>
 
         <template
                 v-else-if="!isAuth"
@@ -14,12 +14,13 @@
                 v-else
                 class="d-flex fill-height"
         >
+            <preloader-app v-if="isPreloader"/>
             <header-app/>
 
-            <v-main class="d-flex flex-column justify-center align-center mt-8 px-md-12 mx-auto px-0">
+            <v-main class="d-flex flex-column justify-center align-center mt-0 mt-lg-12 px-md-12 mx-auto px-0">
                 <v-col
                         cols="11"
-                        lg="8"
+                        lg="10"
                         class="d-flex flex-column mx-auto px-0"
                 >
                     <router-view/>
@@ -60,12 +61,8 @@
             let token = this.getToken();
             if (token) {
                 this.checksTokenEnDecay(token);
-                setTimeout(() => {
-                    this.isGlobalPreloader = false;
-                }, 500);
-            } else {
-                this.isGlobalPreloader = false;
             }
+            this.dropGlobalPreloader();
         },
 
         computed: {
@@ -78,6 +75,11 @@
         },
 
         methods: {
+            dropGlobalPreloader() {
+                setTimeout(() => {
+                    this.isGlobalPreloader = false;
+                }, 400);
+            },
             getToken() {
                 let token = Cookies.get("token_oura") || null;
                 if (!token) token = this.getTokenInHref();
@@ -113,7 +115,7 @@
                         const codeError = new Error(e);
                         if (codeError.message.includes(401)) {
                             Cookies.remove("token_oura");
-                            this.globalPreloader = false;
+                            this.isGlobalPreloader = false;
                         }
                     });
             }
@@ -122,25 +124,6 @@
 </script>
 
 <style>
-    @media screen and (min-width: 991px) {
-        ::-webkit-scrollbar-track {
-            background: transparent
-        }
-
-        ::-webkit-scrollbar {
-            position: absolute;
-            width: 8px;
-            z-index: 1000;
-            background-color: transparent;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background-color: #ccc;
-            border-radius: 3px;
-            border: 1px solid #fff;
-        }
-    }
-
     .theme--dark.v-btn.v-btn--disabled:not(.v-btn--flat):not(.v-btn--text):not(.v-btn--outlined) {
         background-color: #ccc !important;
     }
@@ -152,5 +135,9 @@
     .v-application .primary--text.white-input {
         color: #ffffff;
         caret-color: #fff;
+    }
+
+    h4 {
+        margin: .5em 0;
     }
 </style>

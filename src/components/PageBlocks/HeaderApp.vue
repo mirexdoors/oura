@@ -6,28 +6,33 @@
             class="d-flex justify-space-between py-2 align-center"
             :class="isMobile ? 'pt-4' : ''"
     >
-        <v-btn>
-            <a
-                    class="text-decoration-none"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    href="https://vllesh.medium.com/healthboard-tech-user-manual-5d075d46c408"
-            >
+        <div>
+            <v-btn>
+                <a
+                        class="text-decoration-none"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        href="https://vllesh.medium.com/healthboard-tech-user-manual-5d075d46c408"
+                >
                             <span class="text-decoration-underline">
                             READ USER MANUAL
                             </span>
-                &#128214;
-            </a>
-        </v-btn>
+                    &#128214;
+                </a>
+            </v-btn>
 
-        <a href="/" class="white--text headline text-uppercase font-weight-bold toolbar-title">Healthboard</a>
-
-        <div>
-            <v-btn icon>
+            <a href="/"
+               class="d-inline-block white--text headline text-uppercase font-weight-bold toolbar-title ml-0 ml-lg-12 mt-4 mt-lg-0">Healthboard</a>
+        </div>
+        <div class="d-flex">
+            <v-btn
+                    icon
+                    @click="isOpenSettings = !isOpenSettings"
+            >
                 <v-icon
                         settings
                         class="secondary--text"
-                        @click.stop="isOpenSettings = !isOpenSettings">settings
+                >settings
                 </v-icon>
             </v-btn>
             <v-btn icon>
@@ -72,7 +77,6 @@
     .v-toolbar__content {
         display: flex;
         justify-content: space-between;
-        flex-wrap: wrap;
         width: 100%;
     }
 </style>
