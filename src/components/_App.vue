@@ -1,34 +1,36 @@
 <template>
-    <v-app app class="mx-lg-4">
-        <preloader-app v-if="isGlobalPreloader"/>
-
-        <template
-                v-else-if="!isAuth"
-                class="d-flex"
+    <v-app class="mx-lg-4">
+        <div
+                v-if="!globalPreloader"
+                :class="!isAuth ? 'd-flex' : ''"
+                class="fill-height"
         >
-            <authorization-app class="fill-height justify-center align-self-center align-center"/>
-            <footer-app/>
-        </template>
+            <Preloader
+                    v-if="getPreloader"
+                    class="mx-auto"
+            />
 
-        <template
-                v-else
-                class="d-flex fill-height"
-        >
-            <preloader-app v-if="isPreloader"/>
-            <header-app/>
+            <HeaderApp v-if="isAuth" />
 
-            <v-main class="d-flex flex-column justify-center align-center mt-0 mt-lg-12 px-md-12 mx-auto px-0">
-                <v-col
-                        cols="11"
-                        lg="10"
-                        class="d-flex flex-column mx-auto px-0"
-                >
-                    <router-view/>
-                </v-col>
+            <v-main :class="isAuth ? '' : 'align-center'">
+                <v-card-title
+                        v-if="!getPreloader"
+                        class="text-center justify-center py-6">
+                    <h1 class="font-weight-bold display-3 primary--text text-break px-2">
+                        Health Board
+                    </h1>
+                </v-card-title>
+                <router-view/>
             </v-main>
+        </div>
+        <div
+                v-else
+                class="my-auto"
+        >
+            <Preloader class="mx-auto"/>
+        </div>
 
-            <footer-app/>
-        </template>
+       <FooterApp />
     </v-app>
 </template>
 
@@ -36,23 +38,22 @@
     import axios from "axios";
     import Cookies from "js-cookie";
 
-    import PreloaderApp from "./components/PageBlocks/PreloaderApp";
+    import Preloader from "./components/Preloader";
     import HeaderApp from "./components/PageBlocks/HeaderApp";
     import FooterApp from "./components/PageBlocks/FooterApp";
-    import AuthorizationApp from "./components/PageBlocks/AuthorizationApp";
 
     export default {
         name: "App",
         components: {
             HeaderApp,
             FooterApp,
-            PreloaderApp,
-            AuthorizationApp,
+            Preloader,
         },
 
         data() {
             return {
-                isGlobalPreloader: true,
+                auth: false,
+                globalPreloader: true,
                 isOpenSettings: false,
             }
         },
@@ -61,25 +62,22 @@
             let token = this.getToken();
             if (token) {
                 this.checksTokenEnDecay(token);
+            } else {
+                this.auth = false;
+                this.globalPreloader = false;
             }
-            this.dropGlobalPreloader();
         },
 
         computed: {
             isAuth: function () {
                 return this.$store.state.Auth.token;
             },
-            isPreloader: function () {
-                return this.isGlobalPreloader || this.$store.state.Data.preloader;
+            getPreloader: function () {
+                return this.$store.state.Data.preloader;
             },
         },
 
         methods: {
-            dropGlobalPreloader() {
-                setTimeout(() => {
-                    this.isGlobalPreloader = false;
-                }, 400);
-            },
             getToken() {
                 let token = Cookies.get("token_oura") || null;
                 if (!token) token = this.getTokenInHref();
@@ -108,6 +106,7 @@
                     .then(response => {
                         if (!this.$store.state.Auth.token)
                             this.$store.commit("saveToken", token);
+                        this.auth = true;
                         this.globalPreloader = false;
                         this.$store.dispatch('processEmail', response.data.email);
                     })
@@ -115,7 +114,8 @@
                         const codeError = new Error(e);
                         if (codeError.message.includes(401)) {
                             Cookies.remove("token_oura");
-                            this.isGlobalPreloader = false;
+                            this.auth = false;
+                            this.globalPreloader = false;
                         }
                     });
             }
@@ -124,6 +124,25 @@
 </script>
 
 <style>
+    @media screen and (min-width: 991px) {
+        ::-webkit-scrollbar-track {
+            background: transparent
+        }
+
+        ::-webkit-scrollbar {
+            position: absolute;
+            width: 8px;
+            z-index: 1000;
+            background-color: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: #ccc;
+            border-radius: 3px;
+            border: 1px solid #fff;
+        }
+    }
+
     .theme--dark.v-btn.v-btn--disabled:not(.v-btn--flat):not(.v-btn--text):not(.v-btn--outlined) {
         background-color: #ccc !important;
     }
@@ -135,9 +154,5 @@
     .v-application .primary--text.white-input {
         color: #ffffff;
         caret-color: #fff;
-    }
-
-    h4 {
-        margin: .5em 0;
     }
 </style>

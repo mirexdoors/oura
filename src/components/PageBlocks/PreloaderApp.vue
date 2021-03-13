@@ -25,7 +25,7 @@
 
 <script>
   export default {
-    name: "preloader",
+    name: "PreloaderApp",
 
     data: () => ({
       absolute: true,
