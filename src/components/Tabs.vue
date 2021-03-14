@@ -28,8 +28,8 @@
       </controls-corr>
 
       <controls-mean v-if="controls.mean">
-        <section-subtitle>Enter a date range or select custom dates to compare with the
-          data for the entire period.
+        <section-subtitle>
+          Enter a date range or select custom dates to compare with the data for the entire period. Or just compare your average values with healthboard users' average.
         </section-subtitle>
       </controls-mean>
 
