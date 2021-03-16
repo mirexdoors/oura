@@ -6,7 +6,9 @@
             v-model="switchType"
             color="secondary"
         >
-            <template #label><span class="white--text">{{ switchType ? 'Custom' : 'Range' }}</span></template>
+            <template #label>
+                <span class="white--text">{{ switchType ? 'Custom' : 'Range' }}</span>
+            </template>
         </v-switch>
 
         <div v-if="!switchType">
@@ -119,7 +121,6 @@
 
         <div class="text-center">
             <v-btn
-                :disabled="isDisabled"
                 min-width="150"
                 color="dark"
                 @click="upload()"
@@ -145,7 +146,6 @@ export default {
             {isActive: false, input: [], inputFormatted: ''}
         ],
         switchType: false,
-        isDisabled: true,
     }),
 
     methods: {
@@ -171,8 +171,6 @@ export default {
             if (this.date1 >= this.date2) {
                 this.date1 = null;
             }
-
-            if (this.date1 && this.date2) this.isDisabled = false;
         },
 
         changeCustomDate(index) {
@@ -185,14 +183,17 @@ export default {
                 this.customMenu[index].input[0] = start;
                 this.customMenu[index].input[1] = end;
             }
-
-            if (this.customMenu[index].input[0]) this.isDisabled = false;
         },
 
         upload() {
-            const dates = this.switchType ? this.getCustomDate() : this.getRangeDate();
+            let dates = this.switchType ? this.getCustomDate() : this.getRangeDate();
             const yearDate = this.getYearDate();
 
+            if (!this.date1 && !this.date2) {
+                dates = [yearDate];
+            }
+
+            console.log(dates)
             this.$store.commit("setPreloader", true);
             if (!dates.length) return this.$store.commit("setPreloader", false);
 
