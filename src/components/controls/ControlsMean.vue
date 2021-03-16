@@ -193,7 +193,6 @@ export default {
                 dates = [yearDate];
             }
 
-            console.log(dates)
             this.$store.commit("setPreloader", true);
             if (!dates.length) return this.$store.commit("setPreloader", false);
 
