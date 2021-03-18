@@ -89,7 +89,6 @@
 </template>
 
 <script>
-import axios from 'axios';
 import {calcOffset} from '@/helpers/helper';
 import {db} from "@/db";
 
@@ -123,50 +122,14 @@ export default {
 
   watch: {
     searchCountry(val) {
-      axios.post('https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/address',
-          {
-            query: `${val}`,
-            language: "en",
-            type: "ADDRESS",
-            from_bound: {"value": "country"},
-            to_bound: {"value": "country"},
-            locations: {country: "*"},
-          },
-          {
-            headers:
-                {
-                  "Content-Type": "application/json",
-                  "Accept": "application/json",
-                  "Authorization": `Token ${this.dadataKey}`
-                }
-          }).then(res => {
-        this.entriesCountry = res.data.suggestions;
-      })
-    },
-    searchCity(val) {
-
       if (val) {
-        axios.post('https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/address',
-            {
-              "query": `${val}`,
-              language: "en",
-              "type": "ADDRESS",
-              "from_bound": {"value": "city"},
-              "to_bound": {"value": "city"},
-              locations: {
-                country_iso_code: this.country_iso_code
-              },
-            },
-            {
-              headers:
-                  {
-                    "Content-Type": "application/json",
-                    "Accept": "application/json",
-                    "Authorization": `Token ${this.dadataKey}`
-                  }
-            }).then(res => {
-          this.entriesCity = res.data.suggestions;
-        })
+        this.setDadataCountry(val);
+      }
+    },
+
+    searchCity(val) {
+      if (val) {
+        this.setDadataCity(val);
       }
     },
     city() {
@@ -174,7 +137,8 @@ export default {
 
       const lat = this.city.lat;
       const lon = this.city.lon;
-      axios.get(`https://api.timezonedb.com/v2.1/get-time-zone?key=${this.timeZoneKey}&format=json&by=position&lat=${lat}&lng=${lon}`)
+      fetch.get(`https://api.timezonedb.com/v2.1/get-time-zone?key=${this.timeZoneKey}&format=json&by=position&lat=${lat}&lng=${lon}`)
+          .then(response => response.json())
           .then(response => {
             this.$store.commit('updateTimeZone', response.data.zoneName);
             if (response.data.gmtOffset)
@@ -192,22 +156,27 @@ export default {
         return this.$store.state.Auth.info.timeZone;
       },
     },
+
     dst: {
       get() {
         return (this.$store.state.Auth.info.dst === 0 ? 'No' : 'Yes');
       },
     },
+
     gtmOffset: {
       get() {
         return this.$store.state.Auth.info.gtmOffset;
       },
     },
+
     info() {
       return this.$store.state.Auth.info;
     },
+
     country_iso_code() {
       return this.country ? this.country.iso : '*';
     },
+
     itemsCountry() {
       return this.entriesCountry.map(entry => {
         return {
@@ -216,6 +185,7 @@ export default {
         };
       })
     },
+
     itemsCity() {
       return this.entriesCity.map(entry => {
         return {
@@ -228,6 +198,55 @@ export default {
   },
 
   methods: {
+    async setDadataCity(value) {
+      const query = await fetch('https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/address',
+          {
+            method: 'POST',
+            headers:
+                {
+                  "Content-Type": "application/json",
+                  "Accept": "application/json",
+                  "Authorization": `Token ${this.dadataKey}`
+                },
+            body: {
+              query: `${value}`,
+              language: "en",
+              type: "ADDRESS",
+              from_bound: {"value": "city"},
+              to_bound: {"value": "city"},
+              locations: {
+                country_iso_code: this.country_iso_code
+              },
+            }
+          });
+
+      const result = await query.json();
+      if (result.data) this.entriesCity = result.data.suggestions;
+    },
+
+    async setDadataCountry(value) {
+      const query = await fetch('https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/address', {
+        method: 'POST',
+        headers:
+            {
+              "Content-Type": "application/json",
+              "Accept": "application/json",
+              "Authorization": `Token ${this.dadataKey}`
+            },
+        body: {
+          query: `${value}`,
+          language: "en",
+          type: "ADDRESS",
+          from_bound: {"value": "country"},
+          to_bound: {"value": "country"},
+          locations: {country: "*"},
+        },
+      });
+
+      const result = await query.json();
+      if (result.data) this.entriesCountry = result.data.suggestions;
+    },
+
     save() {
       const info = this.$store.state.Auth.info;
       const userMail = info.email;

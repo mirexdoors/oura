@@ -33,7 +33,6 @@
 </template>
 
 <script>
-    import axios from "axios";
     import Cookies from "js-cookie";
 
     import PreloaderApp from "./components/PageBlocks/PreloaderApp";
@@ -103,8 +102,8 @@
 
 
             checksTokenEnDecay(token) {
-                axios
-                    .get(`https://api.ouraring.com/v1/userinfo?access_token=${token}`)
+                fetch(`https://api.ouraring.com/v1/userinfo?access_token=${token}`)
+                    .then(response => response.json())
                     .then(response => {
                         if (!this.$store.state.Auth.token)
                             this.$store.commit("saveToken", token);
