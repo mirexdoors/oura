@@ -17,15 +17,23 @@
             <preloader-app v-if="isPreloader"/>
             <header-app/>
 
-            <v-main class="d-flex flex-column justify-center align-center mt-0 mt-lg-12 px-md-12 mx-auto px-0">
-                <v-col
-                        cols="11"
-                        lg="10"
-                        class="d-flex flex-column mx-auto px-0"
+            <v-container
+                    fluid
+                    class="d-flex flex-column justify-center align-center mt-0 mt-lg-12 px-md-6 mx-auto px-0"
+            >
+                <v-layout
+                        row
+                        style="width: 100%"
                 >
-                    <router-view/>
-                </v-col>
-            </v-main>
+                    <v-flex
+                            lg6
+                            xs12
+                            class="d-flex flex-column mx-auto px-0"
+                    >
+                        <router-view/>
+                    </v-flex>
+                </v-layout>
+            </v-container>
 
             <footer-app/>
         </template>

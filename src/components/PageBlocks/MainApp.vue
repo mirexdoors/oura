@@ -11,7 +11,7 @@
 </template>
 
 <script>
-    import Data from "../main/Data";
+    import Data from "../Main/Data";
     import Tabs from "../Tabs";
 
     export default {

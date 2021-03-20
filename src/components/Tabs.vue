@@ -49,8 +49,6 @@
           range
         </section-subtitle>
       </controls-advanced-search>
-
-      <average-of-all-users v-if="controls.average && isDev"/>
     </v-col>
   </v-card>
 </template>
@@ -62,7 +60,6 @@ import ControlsWeek from "./controls/ControlsWeek";
 import ControlsTravel from "./controls/ControlsTravel";
 import ControlsAdvancedSearch from "./controls/ControlsAdvancedSearch/ControlsAdvancedSearch";
 import SectionSubtitle from "../components/SectionSubtitle";
-import AverageOfAllUsers from "./tables/AverageOfAllUsers";
 //TODO перенести управление табами в стору
 
 export default {
@@ -75,7 +72,6 @@ export default {
     ControlsTravel,
     ControlsAdvancedSearch,
     SectionSubtitle,
-    AverageOfAllUsers,
   },
 
   data() {
@@ -118,12 +114,6 @@ export default {
           href: '#search',
           is_active: false,
           is_dev: false,
-        },
-        {
-          title: 'Average of all users',
-          href: '#average',
-          is_active: false,
-          is_dev: true,
         },
       ]
     }
