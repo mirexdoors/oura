@@ -1,6 +1,6 @@
 import axios from "axios";
 import {db} from "../../db";
-import {getAverageWithoutSD, dataTableMeanInfo} from "../../helpers/helper";
+import {getUserSummaryDateObject, dataTableMeanInfo} from "../../helpers/helper";
 import {getAllInfoFromDateArray, getDataFromRaw, getSleepAndActiveInfo} from '../../helpers/storeHelpers';
 
 const Sleep = {
@@ -56,7 +56,7 @@ const Sleep = {
     },
 
     actions: {
-      async getCategoryInfo({commit}, payload) {
+        async getCategoryInfo({commit}, payload) {
             const token = this.state.Auth.token;
             axios
                 .all([
@@ -78,7 +78,7 @@ const Sleep = {
         getDataByLastWeek(context, email) {
             const dates = [
                 {
-                    start: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().substr(0, 10), //date 7 days ago
+                    start: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().substr(0, 10),
                     end: new Date().toISOString().substr(0, 10)
                 }
             ];
@@ -90,36 +90,28 @@ const Sleep = {
                     readiness: []
                 };
                 getAllInfoFromDateArray(dates, this.state.Auth.token).then((...data) => {
+
                     if (data.length > 0) {
-                        db.collection('parameters')
-                            .where('email', '==', email.email)
-                            .get()
-                            .then(response => {
-                                let docId = null;
-                                response.forEach(doc => {
-                                    if (doc.data().email === email.email) {
-                                        docId = doc.id;
-                                    }
+
+                        //processData
+                        data[0].forEach(dataItem => {
+                            const tempItem = getDataFromRaw(dataItem);
+                            for (const key in resultDataObj) {
+                                tempItem[key].forEach(tempItemElement => {
+                                    resultDataObj[key].push(tempItemElement);
                                 });
+                            }
+                        });
 
-                                data[0].forEach(dataItem => {
-                                    const tempItem = getDataFromRaw(dataItem);
-                                    for (const key in resultDataObj) {
-                                        tempItem[key].forEach(tempItemElement => {
-                                            resultDataObj[key].push(tempItemElement);
-                                        });
-                                    }
-                                });
+                        const userDataMap = getUserSummaryDateObject(resultDataObj);
+                        const batch = db.batch();
 
-                                const averageData = getAverageWithoutSD(resultDataObj);
-                                averageData.email = email.email;
+                        userDataMap.forEach(userMapDataItem => {
+                            const userMapDataItemRef = db.collection('parameters').doc(`${userMapDataItem.summary_date}__${email.email}`);
+                            batch.set(userMapDataItemRef, userMapDataItem)
+                        });
 
-                                if (!docId) {
-                                    db.collection('parameters').add(averageData);
-                                } else {
-                                    db.collection('parameters').doc(docId).update(averageData);
-                                }
-                            });
+                       batch.commit();
                     }
                 });
             }
@@ -154,7 +146,7 @@ const Sleep = {
                             commit("setInfoSleep", resultData);
                             break;
                         case "mean":
-                            dispatch("setAverageMean", resultData);
+                            dispatch("setAverageMean", {data: resultData, dates: payload.dates});
                             break;
                         case "search":
                             commit("setInfoSearch", resultData);
@@ -170,8 +162,9 @@ const Sleep = {
         async setAverageMean({commit}, payload) {
             if (this.state.Data.categoryData) {
                 const result = await dataTableMeanInfo(
-                    payload,
-                    Object.assign({}, this.state.Data.categoryData)
+                    payload.data,
+                    Object.assign({}, this.state.Data.categoryData),
+                    payload.dates[0]
                 );
 
                 commit("setInfoMean", result);

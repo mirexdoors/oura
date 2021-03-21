@@ -406,17 +406,26 @@ export const getAverageWithoutSD = (data) => {
     return result;
 };
 
-const getUsersAverage = async () => {
+export const getUserSummaryDateObject = (data) => {
+    return getTempSumm(data);
+};
+
+const getUsersAverage = async (dates) => {
     const temporaryData = [];
     const notDisplayedFields = [
         'timezone',
     ];
 
-    await db.collection('parameters').get().then(querySnapshots => {
-        querySnapshots.forEach(doc => {
-            temporaryData.push(doc.data());
+
+    await db.collection('parameters')
+        .where('summary_date', '>=', dates.start)
+        .where('summary_date', '<=', dates.end)
+        .get()
+        .then(querySnapshots => {
+            querySnapshots.forEach(doc => {
+                temporaryData.push(doc.data());
+            });
         });
-    });
 
 
     if (temporaryData.length > 0) {
@@ -461,7 +470,7 @@ const getUsersAverage = async () => {
     return await Promise.all(temporaryData);
 };
 
-export const dataTableMeanInfo = async (data, yearData) => {
+export const dataTableMeanInfo = async (data, yearData, dates) => {
     const result = [];
     const parameters = getParameters(data);
     const tempSummData = getTempSumm(data);
@@ -472,9 +481,11 @@ export const dataTableMeanInfo = async (data, yearData) => {
     const meansSD = getSD(tempSummYearData, means);
     const rangesSD = getSD(tempSummData, ranges);
 
-    const usersAverage = await getUsersAverage();
-    console.log(usersAverage);
+    const usersAverage = await getUsersAverage(dates);
+    const allTimeUsersAverage = await getUsersAverage({start: '2000-01-01', end: '3000-01-01'});
+    const userAveragesSD = getSD(getTempSumm(allTimeUsersAverage), usersAverage);
 
+    console.log(userAveragesSD)
     parameters.forEach(item => {
         if (item !== 'timezone') {
             if (item === 'Bedtime' || item === 'Get-out-of-bed time') {
@@ -606,7 +617,6 @@ export const dataTableCoeffHelper = (data) => {
                         name_1: item.name,
                         name_2: anotherParam.name,
                         coeff: getCorrelation(paramSumm, summOfSqrDevForDay[item.name], summOfSqrDevForDay[anotherParam.name]),
-                        users_coeff: 1111,
                     });
                 }
             }

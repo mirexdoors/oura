@@ -48,12 +48,6 @@
                         value: 'coeff',
                         sortable: false,
                     },
-                    {
-                        text: ' Linear correlation coefficient for all users',
-                        value: 'users_coeff',
-                        sortable: false,
-                    },
-
                 ],
             }
         },
