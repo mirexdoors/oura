@@ -56,26 +56,30 @@ const Sleep = {
     },
 
     actions: {
-        async getCategoryInfo({commit}, payload) {
+         getCategoryInfo({commit}, payload) {
             const token = this.state.Auth.token;
-            axios
-                .all([
-                    getSleepAndActiveInfo(payload, token, "sleep"),
-                    getSleepAndActiveInfo(payload, token, "activity"),
-                    getSleepAndActiveInfo(payload, token, "readiness"),
-                ])
-                .then(
-                    axios.spread(function (...response) {
-                        commit("setCategoryData", response);
-                        commit("setPreloader", false);
-                    })
-                )
-                .catch(function (error) {
-                    console.log(error);
-                });
+             return new Promise((resolve, reject) => {
+                 axios
+                     .all([
+                         getSleepAndActiveInfo(payload, token, "sleep"),
+                         getSleepAndActiveInfo(payload, token, "activity"),
+                         getSleepAndActiveInfo(payload, token, "readiness"),
+                     ])
+                     .then(
+                         axios.spread(function (...response) {
+                             commit("setCategoryData", response);
+                             commit("setPreloader", false);
+                             resolve(true);
+                         })
+                     )
+                     .catch(function (error) {
+                         reject(false);
+                         console.log(error);
+                     });
+             });
         },
 
-        getDataByLastWeek(context, email) {
+        getAllDataByLastYear(context, email) {
             const dates = [
                 {
                     start: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().substr(0, 10),
@@ -111,14 +115,16 @@ const Sleep = {
                             batch.set(userMapDataItemRef, userMapDataItem)
                         });
 
-                       batch.commit();
+                        batch.commit();
                     }
                 });
             }
         },
 
-        getSleepInfo({commit, dispatch}, payload) {
-            if (payload.dates.length > 0) {
+       async getSleepInfo({commit, dispatch}, payload) {
+          const isInfoLoaded =  await dispatch('getCategoryInfo', payload.yearDate);
+
+            if (isInfoLoaded && payload.dates.length > 0) {
                 const token = this.state.Auth.token;
                 const resultData = {
                     sleep: [],
@@ -163,11 +169,12 @@ const Sleep = {
             if (this.state.Data.categoryData) {
                 const result = await dataTableMeanInfo(
                     payload.data,
-                    Object.assign({}, this.state.Data.categoryData),
+                    JSON.parse(JSON.stringify(this.state.Data.categoryData)),
                     payload.dates[0]
                 );
 
                 commit("setInfoMean", result);
+                commit("setPreloader", false);
             }
         }
     },

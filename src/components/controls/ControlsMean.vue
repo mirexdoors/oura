@@ -201,9 +201,7 @@
                 this.$store.commit("setInfoTravel", null);
                 this.$store.commit("setInfoSearch", null);
 
-                await this.$store.dispatch("getCategoryInfo", yearDate);
-                await this.$store.dispatch("getSleepInfo", {dates, param: 'mean'});
-                if (!dates.length) return this.$store.commit("setPreloader", false);
+                await this.$store.dispatch("getSleepInfo", {dates, yearDate, param: 'mean'});
             },
 
             getRangeDate() {

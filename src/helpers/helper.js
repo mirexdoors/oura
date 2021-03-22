@@ -429,45 +429,52 @@ const getUsersAverage = async (dates) => {
 
 
     if (temporaryData.length > 0) {
-        return temporaryData.reduce((acc, currentItem) => {
+        const averageValuesMap = temporaryData.reduce((acc, currentItem) => {
             for (const parameter in currentItem) {
                 if (typeof currentItem[parameter] === 'number' && !notDisplayedFields.includes(parameter)) {
-                    const addedParameterIndex = acc.findIndex(addedItem => addedItem.parameter === parameter);
 
-                    if (addedParameterIndex > -1) {
-                        acc[addedParameterIndex].value += currentItem[parameter];
+                    if (acc.has(parameter)) {
+                        const newVal = acc.get(parameter) + currentItem[parameter]
+                        acc.set(parameter, newVal);
                     } else {
-                        acc.push({
-                            parameter,
-                            value: currentItem[parameter],
-                        });
+                        acc.set(parameter, currentItem[parameter]);
                     }
                 }
             }
             return acc;
-        }, [])
-            .map(item => {
-                let value = Number((item.value / temporaryData.length).toFixed(2));
+        }, new Map());
 
-                if (item.parameter === 'Bedtime' || item.parameter === 'Get-out-of-bed time') {
+        averageValuesMap.forEach((item, key, map) => {
+                let value = Number((item / temporaryData.length).toFixed(2));
+
+                if (key === 'Bedtime' || key === 'Get-out-of-bed time') {
                     value = getTimeFromSeconds(value, true);
                 }
 
-                if (item.parameter === 'Inactive time' || item.parameter === 'Resting time' || item.parameter === 'Non-wear time') {
+                if (key === 'Inactive time' || key === 'Resting time' || key === 'Non-wear time') {
                     value = (value * 60).toFixed(2);
                 }
 
-                if (TIME_PARAMS.includes(item.parameter)) {
+                if (TIME_PARAMS.includes(key)) {
                     value = getTimeFromSeconds(value);
                 }
 
-                return {
-                    ...item,
-                    value,
-                }
+                map.set(key, value);
             });
+
+        //get standard deviations
+        const allUsersAverageSD = getSD(temporaryData, Object.fromEntries(averageValuesMap));
+        averageValuesMap.forEach((value, key, map) => {
+            let newValue = value;
+            if (!isNaN(allUsersAverageSD[key])) {
+               newValue += ` ± ${allUsersAverageSD[key]}`;
+            }
+            map.set(key, newValue);
+        });
+
+        return averageValuesMap;
     }
-    return await Promise.all(temporaryData);
+    return [];
 };
 
 export const dataTableMeanInfo = async (data, yearData, dates) => {
@@ -482,10 +489,7 @@ export const dataTableMeanInfo = async (data, yearData, dates) => {
     const rangesSD = getSD(tempSummData, ranges);
 
     const usersAverage = await getUsersAverage(dates);
-    const allTimeUsersAverage = await getUsersAverage({start: '2000-01-01', end: '3000-01-01'});
-    const userAveragesSD = getSD(getTempSumm(allTimeUsersAverage), usersAverage);
 
-    console.log(userAveragesSD)
     parameters.forEach(item => {
         if (item !== 'timezone') {
             if (item === 'Bedtime' || item === 'Get-out-of-bed time') {
@@ -511,7 +515,7 @@ export const dataTableMeanInfo = async (data, yearData, dates) => {
                 parameter: item,
                 mean: itemMean,
                 range: itemRange,
-                users_mean: usersAverage.find(parameterObj => parameterObj.parameter === item).value,
+                users_mean: usersAverage.get(item),
             })
         }
     });

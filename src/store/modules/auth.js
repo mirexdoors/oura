@@ -70,7 +70,7 @@ const Auth = {
                         const info = {};
                         info.email = response.data.email;
 
-                        dispatch('getDataByLastWeek',{email:  info.email});
+                        dispatch('getAllDataByLastYear',{email:  info.email});
 
                         db.collection('locations')
                             .where('email', '==', response.data.email)
