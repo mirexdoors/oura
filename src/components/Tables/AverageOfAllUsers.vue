@@ -32,6 +32,7 @@
     const notDisplayedFields = [
         'timezone',
     ];
+
     export default {
         name: "AverageOfAllUsers",
 
