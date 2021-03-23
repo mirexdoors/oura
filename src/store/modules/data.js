@@ -74,7 +74,7 @@ const Sleep = {
                      )
                      .catch(function (error) {
                          reject(false);
-                         console.log(error);
+                         console.error(error);
                      });
              });
         },

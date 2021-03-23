@@ -374,8 +374,8 @@ const getMeanByDay = (days, tmpSumm) => {
     for (const day in days) {
         for (const param in days[day]) {
 
-//найдем количество элементов, в которых встречается
-// параметр пот дням недели
+            //найдем количество элементов, в которых встречается
+            // параметр по дням недели
             const daysWithParam = getDaysWithParam(param, tmpSumm);
 
             days[day][param] = (days[day][param] / daysWithParam[day]).toFixed(2);
@@ -416,7 +416,6 @@ const getUsersAverage = async (dates) => {
         'timezone',
     ];
 
-
     await db.collection('parameters')
         .where('summary_date', '>=', dates.start)
         .where('summary_date', '<=', dates.end)
@@ -446,29 +445,34 @@ const getUsersAverage = async (dates) => {
 
         averageValuesMap.forEach((item, key, map) => {
                 let value = Number((item / temporaryData.length).toFixed(2));
-
-                if (key === 'Bedtime' || key === 'Get-out-of-bed time') {
-                    value = getTimeFromSeconds(value, true);
-                }
-
-                if (key === 'Inactive time' || key === 'Resting time' || key === 'Non-wear time') {
-                    value = (value * 60).toFixed(2);
-                }
-
-                if (TIME_PARAMS.includes(key)) {
-                    value = getTimeFromSeconds(value);
-                }
-
                 map.set(key, value);
             });
 
         //get standard deviations
+
         const allUsersAverageSD = getSD(temporaryData, Object.fromEntries(averageValuesMap));
+
         averageValuesMap.forEach((value, key, map) => {
+
             let newValue = value;
-            if (!isNaN(allUsersAverageSD[key])) {
+
+            if (key === 'Bedtime' || key === 'Get-out-of-bed time') {
+                newValue = getTimeFromSeconds(value, true);
+            }
+
+            if (key === 'Inactive time' || key === 'Resting time' || key === 'Non-wear time') {
+                newValue = (value * 60).toFixed(2);
+            }
+
+            if (TIME_PARAMS.includes(key)) {
+                newValue = getTimeFromSeconds(value);
+            }
+
+
+            if (allUsersAverageSD[key]) {
                newValue += ` ± ${allUsersAverageSD[key]}`;
             }
+
             map.set(key, newValue);
         });
 
