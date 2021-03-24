@@ -90,8 +90,8 @@
                             value = getTimeFromSeconds(value, true);
                         }
 
-                        if (item.parameter === 'Inactive time' || item.parameter === 'Resting time' || item.parameter === 'Non-wear time') {
-                            value = (value * 60).toFixed(2);
+                        if (item.parameter === 'Inactive time (minutes)' || item.parameter === 'Resting time (minutes)' || item.parameter === 'Non-wear time (minutes)') {
+                            value = value.toFixed(2);
                         }
 
                         if (TIME_PARAMS.includes(item.parameter)) {

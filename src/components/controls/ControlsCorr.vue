@@ -121,9 +121,8 @@ export default {
 
             const start = this.date1;
             const end = this.date2;
-            const dates = [];
+            const dates = [{start, end}];
 
-            dates.push({start, end});
             this.$store.dispatch("getSleepInfo", {dates, param: 'corr'});
         },
 

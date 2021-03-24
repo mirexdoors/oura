@@ -99,7 +99,7 @@
 <script>
 const timeParameters = ['Bedtime', 'Get-out-of-bed time'];
 const secondsTimeParameters = ['Time asleep', 'Time in bed', 'REM sleep', 'Light sleep', 'Deep sleep', 'Sleep midpoint', 'Sleep latency'];
-const minutesTimeParameters = ['Inactive time', 'Resting time', 'Non-wear time',];
+const minutesTimeParameters = ['Inactive time (minutes)', 'Resting time (minutes)', 'Non-wear time (minutes)',];
 
 export default {
   name: "ControlAdvancedSearchItem",

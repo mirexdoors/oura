@@ -88,6 +88,8 @@ export default {
     name: "ControlsWeek",
 
     data: () => ({
+        menu1: false,
+        menu2: false,
         date1: null,
         date2: new Date().toISOString().substr(0, 10),
         period: null,
@@ -120,9 +122,8 @@ export default {
 
             const start = this.date1;
             const end = this.date2;
-            const dates = [];
+            const dates = [{start, end}];
 
-            dates.push({start, end});
             this.$store.dispatch("getSleepInfo", {dates, param: 'days'});
         },
 
