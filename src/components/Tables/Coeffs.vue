@@ -44,7 +44,12 @@
                         value: 'name_2',
                     },
                     {
-                        text: 'Linear correlation coefficient ',
+                        text: 'Linear correlation coefficient',
+                        value: 'coeff',
+                        sortable: false,
+                    },
+                    {
+                        text: `User's linear correlation coefficient`,
                         value: 'coeff',
                         sortable: false,
                     },
@@ -61,7 +66,3 @@
         },
     }
 </script>
-
-<style scoped>
-
-</style>

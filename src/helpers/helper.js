@@ -532,7 +532,7 @@ export const dataTableMeanInfo = async (data, yearData, dates) => {
     return result;
 };
 
-export const dataTableCoeffHelper = (data) => {
+export const dataTableCoeffHelper = (data, dates = {}) => {
     const result = [];
     const parameters = [];
     const tempNames = [];
@@ -576,9 +576,9 @@ export const dataTableCoeffHelper = (data) => {
     const summOfSqrDevForDay = getSummOfSqrDevForDay(sqrDevForDay);
 
 
-//8.Рассчитываем для каждого наблюдения произведение
-// разности среднего арифметического и значения (для каждой
-// пары)
+    //5.Рассчитываем для каждого наблюдения произведение
+    // разности среднего арифметического и значения (для каждой
+    // пары)
     const linkParams = {};
     for (let day in devForDay) {
         linkParams[day] = {};
@@ -605,7 +605,7 @@ export const dataTableCoeffHelper = (data) => {
     }
 
 
-    //9 получаем сумму произведений для каждой пары
+    //6 получаем сумму произведений для каждой пары
     const summLinkParams = {};
     for (let day in linkParams) {
         for (let param in linkParams[day]) {
@@ -614,8 +614,7 @@ export const dataTableCoeffHelper = (data) => {
         }
     }
 
-
-    //2. Заполняем результирующий массив (должно быть 378 пар)
+    //7. Заполняем результирующий массив (должно быть 378 пар)
     parameters.forEach((item, index) => {
         for (let i = index + 1; i < parameters.length; i++) {
             const anotherParam = parameters[i];
@@ -635,6 +634,10 @@ export const dataTableCoeffHelper = (data) => {
             }
         }
     });
+
+    if (dates.start && dates.end) {
+        // TODO: получаем средние показатели для всех пользователей из firebase
+    }
     return result;
 };
 

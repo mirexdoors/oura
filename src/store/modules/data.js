@@ -1,12 +1,12 @@
 import axios from "axios";
 import {db} from "../../db";
-import {getUserSummaryDateObject, dataTableMeanInfo} from "../../helpers/helper";
+import {getUserSummaryDateObject, dataTableMeanInfo, dataTableCoeffHelper} from "../../helpers/helper";
 import {getAllInfoFromDateArray, getDataFromRaw, getSleepAndActiveInfo} from '../../helpers/storeHelpers';
 
 const Sleep = {
     state: {
         preloader: false,
-        infoSleep: null,
+        infoCorrCoeffs: null,
         categoryData: null,
         infoMean: [],
         infoDays: null,
@@ -19,8 +19,8 @@ const Sleep = {
             state.categoryData = getDataFromRaw(payload);
         },
 
-        setInfoSleep(state, payload) {
-            state.infoSleep = payload;
+        setInfoCorrCoeffs(state, payload) {
+            state.infoCorrCoeffs = payload;
         },
 
         setInfoTravel(state, payload) {
@@ -56,27 +56,26 @@ const Sleep = {
     },
 
     actions: {
-         getCategoryInfo({commit}, payload) {
+        getCategoryData({commit}, payload) {
             const token = this.state.Auth.token;
-             console.log(payload)
-             return new Promise((resolve, reject) => {
-                 axios
-                     .all([
-                         getSleepAndActiveInfo(payload, token, "sleep"),
-                         getSleepAndActiveInfo(payload, token, "activity"),
-                         getSleepAndActiveInfo(payload, token, "readiness"),
-                     ])
-                     .then(
-                         axios.spread(function (...response) {
-                             commit("setCategoryData", response);
-                             resolve(true);
-                         })
-                     )
-                     .catch(function (error) {
-                         reject(false);
-                         console.error(error);
-                     });
-             });
+            return new Promise((resolve, reject) => {
+                axios
+                    .all([
+                        getSleepAndActiveInfo(payload, token, "sleep"),
+                        getSleepAndActiveInfo(payload, token, "activity"),
+                        getSleepAndActiveInfo(payload, token, "readiness"),
+                    ])
+                    .then(
+                        axios.spread(function (...response) {
+                            commit("setCategoryData", response);
+                            resolve(true);
+                        })
+                    )
+                    .catch(function (error) {
+                        reject(false);
+                        console.error(error);
+                    });
+            });
         },
 
         getAllDataByLastYear(context, email) {
@@ -121,8 +120,8 @@ const Sleep = {
             }
         },
 
-       async getSleepInfo({commit, dispatch}, payload) {
-          const isInfoLoaded =  await dispatch('getCategoryInfo', payload.dates);
+        async getSleepInfo({commit, dispatch}, payload) {
+            const isInfoLoaded = await dispatch('getCategoryData', payload.dates);
 
             if (isInfoLoaded && payload.dates.length > 0) {
                 const token = this.state.Auth.token;
@@ -151,13 +150,20 @@ const Sleep = {
                             commit("setPreloader", false);
                             break;
                         case "corr":
-                            commit("setInfoSleep", resultData);
-                            commit("setPreloader", false);
+                            if (resultData)
+                                dispatch("calcInfoCorrCoeffs", {data: resultData, dates: payload.dates});
+                            else {
+                                commit("setInfoCorrCoeffs", null);
+                                commit("setPreloader", false);
+                            }
                             break;
                         case "mean":
                             if (resultData)
-                            dispatch("setAverageMean", {data: resultData, dates: payload.dates});
-                            else  commit("setInfoMean", null);
+                                dispatch("setAverageMean", {data: resultData, dates: payload.dates});
+                            else {
+                                commit("setInfoMean", null);
+                                commit("setPreloader", false);
+                            }
                             break;
                         case "search":
                             commit("setInfoSearch", resultData);
@@ -166,6 +172,17 @@ const Sleep = {
                             break;
                     }
                 });
+            }
+        },
+
+        async calcInfoCorrCoeffs({commit}, payload) {
+            if (this.state.Data.categoryData) {
+                const result = await dataTableCoeffHelper(
+                    payload.data,
+                    payload.dates[0],
+                );
+                commit("setInfoCorrCoeffs", result);
+                commit("setPreloader", false);
             }
         },
 

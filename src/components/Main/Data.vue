@@ -3,8 +3,8 @@
             v-if="!getPreloader"
             justify="center"
     >
-        <v-col v-if="infoSleep.length ">
-            <coeffs :items="infoSleep"/>
+        <v-col v-if="infoCorrCoeffs.length ">
+            <coeffs :items="infoCorrCoeffs"/>
         </v-col>
 
         <v-col v-if="infoMean.length">
@@ -37,7 +37,6 @@
 
     import {
         APINames,
-        dataTableCoeffHelper,
         dataTableDaysInfo,
         travelDaysHelper,
         getTravelPeriods,
@@ -73,10 +72,8 @@
                 return this.$store.state.Data.preloader;
             },
 
-            infoSleep() {
-                if (this.$store.state.Data.infoSleep)
-                    return dataTableCoeffHelper(Object.assign({}, this.$store.state.Data.infoSleep));
-                else return [];
+            infoCorrCoeffs() {
+                return this.$store.state.Data.infoCorrCoeffs;
             },
 
             infoMean() {
