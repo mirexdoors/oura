@@ -58,7 +58,7 @@ const Sleep = {
     actions: {
          getCategoryInfo({commit}, payload) {
             const token = this.state.Auth.token;
-             console.log(payload)
+
              return new Promise((resolve, reject) => {
                  axios
                      .all([
