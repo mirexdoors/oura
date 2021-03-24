@@ -81,8 +81,8 @@ export default {
 
             const start = new Date(2000, 0, 1).toISOString().substr(0, 10);
             const end = new Date().toISOString().substr(0, 10);
-            const dates = [];
-            dates.push({start, end});
+            const dates = [{start, end}];
+
             this.$store.dispatch("getSleepInfo", {dates, param: 'search', parameters: this.selectedValues});
         },
 

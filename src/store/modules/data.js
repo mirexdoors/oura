@@ -58,6 +58,7 @@ const Sleep = {
     actions: {
          getCategoryInfo({commit}, payload) {
             const token = this.state.Auth.token;
+             console.log(payload)
              return new Promise((resolve, reject) => {
                  axios
                      .all([
@@ -68,7 +69,6 @@ const Sleep = {
                      .then(
                          axios.spread(function (...response) {
                              commit("setCategoryData", response);
-                             commit("setPreloader", false);
                              resolve(true);
                          })
                      )
@@ -122,7 +122,7 @@ const Sleep = {
         },
 
        async getSleepInfo({commit, dispatch}, payload) {
-          const isInfoLoaded =  await dispatch('getCategoryInfo', payload.yearDate);
+          const isInfoLoaded =  await dispatch('getCategoryInfo', payload.dates);
 
             if (isInfoLoaded && payload.dates.length > 0) {
                 const token = this.state.Auth.token;
@@ -144,23 +144,27 @@ const Sleep = {
                     switch (payload.param) {
                         case "days":
                             commit("setInfoDays", resultData);
+                            commit("setPreloader", false);
                             break;
                         case "travel":
                             commit("setInfoTravel", resultData);
+                            commit("setPreloader", false);
                             break;
                         case "corr":
                             commit("setInfoSleep", resultData);
+                            commit("setPreloader", false);
                             break;
                         case "mean":
+                            if (resultData)
                             dispatch("setAverageMean", {data: resultData, dates: payload.dates});
+                            else  commit("setInfoMean", null);
                             break;
                         case "search":
                             commit("setInfoSearch", resultData);
                             commit("setInfoSearchParams", payload.parameters);
+                            commit("setPreloader", false);
                             break;
                     }
-
-                    commit("setPreloader", false);
                 });
             }
         },
@@ -176,7 +180,7 @@ const Sleep = {
                 commit("setInfoMean", result);
                 commit("setPreloader", false);
             }
-        }
+        },
     },
 
     getters: {

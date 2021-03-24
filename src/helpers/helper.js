@@ -24,9 +24,9 @@ export const APINames = {
     activity: {
         score: 'Activity score',
         daily_movement: 'Walking equivalent',
-        non_wear: 'Non-wear time',
-        rest: 'Resting time',
-        inactive: 'Inactive time',
+        non_wear: 'Non-wear time (minutes)',
+        rest: 'Resting time (minutes)',
+        inactive: 'Inactive time (minutes)',
         steps: 'Steps',
         cal_total: 'Total burn',
         cal_active: 'Activity burn',
@@ -40,7 +40,7 @@ export const APINames = {
 };
 
 export const TIME_PARAMS = [
-    'Time asleep', 'Time in bed', 'Time awake in bed', 'Light sleep', 'REM sleep', 'Deep sleep', 'Sleep midpoint', 'Inactive time', 'Resting time', 'Non-wear time'
+    'Time asleep', 'Time in bed', 'Time awake in bed', 'Light sleep', 'REM sleep', 'Deep sleep', 'Sleep midpoint',
 ];
 
 export const getHHmmFromDateObject = (str) => new Date(str).toTimeString().split(' ')[0];
@@ -300,8 +300,7 @@ const getDeviation = (summOfSqrDevForDay, length) => {
         if (param === 'Bedtime' || param === 'Get-out-of-bed time') {
             deviation[param] = getTimeFromSeconds(deviation[param]);
         }
-        if (param === 'Inactive time' || param === 'Resting' +
-            ' time' || param === 'Non-wear time') deviation[param] = deviation[param] * 60;
+
 
         if (TIME_PARAMS.includes(param)) deviation[param] = getTimeFromSeconds(deviation[param]);
     }
@@ -382,8 +381,7 @@ const getMeanByDay = (days, tmpSumm) => {
             if (param === 'Bedtime' || param === 'Get-out-of-bed time') {
                 days[day][param] = getTimeFromSeconds(days[day][param], true);
             }
-            if (param === 'Inactive time' || param === 'Resting' +
-                ' time' || param === 'Non-wear time') days[day][param] = days[day][param] * 60;
+
             if (TIME_PARAMS.includes(param)) days[day][param] = getTimeFromSeconds(days[day][param]);
         }
     }
@@ -444,12 +442,11 @@ const getUsersAverage = async (dates) => {
         }, new Map());
 
         averageValuesMap.forEach((item, key, map) => {
-                let value = Number((item / temporaryData.length).toFixed(2));
-                map.set(key, value);
-            });
+            let value = Number((item / temporaryData.length).toFixed(2));
+            map.set(key, value);
+        });
 
         //get standard deviations
-
         const allUsersAverageSD = getSD(temporaryData, Object.fromEntries(averageValuesMap));
 
         averageValuesMap.forEach((value, key, map) => {
@@ -460,17 +457,20 @@ const getUsersAverage = async (dates) => {
                 newValue = getTimeFromSeconds(value, true);
             }
 
-            if (key === 'Inactive time' || key === 'Resting time' || key === 'Non-wear time') {
-                newValue = (value * 60).toFixed(2);
+            if (key === 'Inactive time (minutes)' || key === 'Resting time (minutes)' || key === 'Non-wear time (minutes)') {
+                newValue = value.toFixed(2);
             }
 
             if (TIME_PARAMS.includes(key)) {
                 newValue = getTimeFromSeconds(value);
             }
 
-
             if (allUsersAverageSD[key]) {
-               newValue += ` ± ${allUsersAverageSD[key]}`;
+                let sdValue = (Number(newValue) < Number(allUsersAverageSD[key])
+                    && !TIME_PARAMS.includes(key)
+                    && key !== 'Bedtime'
+                    && key !== 'Get-out-of-bed time') ? (allUsersAverageSD[key] / 10).toFixed(2) : allUsersAverageSD[key];
+                newValue += ` ± ${sdValue}`;
             }
 
             map.set(key, newValue);
@@ -501,19 +501,24 @@ export const dataTableMeanInfo = async (data, yearData, dates) => {
                 ranges[item] = getTimeFromSeconds(ranges[item], true);
             }
 
-            if (item === 'Inactive time' || item === 'Resting' +
-                ' time' || item === 'Non-wear time') {
-                means[item] = means[item] * 60;
-                ranges[item] = ranges[item] * 60;
-            }
-
             if (TIME_PARAMS.includes(item)) {
                 means[item] = getTimeFromSeconds(means[item]);
                 ranges[item] = getTimeFromSeconds(ranges[item]);
             }
 
-            const itemMean = means[item] + ' ± ' + meansSD[item];
-            let itemRange = ranges[item] + ' ± ' + rangesSD[item];
+            let meanSD = (Number(means[item]) < Number(meansSD[item])
+                && !TIME_PARAMS.includes(item)
+                && item !== 'Bedtime'
+                && item !== 'Get-out-of-bed time') ?(meansSD[item] / 10).toFixed(2) : meansSD[item];
+
+            let rangeSD = (Number(ranges[item]) < Number(rangesSD[item])
+                && !TIME_PARAMS.includes(item)
+                && item !== 'Bedtime'
+                && item !== 'Get-out-of-bed time') ? (rangesSD[item] / 10).toFixed(2) : rangesSD[item];
+
+
+            const itemMean = means[item] + ' ± ' + meanSD;
+            const itemRange = ranges[item] + ' ± ' + rangeSD;
 
             result.push({
                 parameter: item,
@@ -845,12 +850,6 @@ export const getMeanParamsForTimeZone = (data, timezone, periods) => {
                     meansAway[item] = getTimeFromSeconds(meansAway[item], true);
             }
 
-            if (item === 'Inactive time' || item === 'Resting' +
-                ' time' || item === 'Non-wear time') {
-                meansHome[item] = meansHome[item] * 60;
-                if (meansAway[item] !== undefined)
-                    meansAway[item] = meansAway[item] * 60;
-            }
 
             if (TIME_PARAMS.includes(item)) {
                 meansHome[item] = getTimeFromSeconds(meansHome[item]);
@@ -873,11 +872,6 @@ export const getMeanParamsForTimeZone = (data, timezone, periods) => {
             meansByPeriods.forEach((period, index) => {
                 if (item === 'Bedtime' || item === 'Get-out-of-bed time') {
                     period.mean[item] = getTimeFromSeconds(period.mean[item], true);
-                }
-
-                if (item === 'Inactive time' || item === 'Resting' +
-                    ' time' || item === 'Non-wear time') {
-                    period.mean[item] = period.mean[item] * 60;
                 }
 
                 if (TIME_PARAMS.includes(item)) {
