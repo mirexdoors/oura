@@ -6,7 +6,7 @@ import {getAllInfoFromDateArray, getDataFromRaw, getSleepAndActiveInfo} from '..
 const Sleep = {
     state: {
         preloader: false,
-        infoCorrCoeffs: null,
+        infoCorrCoeffs: [],
         categoryData: null,
         infoMean: [],
         infoDays: null,

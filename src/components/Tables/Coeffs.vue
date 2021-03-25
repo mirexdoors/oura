@@ -49,8 +49,8 @@
                         sortable: false,
                     },
                     {
-                        text: `User's linear correlation coefficient`,
-                        value: 'coeff',
+                        text: `Linear correlation coeff for all users`,
+                        value: 'average_coeff',
                         sortable: false,
                     },
                 ],
