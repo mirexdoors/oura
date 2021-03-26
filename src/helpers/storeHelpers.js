@@ -2,13 +2,15 @@ import axios from "axios";
 
 export const getAllInfoFromDateArray = async (dates, token) => {
     const result = [];
+
     for (const date of dates) {
         result.push(await getData(date, token));
     }
+
     return result;
 };
 
-const filteredData =  (data) => {
+const filteredData = (data) => {
     if (data.sleep) {
         return {
             sleep: data.sleep.map((item) => {
@@ -67,12 +69,19 @@ const filteredData =  (data) => {
 };
 
 export const getSleepAndActiveInfo = async (payload, token, request) => {
+    let {start, end} = payload;
+
+    if (Array.isArray(payload)){
+        start = payload[0].start;
+        end = payload[0].end;
+    }
+
     return await axios.get(
-        `https://api.ouraring.com/v1/${request}?access_token=${token}&start=${payload.start}&end=${payload.end}`
+        `https://api.ouraring.com/v1/${request}?access_token=${token}&start=${start}&end=${end}`
     );
 };
 
-export const  getDataFromRaw = (payload) => {
+export const getDataFromRaw = (payload) => {
     let dataObj = {};
 
     if (payload !== null) {
@@ -87,6 +96,7 @@ export const  getDataFromRaw = (payload) => {
 };
 
 const getData = async (dates, token) => {
+
     return await axios
         .all([
             getSleepAndActiveInfo(dates, token, "sleep"),

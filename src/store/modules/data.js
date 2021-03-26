@@ -56,33 +56,34 @@ const Sleep = {
     },
 
     actions: {
-         getCategoryInfo({commit}, payload) {
+        getCategoryInfo({commit}, payload) {
             const token = this.state.Auth.token;
 
-             return new Promise((resolve, reject) => {
-                 axios
-                     .all([
-                         getSleepAndActiveInfo(payload, token, "sleep"),
-                         getSleepAndActiveInfo(payload, token, "activity"),
-                         getSleepAndActiveInfo(payload, token, "readiness"),
-                     ])
-                     .then(
-                         axios.spread(function (...response) {
-                             commit("setCategoryData", response);
-                             resolve(true);
-                         })
-                     )
-                     .catch(function (error) {
-                         reject(false);
-                         console.error(error);
-                     });
-             });
+
+            return new Promise((resolve, reject) => {
+                axios
+                    .all([
+                        getSleepAndActiveInfo(payload, token, "sleep"),
+                        getSleepAndActiveInfo(payload, token, "activity"),
+                        getSleepAndActiveInfo(payload, token, "readiness"),
+                    ])
+                    .then(
+                        axios.spread(function (...response) {
+                            commit("setCategoryData", response);
+                            resolve(true);
+                        })
+                    )
+                    .catch(function (error) {
+                        reject(false);
+                        console.error(error);
+                    });
+            });
         },
 
         getAllDataByLastYear(context, email) {
             const dates = [
                 {
-                    start: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().substr(0, 10),
+                    start: new Date(Date.now() - 2000 * 24 * 60 * 60 * 1000).toISOString().substr(0, 10),
                     end: new Date().toISOString().substr(0, 10)
                 }
             ];
@@ -109,28 +110,40 @@ const Sleep = {
 
                         const userDataMap = getUserSummaryDateObject(resultDataObj);
                         const batch = db.batch();
+                        const batch2 = db.batch();
+                        let i = 1;
 
                         userDataMap.forEach(userMapDataItem => {
                             const userMapDataItemRef = db.collection('parameters').doc(`${userMapDataItem.summary_date}__${email.email}`);
-                            batch.set(userMapDataItemRef, userMapDataItem)
+                            if (i < 501)
+                                batch.set(userMapDataItemRef, userMapDataItem);
+                            else
+                                batch2.set(userMapDataItemRef, userMapDataItem);
+                            i++;
                         });
 
                         batch.commit();
+                        if (userDataMap.length > 500) {
+                            batch2.commit();
+                        }
+
                     }
                 });
             }
         },
 
-       async getSleepInfo({commit, dispatch}, payload) {
-          const isInfoLoaded =  await dispatch('getCategoryInfo', payload.dates);
+        async fireProcessInfo({commit, dispatch}, payload) {
 
-            if (isInfoLoaded && payload.dates.length > 0) {
+            const isInfoLoaded = await dispatch('getCategoryInfo', payload.dates);
+
+            if (isInfoLoaded && payload.dates.length > 0 && payload.yearDate.length > 0) {
                 const token = this.state.Auth.token;
                 const resultData = {
                     sleep: [],
                     activity: [],
                     readiness: []
                 };
+
                 getAllInfoFromDateArray(payload.dates, token).then((...data) => {
                     data[0].forEach(dataItem => {
                         const tempItem = getDataFromRaw(dataItem);
@@ -155,9 +168,8 @@ const Sleep = {
                             commit("setPreloader", false);
                             break;
                         case "mean":
-                            if (resultData)
-                            dispatch("setAverageMean", {data: resultData, dates: payload.dates});
-                            else  commit("setInfoMean", null);
+                            if (resultData) dispatch("setAverageMean", {data: resultData, dates: payload.dates});
+                            else commit("setInfoMean", null);
                             break;
                         case "search":
                             commit("setInfoSearch", resultData);

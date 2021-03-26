@@ -77,6 +77,7 @@
             isAuth: function () {
                 return this.$store.state.Auth.token;
             },
+
             isPreloader: function () {
                 return this.isGlobalPreloader || this.$store.state.Data.preloader;
             },
@@ -88,6 +89,7 @@
                     this.isGlobalPreloader = false;
                 }, 400);
             },
+
             getToken() {
                 let token = Cookies.get("token_oura") || null;
                 if (!token) token = this.getTokenInHref();
@@ -95,6 +97,7 @@
                 history.pushState({page: 1}, document.title, url);
                 return token;
             },
+
             getTokenInHref() {
                 let token;
                 const href = decodeURIComponent(location.href);
@@ -116,7 +119,6 @@
                     .then(response => {
                         if (!this.$store.state.Auth.token)
                             this.$store.commit("saveToken", token);
-                        this.globalPreloader = false;
                         this.$store.dispatch('processEmail', response.data.email);
                     })
                     .catch(e => {

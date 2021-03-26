@@ -187,10 +187,10 @@
 
             async upload() {
                 let dates = this.switchType ? this.getCustomDate() : this.getRangeDate();
-                const yearDate = this.getYearDate();
+                const yearDate = [this.getYearDate()];
 
                 if (!this.date1 && !this.date2) {
-                    dates = [yearDate];
+                    dates = Object.assign([], yearDate);
                 }
 
                 this.$store.commit("setPreloader", true);
@@ -201,7 +201,7 @@
                 this.$store.commit("setInfoTravel", null);
                 this.$store.commit("setInfoSearch", null);
 
-                await this.$store.dispatch("getSleepInfo", {dates, yearDate, param: 'mean'});
+                await this.$store.dispatch("fireProcessInfo", {dates, yearDate, param: 'mean'});
             },
 
             getRangeDate() {
