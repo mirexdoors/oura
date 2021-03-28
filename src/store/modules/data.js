@@ -135,7 +135,7 @@ const Sleep = {
 
             const isInfoLoaded = await dispatch('getCategoryInfo', payload.dates);
 
-            if (isInfoLoaded && payload.dates.length > 0 && payload.yearDate.length > 0) {
+            if (isInfoLoaded && payload.dates.length > 0) {
                 const token = this.state.Auth.token;
                 const resultData = {
                     sleep: [],
@@ -166,7 +166,7 @@ const Sleep = {
                             if (resultData)
                                 dispatch("calcInfoCorrCoeffs", {data: resultData, dates: payload.dates});
                             else {
-                                commit("setInfoCorrCoeffs", null);
+                                commit("setInfoCorrCoeffs", []);
                                 commit("setPreloader", false);
                             }
                             break;
@@ -174,10 +174,9 @@ const Sleep = {
                             if (resultData)
                                 dispatch("setAverageMean", {data: resultData, dates: payload.dates});
                             else {
-                                commit("setInfoMean", null);
+                                commit("setInfoMean", []);
                                 commit("setPreloader", false);
                             }
-
                             break;
                         case "search":
                             commit("setInfoSearch", resultData);
