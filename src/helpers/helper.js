@@ -720,7 +720,7 @@ const calcLinearCoeffs = (dataSumm, parameters) => {
 
             if (linkParams[day][param] || linkParams[day][swapParameter]) {
                 const addedParamValue = linkParams[day][param] || linkParams[day][swapParameter];
-                summLinkParams[param] = (summLinkParams[param] + addedParamValue).toFixed(3);
+                summLinkParams[param] = summLinkParams[param] + addedParamValue;
             }
         }
     }
