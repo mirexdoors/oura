@@ -143,7 +143,7 @@ export default {
             const end = this.date2;
             const dates = [{start, end}];
 
-            this.$store.dispatch("getSleepInfo", {dates, param: 'travel'});
+            this.$store.dispatch("fireProcessInfo", {dates, param: 'travel'});
         },
 
         setDates() {

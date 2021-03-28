@@ -26,6 +26,7 @@ const Auth = {
         saveToken(state, payload) {
             state.token = payload;
         },
+
         saveInfo(state, payload) {
             state.info.email = payload.email;
             state.info.country = payload.country;
@@ -34,9 +35,11 @@ const Auth = {
             state.info.gtmOffset = payload.gtmOffset;
             state.info.dst = payload.dst;
         },
+
         updateTimeZone(state, payload) {
             state.info.timeZone = payload;
         },
+
         updateGmt(state, payload) {
             state.info.gtmOffset = payload;
         },
@@ -90,6 +93,7 @@ const Auth = {
                 );
         }
     },
+
     getters: {
         userInfo: state => state.info,
         email: state => state.info.email,

@@ -56,8 +56,9 @@ const Sleep = {
     },
 
     actions: {
-        getCategoryData({commit}, payload) {
+        getCategoryInfo({commit}, payload) {
             const token = this.state.Auth.token;
+
             return new Promise((resolve, reject) => {
                 axios
                     .all([
@@ -81,7 +82,7 @@ const Sleep = {
         getAllDataByLastYear(context, email) {
             const dates = [
                 {
-                    start: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().substr(0, 10),
+                    start: new Date(Date.now() - 2000 * 24 * 60 * 60 * 1000).toISOString().substr(0, 10),
                     end: new Date().toISOString().substr(0, 10)
                 }
             ];
@@ -108,28 +109,40 @@ const Sleep = {
 
                         const userDataMap = getUserSummaryDateObject(resultDataObj);
                         const batch = db.batch();
+                        const batch2 = db.batch();
+                        let i = 1;
 
                         userDataMap.forEach(userMapDataItem => {
                             const userMapDataItemRef = db.collection('parameters').doc(`${userMapDataItem.summary_date}__${email.email}`);
-                            batch.set(userMapDataItemRef, userMapDataItem)
+                            if (i < 501)
+                                batch.set(userMapDataItemRef, userMapDataItem);
+                            else
+                                batch2.set(userMapDataItemRef, userMapDataItem);
+                            i++;
                         });
 
                         batch.commit();
+                        if (userDataMap.length > 500) {
+                            batch2.commit();
+                        }
+
                     }
                 });
             }
         },
 
-        async getSleepInfo({commit, dispatch}, payload) {
-            const isInfoLoaded = await dispatch('getCategoryData', payload.dates);
+        async fireProcessInfo({commit, dispatch}, payload) {
 
-            if (isInfoLoaded && payload.dates.length > 0) {
+            const isInfoLoaded = await dispatch('getCategoryInfo', payload.dates);
+
+            if (isInfoLoaded && payload.dates.length > 0 && payload.yearDate.length > 0) {
                 const token = this.state.Auth.token;
                 const resultData = {
                     sleep: [],
                     activity: [],
                     readiness: []
                 };
+
                 getAllInfoFromDateArray(payload.dates, token).then((...data) => {
                     data[0].forEach(dataItem => {
                         const tempItem = getDataFromRaw(dataItem);
@@ -164,6 +177,7 @@ const Sleep = {
                                 commit("setInfoMean", null);
                                 commit("setPreloader", false);
                             }
+
                             break;
                         case "search":
                             commit("setInfoSearch", resultData);
@@ -199,12 +213,6 @@ const Sleep = {
             }
         },
     },
-
-    getters: {
-        getMean: state => {
-            return state.infoMean;
-        }
-    }
 };
 
 export default Sleep;

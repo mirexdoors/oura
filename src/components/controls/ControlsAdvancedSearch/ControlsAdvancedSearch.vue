@@ -83,7 +83,7 @@ export default {
             const end = new Date().toISOString().substr(0, 10);
             const dates = [{start, end}];
 
-            this.$store.dispatch("getSleepInfo", {dates, param: 'search', parameters: this.selectedValues});
+            this.$store.dispatch("fireProcessInfo", {dates, param: 'search', parameters: this.selectedValues});
         },
 
         processParameterItem(payload) {
