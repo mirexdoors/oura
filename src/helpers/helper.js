@@ -684,7 +684,7 @@ const calcLinearCoeffs = (dataSumm, parameters) => {
         for (let param in devForDay[day]) {
             keys.forEach(item => {
                 if (item !== param &&
-                    !Object.prototype.hasOwnProperty.call(linkParams[day], item + '$' + param) &&
+                    !Object.prototype.hasOwnProperty.call(linkParams[day], param + '$' + item) &&
                     !((param.indexOf('prev.') > -1 && item.indexOf('prev.') > -1)) &&
                     !((param.indexOf('next day') > -1 && item.indexOf('next day') > -1)) &&
                     !((param.indexOf('prev.') > -1 && item.indexOf('next day') > -1)) &&
@@ -698,11 +698,7 @@ const calcLinearCoeffs = (dataSumm, parameters) => {
                     item !== 'id' &&
                     item !== 'summary_date'
                 ) {
-                    {
-                        const key = param + '$' + item;
-
-                        linkParams[day][key] = devForDay[day][param] * devForDay[day][item];
-                    }
+                    linkParams[day][param + '$' + item] = devForDay[day][param] * devForDay[day][item];
                 }
             });
         }
@@ -712,15 +708,10 @@ const calcLinearCoeffs = (dataSumm, parameters) => {
     const summLinkParams = {};
     for (let day in linkParams) {
         for (let param in linkParams[day]) {
-            const currentParams = param.split('$');
-            [currentParams[0], currentParams[1]] = [currentParams[1], currentParams[0]];
-            const swapParameter = currentParams.join('$');
+            if (!summLinkParams[param]) summLinkParams[param] = 0;
 
-            if (!summLinkParams[param] && !summLinkParams[swapParameter]) summLinkParams[param] = 0;
-
-            if (linkParams[day][param] || linkParams[day][swapParameter]) {
-                const addedParamValue = linkParams[day][param] || linkParams[day][swapParameter];
-                summLinkParams[param] = summLinkParams[param] + addedParamValue;
+            if (linkParams[day][param]) {
+                summLinkParams[param] = summLinkParams[param] + linkParams[day][param];
             }
         }
     }
