@@ -1,12 +1,12 @@
 import axios from "axios";
 import {db} from "../../db";
-import {getUserSummaryDateObject, dataTableMeanInfo} from "../../helpers/helper";
+import {getUserSummaryDateObject, dataTableMeanInfo, dataTableCoeffHelper} from "../../helpers/helper";
 import {getAllInfoFromDateArray, getDataFromRaw, getSleepAndActiveInfo} from '../../helpers/storeHelpers';
 
 const Sleep = {
     state: {
         preloader: false,
-        infoSleep: null,
+        infoCorrCoeffs: [],
         categoryData: null,
         infoMean: [],
         infoDays: null,
@@ -19,8 +19,8 @@ const Sleep = {
             state.categoryData = getDataFromRaw(payload);
         },
 
-        setInfoSleep(state, payload) {
-            state.infoSleep = payload;
+        setInfoCorrCoeffs(state, payload) {
+            state.infoCorrCoeffs = payload;
         },
 
         setInfoTravel(state, payload) {
@@ -58,7 +58,6 @@ const Sleep = {
     actions: {
         getCategoryInfo({commit}, payload) {
             const token = this.state.Auth.token;
-
 
             return new Promise((resolve, reject) => {
                 axios
@@ -136,7 +135,7 @@ const Sleep = {
 
             const isInfoLoaded = await dispatch('getCategoryInfo', payload.dates);
 
-            if (isInfoLoaded && payload.dates.length > 0 && payload.yearDate.length > 0) {
+            if (isInfoLoaded && payload.dates.length > 0) {
                 const token = this.state.Auth.token;
                 const resultData = {
                     sleep: [],
@@ -164,12 +163,20 @@ const Sleep = {
                             commit("setPreloader", false);
                             break;
                         case "corr":
-                            commit("setInfoSleep", resultData);
-                            commit("setPreloader", false);
+                            if (resultData)
+                                dispatch("calcInfoCorrCoeffs", {data: resultData, dates: payload.dates});
+                            else {
+                                commit("setInfoCorrCoeffs", []);
+                                commit("setPreloader", false);
+                            }
                             break;
                         case "mean":
-                            if (resultData) dispatch("setAverageMean", {data: resultData, dates: payload.dates});
-                            else commit("setInfoMean", null);
+                            if (resultData)
+                                dispatch("setAverageMean", {data: resultData, dates: payload.dates});
+                            else {
+                                commit("setInfoMean", []);
+                                commit("setPreloader", false);
+                            }
                             break;
                         case "search":
                             commit("setInfoSearch", resultData);
@@ -178,6 +185,17 @@ const Sleep = {
                             break;
                     }
                 });
+            }
+        },
+
+        async calcInfoCorrCoeffs({commit}, payload) {
+            if (this.state.Data.categoryData) {
+                const result = await dataTableCoeffHelper(
+                    payload.data,
+                    payload.dates[0],
+                );
+                commit("setInfoCorrCoeffs", result);
+                commit("setPreloader", false);
             }
         },
 
@@ -194,12 +212,6 @@ const Sleep = {
             }
         },
     },
-
-    getters: {
-        getMean: state => {
-            return state.infoMean;
-        }
-    }
 };
 
 export default Sleep;

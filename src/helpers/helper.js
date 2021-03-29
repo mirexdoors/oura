@@ -133,11 +133,9 @@ const getIterationCount = (param, summa, timezone = false, isForAway = false) =>
 const getAverageForParams = (summa, summaForParam, timezone = false, isForAway = false) => {
     const averageOfParam = {};
 
-
     for (let index in summa) {
         for (let param in summa[index]) {
             const coeff = getIterationCount(param, summa, timezone, isForAway);
-
 
             if (summa[index][param]) {
                 if (timezone) {
@@ -160,13 +158,32 @@ const getAverageForParams = (summa, summaForParam, timezone = false, isForAway =
 };
 
 const getSummForParam = (summa, timezone = false, isForAwayTimeZone = false) => {
-
     const summOfParam = {};
+
     summa.forEach((day, index) => {
         for (let param in summa[index]) {
-            if (param !== 'summary_date') {
+            if (param !== 'id'
+                && param !== 'email'
+                && param !== 'summary_date'
+                && param !== 'summary_date prev. day'
+                && param !== 'summary_date next day') {
+
+                if (typeof summa[index][param] !== "number"
+                    && typeof (new Date(summa[index][param])) == 'object' && (
+                        param === 'Bedtime next day'
+                        || param === 'Get-out-of-bed time next day'
+                        || param === 'bedtime_start'
+                        || param === 'bedtime_end')) {
+                    summa[index][param] = getSecondsToday(summa[index][param]);
+                }
+
+                if (param === 'Bedtime next day' && (summa[index][param] < 43200)) {
+                    summa[index][param] = summa[index][param] + 86400;
+                }
+
                 if (timezone) {
                     if (!summOfParam[param]) summOfParam[param] = 0;
+
                     if (!isForAwayTimeZone) {
                         if (Number(summa[index].timezone) === timezone) {
                             summOfParam[param] = summOfParam[param] + Number(summa[index][param]);
@@ -226,7 +243,7 @@ const getTempSumm = (data, isCorr = false, isForTimeZone = false) => {
                     if (param === 'bedtime_start' || param === 'bedtime_end') {
                         item[param] = getSecondsToday(item[param]);
                     }
-                    if (param == 'bedtime_start' && (item[param] < 43200)) {
+                    if (param === 'bedtime_start' && (item[param] < 43200)) {
                         item[param] = item[param] + 86400;
                     }
 
@@ -239,7 +256,7 @@ const getTempSumm = (data, isCorr = false, isForTimeZone = false) => {
                         delete currentItem[0].timezone
                     }
 
-                    if (isCorr && param !== 'timezone') {
+                    if (isCorr && param !== 'id' && param !== 'timezone') {
                         if (tempData[dataCategory][index - 1])
                             currentItem[0][appName + ' prev. day'] = tempData[dataCategory][index - 1][param];
                         if (tempData[dataCategory][index + 1])
@@ -270,7 +287,7 @@ const getDevForDay = (summa, averages) => {
 };
 
 const getSqrDevForDay = (devForDay) => {
-    //6 Возводим в квадрат каждое
+    // Возводим в квадрат каждое
     const sqrDevForDay = {};
     for (let day in devForDay) {
         sqrDevForDay[day] = {};
@@ -281,7 +298,7 @@ const getSqrDevForDay = (devForDay) => {
 };
 
 const getSummOfSqrDevForDay = (sqrDevForDay) => {
-    //7 Потом рассчитываем сумма квадратов отклонений
+    // рассчитываем сумма квадратов отклонений
     const summOfSqrDevForDay = {};
     for (let day in sqrDevForDay) {
         for (let param in sqrDevForDay[day]) {
@@ -509,7 +526,7 @@ export const dataTableMeanInfo = async (data, yearData, dates) => {
             let meanSD = (Number(means[item]) < Number(meansSD[item])
                 && !TIME_PARAMS.includes(item)
                 && item !== 'Bedtime'
-                && item !== 'Get-out-of-bed time') ?(meansSD[item] / 10).toFixed(2) : meansSD[item];
+                && item !== 'Get-out-of-bed time') ? (meansSD[item] / 10).toFixed(2) : meansSD[item];
 
             let rangeSD = (Number(ranges[item]) < Number(rangesSD[item])
                 && !TIME_PARAMS.includes(item)
@@ -532,8 +549,7 @@ export const dataTableMeanInfo = async (data, yearData, dates) => {
     return result;
 };
 
-export const dataTableCoeffHelper = (data) => {
-    const result = [];
+export const dataTableCoeffHelper = async (data, dates = {}) => {
     const parameters = [];
     const tempNames = [];
     //1. Собираем все параметры в 1 массив в виде объекта
@@ -566,56 +582,140 @@ export const dataTableCoeffHelper = (data) => {
 
     //2.Данные сведем в одну таблицу:
     const tempSumm = getTempSumm(data, true);
-    //3. Вычисляем суму значений параметра
-    const summOfParam = getSummForParam(tempSumm);
 
-    //4. Вычисляем среднее арифметическое
-    const averageOfParam = getAverageForParams(tempSumm, summOfParam);
-    const devForDay = getDevForDay(tempSumm, averageOfParam);
+
+    const result = calcLinearCoeffs(tempSumm, parameters);
+
+    if (dates.start && dates.end) {
+        const temporaryUsersAverageData = [];
+        await db.collection('parameters')
+            .where('summary_date', '>=', dates.start)
+            .where('summary_date', '<=', dates.end)
+            .get()
+            .then(querySnapshots => {
+                querySnapshots.forEach(doc => {
+                    temporaryUsersAverageData.push({...doc.data(), ...{id: doc.id}});
+                });
+            });
+
+
+        const dataByUsers = new Map();
+
+        temporaryUsersAverageData.forEach(row => {
+            const idArr = row.id.split('__');
+            idArr.shift();
+            const userId = idArr.join('');
+
+            if (dataByUsers.has(userId)) {
+                dataByUsers.set(userId, dataByUsers.get(userId).concat(row));
+            } else {
+                dataByUsers.set(userId, [row]);
+            }
+        });
+
+
+        dataByUsers.forEach((value) => {
+            value.forEach((day, index) => {
+                for (let param in day) {
+                    if (param !== 'id' && param !== 'timezone' && param !== 'email' && param !== 'summary_date') {
+                        if (value[index - 1] && value[index - 1][param] !== undefined) day[param + ' prev. day'] = value[index - 1][param];
+                        if (value[index + 1] && value[index + 1][param] !== undefined) day[param + ' next day'] = value[index + 1][param];
+                    }
+                }
+            });
+        });
+
+        const allUsersCoeffValues = new Map();
+
+        dataByUsers.forEach((value) => {
+            const userAverageData = calcLinearCoeffs(value, parameters);
+
+            userAverageData.forEach(item => {
+                const parameterIdentificator = item.name_1 + '$' + item.name_2;
+                if (allUsersCoeffValues.has(parameterIdentificator)) {
+                    const currentValue = JSON.parse(allUsersCoeffValues.get(parameterIdentificator))
+                    currentValue.push(Number(item.coeff));
+                    allUsersCoeffValues.set(parameterIdentificator, JSON.stringify(currentValue));
+                } else {
+                    allUsersCoeffValues.set(parameterIdentificator, JSON.stringify([Number(item.coeff)]));
+                }
+            })
+        });
+
+
+        const usersCount = dataByUsers.size;
+
+        allUsersCoeffValues.forEach((value, parameter, map) => {
+            const values = JSON.parse(value);
+            map.set(parameter, (values.reduce(function (sum, arg) {
+                return sum + (Number(arg) || 0);
+            }, 0) / usersCount).toFixed(3));
+        });
+
+        return result.map(item => {
+            item.average_coeff = allUsersCoeffValues.has(item.name_1 + '$' + item.name_2) ? allUsersCoeffValues.get(item.name_1 + '$' + item.name_2) : 'Not calc';
+            return item;
+        });
+    }
+
+    return result;
+};
+
+const calcLinearCoeffs = (dataSumm, parameters) => {
+    const result = [];
+
+    const summOfParam = getSummForParam(dataSumm);
+
+    // Вычисляем среднее арифметическое
+    const averageOfParam = getAverageForParams(dataSumm, summOfParam);
+    const devForDay = getDevForDay(dataSumm, averageOfParam);
     const sqrDevForDay = getSqrDevForDay(devForDay);
     const summOfSqrDevForDay = getSummOfSqrDevForDay(sqrDevForDay);
 
-
-//8.Рассчитываем для каждого наблюдения произведение
-// разности среднего арифметического и значения (для каждой
-// пары)
+    // Рассчитываем для каждого наблюдения произведение
+    // разности среднего арифметического и значения (для каждой
+    // пары)
     const linkParams = {};
+
     for (let day in devForDay) {
         linkParams[day] = {};
         const keys = Object.keys(devForDay[day]);
+
         for (let param in devForDay[day]) {
             keys.forEach(item => {
                 if (item !== param &&
-                    !Object.prototype.hasOwnProperty.call(linkParams[day], item + '$' + param) &&
+                    !Object.prototype.hasOwnProperty.call(linkParams[day], param + '$' + item) &&
                     !((param.indexOf('prev.') > -1 && item.indexOf('prev.') > -1)) &&
                     !((param.indexOf('next day') > -1 && item.indexOf('next day') > -1)) &&
                     !((param.indexOf('prev.') > -1 && item.indexOf('next day') > -1)) &&
                     !((param.indexOf('next day') > -1 && item.indexOf('prev.') > -1)) &&
                     ((param !== item + ' next day')) &&
-                    ((item !== param + ' next day'))
+                    ((item !== param + ' next day')) &&
+                    param !== 'email' &&
+                    param !== 'id' &&
+                    param !== 'summary_date' &&
+                    item !== 'email' &&
+                    item !== 'id' &&
+                    item !== 'summary_date'
                 ) {
-                    {
-
-                        const key = param + '$' + item;
-                        linkParams[day][key] = devForDay[day][param] * devForDay[day][item];
-                    }
+                    linkParams[day][param + '$' + item] = devForDay[day][param] * devForDay[day][item];
                 }
             });
         }
     }
 
-
-    //9 получаем сумму произведений для каждой пары
+    //6 получаем сумму произведений для каждой пары
     const summLinkParams = {};
     for (let day in linkParams) {
         for (let param in linkParams[day]) {
             if (!summLinkParams[param]) summLinkParams[param] = 0;
-            summLinkParams[param] = summLinkParams[param] + linkParams[day][param];
+
+            if (linkParams[day][param]) {
+                summLinkParams[param] = summLinkParams[param] + linkParams[day][param];
+            }
         }
     }
 
-
-    //2. Заполняем результирующий массив (должно быть 378 пар)
     parameters.forEach((item, index) => {
         for (let i = index + 1; i < parameters.length; i++) {
             const anotherParam = parameters[i];
@@ -625,7 +725,7 @@ export const dataTableCoeffHelper = (data) => {
             }
             if (Object.prototype.hasOwnProperty.call(summLinkParams, key)) {
                 const paramSumm = summLinkParams[key];
-                if (getCorrelation(paramSumm, summOfSqrDevForDay[item.name], summOfSqrDevForDay[anotherParam.name]) != 'NaN') {
+                if (getCorrelation(paramSumm, summOfSqrDevForDay[item.name], summOfSqrDevForDay[anotherParam.name]) !== 'NaN') {
                     result.push({
                         name_1: item.name,
                         name_2: anotherParam.name,
@@ -635,6 +735,7 @@ export const dataTableCoeffHelper = (data) => {
             }
         }
     });
+
     return result;
 };
 
