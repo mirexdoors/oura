@@ -115,7 +115,7 @@ export default {
         upload() {
             this.$store.commit("setPreloader", true);
 
-            this.$store.commit("setInfoSleep", null);
+            this.$store.commit("setInfoCorrCoeffs", []);
             this.$store.commit("setInfoMean", null);
             this.$store.commit("setInfoTravel", null);
             this.$store.commit("setInfoSearch", null);
